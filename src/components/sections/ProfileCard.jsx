@@ -6,28 +6,28 @@ const ProfileCard = () => {
   return (
     <>
       <div
-        className="flex flex-col items-center justify-center p-6 m-12 rounded-lg shadow-md"
+        className="flex flex-col items-center justify-center p-4 sm:p-6 mx-2 sm:mx-4 lg:mx-12 rounded-lg shadow-md"
         style={{ backgroundColor: 'var(--card-bg)' }}
       >
         {/* image */}
-        <div className="flex items-center mb-4">
+        <div className="flex items-center justify-center mb-4 w-full">
           <img
             src="/src/assets/tanvir.png"
             alt="Profile"
-            className="w-48 h-56 rounded-md object-cover m-8"
+            className="w-32 h-40 sm:w-40 sm:h-48 lg:w-48 lg:h-56 rounded-md object-cover"
           />
         </div>
 
         {/* name */}
         <h2
-          className="text-2xl font-semibold mb-2"
+          className="text-lg sm:text-xl lg:text-2xl font-semibold mb-2 text-center"
           style={{ color: 'var(--text-secondary)' }}
         >
           Tanvir Ibn Mizan
         </h2>
 
         {/* social link icon */}
-        <div className="flex space-x-4 mt-4">
+        <div className="flex space-x-3 sm:space-x-4 mt-2 sm:mt-4">
           <SocialIcon icon={FiGithub} href="https://github.com/7anv1r" />
           <SocialIcon
             icon={FiTwitter}

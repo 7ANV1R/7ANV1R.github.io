@@ -28,6 +28,7 @@ const MobileLayout = () => {
       <FloatingNav onNavigate={handleNavigate} />
 
       <div className="container mx-auto px-4 py-6 space-y-6">
+        <div style={{ height: 70 }} />
         <div ref={sectionRefs.profile}>
           <ProfileCard className="h-64" />
         </div>
