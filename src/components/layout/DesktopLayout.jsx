@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import ProfileCard from '../sections/ProfileCard';
 import About from '../sections/About';
 import RecentProjects from '../sections/RecentProjects';
@@ -6,7 +6,6 @@ import Education from '../sections/Education';
 import FloatingNav from '../ui/FloatingNav';
 
 const DesktopLayout = () => {
-  const [activeSection, setActiveSection] = useState('profile');
   const scrollContainerRef = useRef(null);
   const sectionRefs = {
     profile: useRef(null),
@@ -16,8 +15,6 @@ const DesktopLayout = () => {
   };
 
   const handleNavigate = (sectionId) => {
-    setActiveSection(sectionId);
-
     if (sectionId === 'profile') {
       // For profile, scroll to top of right container
       if (scrollContainerRef.current) {
@@ -44,7 +41,7 @@ const DesktopLayout = () => {
 
   return (
     <div className="hidden lg:flex h-screen">
-      <FloatingNav onNavigate={handleNavigate} activeSection={activeSection} />
+      <FloatingNav onNavigate={handleNavigate} />
 
       {/* Left Side - Pinned Card */}
       <div

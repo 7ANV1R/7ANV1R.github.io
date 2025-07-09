@@ -7,17 +7,14 @@ const ThemeToggle = () => {
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-full transition-all duration-200 hover:bg-orange-100 dark:hover:bg-orange-900/20 group"
-      style={{
-        backgroundColor: isDark ? 'rgba(243, 108, 56, 0.1)' : 'rgba(243, 108, 56, 0.1)',
-      }}
+      className="p-3 rounded-xl transition-all duration-200 hover:bg-white/30 dark:hover:bg-gray-700/30 group text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
       title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
     >
       <div className="relative w-5 h-5 transition-transform duration-200 group-hover:scale-110">
         {isDark ? (
           <svg
-            className="w-5 h-5 text-yellow-400"
+            className="w-5 h-5"
             fill="currentColor"
             viewBox="0 0 20 20"
             xmlns="http://www.w3.org/2000/svg"
@@ -30,7 +27,7 @@ const ThemeToggle = () => {
           </svg>
         ) : (
           <svg
-            className="w-5 h-5 text-gray-700"
+            className="w-5 h-5"
             fill="currentColor"
             viewBox="0 0 20 20"
             xmlns="http://www.w3.org/2000/svg"

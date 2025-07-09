@@ -1,47 +1,50 @@
 import React from 'react';
+import {
+  HiOutlineUser,
+  HiOutlineInformationCircle,
+  HiOutlineBriefcase,
+  HiOutlineAcademicCap,
+} from 'react-icons/hi2';
 import ThemeToggle from './ThemeToggle';
 
-const FloatingNav = ({ onNavigate, activeSection }) => {
+const FloatingNav = ({ onNavigate }) => {
   const navItems = [
-    { id: 'profile', label: 'Profile', symbol: '👤' },
-    { id: 'about', label: 'About', symbol: '📖' },
-    { id: 'projects', label: 'Projects', symbol: '💼' },
-    { id: 'education', label: 'Education', symbol: '🎓' },
+    { id: 'profile', label: 'Profile', icon: HiOutlineUser },
+    { id: 'about', label: 'About', icon: HiOutlineInformationCircle },
+    { id: 'projects', label: 'Projects', icon: HiOutlineBriefcase },
+    { id: 'education', label: 'Education', icon: HiOutlineAcademicCap },
   ];
 
   return (
-    <nav 
-      className="fixed top-6 right-6 z-50 backdrop-blur-sm border rounded-full px-3 py-2 shadow-lg"
+    <nav
+      className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 backdrop-blur-xl bg-white/20 dark:bg-gray-900/20 border border-white/40 dark:border-gray-700/30 rounded-3xl px-8 py-4 shadow-2xl shadow-black/5 dark:shadow-black/40"
       style={{
-        backgroundColor: 'var(--nav-bg)',
-        borderColor: 'var(--card-border)',
+        backdropFilter: 'blur(20px) saturate(180%)',
       }}
     >
       <div className="flex items-center space-x-2">
         {navItems.map((item) => {
+          const IconComponent = item.icon;
           return (
             <button
               key={item.id}
               onClick={() => onNavigate(item.id)}
-              className={`p-2 rounded-full transition-all duration-200 hover:bg-orange-100 dark:hover:bg-orange-900/20 relative ${
-                activeSection === item.id
-                  ? 'text-orange-600'
-                  : ''
-              }`}
-              style={{
-                backgroundColor: activeSection === item.id ? 'rgba(243, 108, 56, 0.1)' : 'transparent',
-                color: activeSection === item.id ? '#F36C38' : 'var(--text-secondary)',
-              }}
+              className="p-3 rounded-xl transition-all duration-200 hover:bg-white/30 dark:hover:bg-gray-700/30 relative group text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
               aria-label={item.label}
               title={item.label}
             >
-              <span className="text-lg">{item.symbol}</span>
+              <IconComponent className="w-5 h-5" />
+
+              {/* Tooltip */}
+              <span className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                {item.label}
+              </span>
             </button>
           );
         })}
-        
-        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
-        
+
+        <div className="w-px h-6 bg-white/40 dark:bg-gray-600/40 mx-3" />
+
         <ThemeToggle />
       </div>
     </nav>
