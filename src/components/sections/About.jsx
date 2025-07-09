@@ -1,14 +1,17 @@
 import React from 'react';
 import Card from '../ui/Card';
 import Skeleton from '../ui/Skeleton';
+import SectionTitle from '../ui/SectionTitle';
 
-const About = ({ className = "" }) => {
+const About = () => {
   return (
-    <Card title="About" className={`h-80 ${className}`}>
-      <Skeleton className="mb-2" />
-      <Skeleton width="w-3/4" className="mb-4" />
-      <Skeleton height="h-32" />
-    </Card>
+    <>
+      {/* large designation */}
+      <SectionTitle 
+        primaryText="SOFTWARE" 
+        secondaryText="ENGINEER" 
+      />
+    </>
   );
 };
 
