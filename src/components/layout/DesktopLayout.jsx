@@ -44,10 +44,7 @@ const DesktopLayout = () => {
       <FloatingNav onNavigate={handleNavigate} />
 
       {/* Left Side - Pinned Card */}
-      <div
-        className="w-1/3 p-6 border-r transition-colors duration-300"
-        style={{ borderColor: 'var(--card-border)' }}
-      >
+      <div className="w-1/3 p-6 transition-colors duration-300">
         <div className="sticky top-6" ref={sectionRefs.profile}>
           <ProfileCard className="h-96" />
         </div>
