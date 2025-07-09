@@ -28,12 +28,12 @@ const ProfileCard = () => {
 
         {/* social link icon */}
         <div className="flex space-x-4 mt-4">
-          <SocialIcon icon={FiGithub} href="https://github.com/yourusername" />
+          <SocialIcon icon={FiGithub} href="https://github.com/7anv1r" />
           <SocialIcon
             icon={FiTwitter}
-            href="https://twitter.com/yourusername"
+            href="https://twitter.com/tanvir_ibn_mizan"
           />
-          <SocialIcon icon={FiMail} href="mailto:your.email@example.com" />
+          <SocialIcon icon={FiMail} href="mailto:tanvir.inquiries@gmail.com" />
         </div>
       </div>
     </>
