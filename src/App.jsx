@@ -5,7 +5,7 @@ import DesktopLayout from './components/layout/DesktopLayout';
 const App = () => {
   return (
     <div 
-      className="min-h-screen transition-colors duration-300"
+      className="min-h-screen transition-colors duration-300 font-poppins"
       style={{ backgroundColor: 'var(--bg-secondary)' }}
     >
       <MobileLayout />

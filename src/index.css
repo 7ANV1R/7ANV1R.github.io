@@ -1,4 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
 @import 'tailwindcss';
+
+@theme {
+  /* Poppins font family */
+  --font-poppins: "Poppins", sans-serif;
+  
+  /* Custom typography scale for headings and paragraphs */
+  --text-h1: 3.5rem;         /* 56px */
+  --text-h1--line-height: 1.1;
+  
+  --text-h2: 3rem;           /* 48px */
+  --text-h2--line-height: 1.2;
+  
+  --text-h3: 2.5rem;         /* 40px */
+  --text-h3--line-height: 1.2;
+  
+  --text-h4: 2rem;           /* 32px */
+  --text-h4--line-height: 1.3;
+  
+  --text-h5: 1.5rem;         /* 24px */
+  --text-h5--line-height: 1.4;
+  
+  --text-h6: 1.25rem;        /* 20px */
+  --text-h6--line-height: 1.4;
+  
+  --text-paragraph: 1rem;    /* 16px */
+  --text-paragraph--line-height: 1.6;
+  
+  --text-small: 0.875rem;    /* 14px */
+  --text-small--line-height: 1.5;
+}
 
 :root {
   /* Light theme colors */
@@ -28,6 +59,87 @@ body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: "Poppins", sans-serif;
+}
+
+/* Typography utility classes */
+.text-h1 {
+  font-size: var(--text-h1);
+  line-height: var(--text-h1--line-height);
+  font-weight: 700;
+  font-family: "Poppins", sans-serif;
+}
+
+.text-h2 {
+  font-size: var(--text-h2);
+  line-height: var(--text-h2--line-height);
+  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+}
+
+.text-h3 {
+  font-size: var(--text-h3);
+  line-height: var(--text-h3--line-height);
+  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+}
+
+.text-h4 {
+  font-size: var(--text-h4);
+  line-height: var(--text-h4--line-height);
+  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+}
+
+.text-h5 {
+  font-size: var(--text-h5);
+  line-height: var(--text-h5--line-height);
+  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+}
+
+.text-h6 {
+  font-size: var(--text-h6);
+  line-height: var(--text-h6--line-height);
+  font-weight: 500;
+  font-family: "Poppins", sans-serif;
+}
+
+.text-paragraph {
+  font-size: var(--text-paragraph);
+  line-height: var(--text-paragraph--line-height);
+  font-weight: 400;
+  font-family: "Poppins", sans-serif;
+}
+
+.text-small {
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  font-weight: 400;
+  font-family: "Poppins", sans-serif;
+}
+
+/* Responsive typography - Mobile first approach */
+@media (max-width: 768px) {
+  .text-h1 {
+    font-size: 2.5rem; /* 40px on mobile */
+  }
+  
+  .text-h2 {
+    font-size: 2rem; /* 32px on mobile */
+  }
+  
+  .text-h3 {
+    font-size: 1.75rem; /* 28px on mobile */
+  }
+  
+  .text-h4 {
+    font-size: 1.5rem; /* 24px on mobile */
+  }
+  
+  .text-h5 {
+    font-size: 1.25rem; /* 20px on mobile */
+  }
 }
 
 /* Custom scrollbar for dark theme */

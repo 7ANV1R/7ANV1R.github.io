@@ -16,8 +16,8 @@ const Card = ({
     >
       {title && (
         <div 
-          className={`text-sm mb-2 ${titleClassName}`}
-          style={{ color: 'var(--text-secondary)' }}
+          className={`text-h5 mb-4 ${titleClassName}`}
+          style={{ color: 'var(--text-primary)' }}
         >
           {title}
         </div>
