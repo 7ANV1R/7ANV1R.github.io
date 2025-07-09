@@ -29,11 +29,18 @@ const FloatingNav = ({ onNavigate }) => {
             <button
               key={item.id}
               onClick={() => onNavigate(item.id)}
-              className="p-3 rounded-xl transition-all duration-200 hover:bg-white/30 dark:hover:bg-gray-700/30 relative group text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              className="p-3 rounded-xl transition-all duration-200 hover:bg-white/30 dark:hover:bg-gray-700/30 relative group hover:text-gray-900 dark:hover:text-white"
+              style={{ color: 'var(--accent)' }}
               aria-label={item.label}
               title={item.label}
             >
-              <IconComponent className="w-5 h-5" />
+              <IconComponent 
+                className="w-5 h-5" 
+                style={{
+                  filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.06))',
+                  color: 'var(--accent)'
+                }}
+              />
 
               {/* Tooltip */}
               <span className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
