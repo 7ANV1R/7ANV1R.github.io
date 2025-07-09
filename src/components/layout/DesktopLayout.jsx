@@ -17,13 +17,13 @@ const DesktopLayout = () => {
 
   const handleNavigate = (sectionId) => {
     setActiveSection(sectionId);
-    
+
     if (sectionId === 'profile') {
       // For profile, scroll to top of right container
       if (scrollContainerRef.current) {
         scrollContainerRef.current.scrollTo({
           top: 0,
-          behavior: 'smooth'
+          behavior: 'smooth',
         });
       }
       return;
@@ -37,7 +37,7 @@ const DesktopLayout = () => {
 
       container.scrollTo({
         top: targetTop,
-        behavior: 'smooth'
+        behavior: 'smooth',
       });
     }
   };
@@ -45,9 +45,9 @@ const DesktopLayout = () => {
   return (
     <div className="hidden lg:flex h-screen">
       <FloatingNav onNavigate={handleNavigate} activeSection={activeSection} />
-      
+
       {/* Left Side - Pinned Card */}
-      <div 
+      <div
         className="w-1/3 p-6 border-r transition-colors duration-300"
         style={{ borderColor: 'var(--card-border)' }}
       >
