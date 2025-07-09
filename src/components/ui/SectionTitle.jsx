@@ -1,13 +1,15 @@
 import React from 'react';
 
-const SectionTitle = ({ primaryText, secondaryText, fontSize = '110px' }) => {
+const SectionTitle = ({ primaryText, secondaryText, minSize = '3rem', maxSize = '6.875rem' }) => {
+  const responsiveFontSize = `clamp(${minSize}, 8vw, ${maxSize})`;
+  
   return (
     <div className="text-left leading-none">
       <h1
         className="font-semibold"
         style={{
           color: 'var(--text-primary)',
-          fontSize: fontSize,
+          fontSize: responsiveFontSize,
           lineHeight: '0.8',
           marginBottom: '0',
         }}
@@ -18,7 +20,7 @@ const SectionTitle = ({ primaryText, secondaryText, fontSize = '110px' }) => {
         className="font-semibold"
         style={{
           color: 'var(--text-secondary)',
-          fontSize: fontSize,
+          fontSize: responsiveFontSize,
           lineHeight: '0.8',
           marginTop: '0',
           marginBottom: '0',
