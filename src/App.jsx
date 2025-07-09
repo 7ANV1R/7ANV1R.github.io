@@ -4,7 +4,10 @@ import DesktopLayout from './components/layout/DesktopLayout';
 
 const App = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div 
+      className="min-h-screen transition-colors duration-300"
+      style={{ backgroundColor: 'var(--bg-secondary)' }}
+    >
       <MobileLayout />
       <DesktopLayout />
     </div>

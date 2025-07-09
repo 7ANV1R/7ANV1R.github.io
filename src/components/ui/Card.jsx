@@ -7,9 +7,18 @@ const Card = ({
   titleClassName = "" 
 }) => {
   return (
-    <div className={`bg-gray-200 rounded-lg p-6 ${className}`}>
+    <div 
+      className={`rounded-lg p-6 border transition-colors duration-300 ${className}`}
+      style={{
+        backgroundColor: 'var(--card-bg)',
+        borderColor: 'var(--card-border)',
+      }}
+    >
       {title && (
-        <div className={`text-sm text-gray-500 mb-2 ${titleClassName}`}>
+        <div 
+          className={`text-sm mb-2 ${titleClassName}`}
+          style={{ color: 'var(--text-secondary)' }}
+        >
           {title}
         </div>
       )}

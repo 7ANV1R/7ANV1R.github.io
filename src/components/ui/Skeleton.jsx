@@ -6,7 +6,10 @@ const Skeleton = ({
   className = "" 
 }) => {
   return (
-    <div className={`bg-gray-300 rounded ${width} ${height} ${className}`}></div>
+    <div 
+      className={`rounded animate-pulse transition-colors duration-300 ${width} ${height} ${className}`}
+      style={{ backgroundColor: 'var(--text-secondary)', opacity: 0.3 }}
+    ></div>
   );
 };
 

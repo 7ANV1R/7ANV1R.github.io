@@ -1,1 +1,67 @@
 @import 'tailwindcss';
+
+:root {
+  /* Light theme colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --accent: #F36C38;
+  --card-bg: #ffffff;
+  --card-border: #e5e7eb;
+  --nav-bg: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme="dark"] {
+  /* Dark theme colors */
+  --bg-primary: #161312;
+  --bg-secondary: #161312;
+  --text-primary: #ffffff;
+  --text-secondary: #353334;
+  --accent: #F36C38;
+  --card-bg: #F36C38;
+  --card-border: #353334;
+  --nav-bg: rgba(22, 19, 18, 0.9);
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Custom scrollbar for dark theme */
+[data-theme="dark"] ::-webkit-scrollbar {
+  width: 8px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: #161312;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #353334;
+  border-radius: 4px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #F36C38;
+}
+
+/* Light theme scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #F36C38;
+}

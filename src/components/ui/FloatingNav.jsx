@@ -1,4 +1,5 @@
 import React from 'react';
+import ThemeToggle from './ThemeToggle';
 
 const FloatingNav = ({ onNavigate, activeSection }) => {
   const navItems = [
@@ -9,18 +10,28 @@ const FloatingNav = ({ onNavigate, activeSection }) => {
   ];
 
   return (
-    <nav className="fixed top-6 right-6 z-50 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full px-3 py-2 shadow-lg">
+    <nav 
+      className="fixed top-6 right-6 z-50 backdrop-blur-sm border rounded-full px-3 py-2 shadow-lg"
+      style={{
+        backgroundColor: 'var(--nav-bg)',
+        borderColor: 'var(--card-border)',
+      }}
+    >
       <div className="flex items-center space-x-2">
         {navItems.map((item) => {
           return (
             <button
               key={item.id}
               onClick={() => onNavigate(item.id)}
-              className={`p-2 rounded-full transition-all duration-200 hover:bg-gray-100 relative ${
+              className={`p-2 rounded-full transition-all duration-200 hover:bg-orange-100 dark:hover:bg-orange-900/20 relative ${
                 activeSection === item.id
-                  ? 'bg-blue-100 text-blue-600'
-                  : 'text-gray-600'
+                  ? 'text-orange-600'
+                  : ''
               }`}
+              style={{
+                backgroundColor: activeSection === item.id ? 'rgba(243, 108, 56, 0.1)' : 'transparent',
+                color: activeSection === item.id ? '#F36C38' : 'var(--text-secondary)',
+              }}
               aria-label={item.label}
               title={item.label}
             >
@@ -28,6 +39,10 @@ const FloatingNav = ({ onNavigate, activeSection }) => {
             </button>
           );
         })}
+        
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+        
+        <ThemeToggle />
       </div>
     </nav>
   );
