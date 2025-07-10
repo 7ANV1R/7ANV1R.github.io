@@ -17,7 +17,7 @@ const FloatingNav = ({ onNavigate }) => {
 
   return (
     <nav
-      className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 backdrop-blur-xl bg-white/25 dark:bg-gray-900/25 border border-white/30 dark:border-gray-700/30 rounded-3xl px-8 py-4 shadow-2xl shadow-black/20 dark:shadow-black/50"
+      className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 backdrop-blur-xl bg-white/25 dark:bg-gray-900/25 border border-white/30 dark:border-gray-700/30 rounded-2xl px-8 py-2 shadow-2xl shadow-black/20 dark:shadow-black/50"
       style={{
         backdropFilter: 'blur(20px) saturate(180%)',
       }}
@@ -34,11 +34,12 @@ const FloatingNav = ({ onNavigate }) => {
               aria-label={item.label}
               title={item.label}
             >
-              <IconComponent 
-                className="w-5 h-5" 
+              <IconComponent
+                className="w-5 h-5"
                 style={{
-                  filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.06))',
-                  color: 'var(--accent)'
+                  filter:
+                    'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.06))',
+                  color: 'var(--accent)',
                 }}
               />
 
