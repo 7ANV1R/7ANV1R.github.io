@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300" fill="none">
+  <!-- Single organic shape - scaled up and rotated -->
+  <path
+    d="M 200 250 C 170 240 140 220 130 190 C 120 160 40 180 -20 200 L 0 80 C 50 70 120 45 115 20 C 110 -5 135 -10 175 -5 C 215 0 210 -15 230 -20"
+    fill="transparent"
+    stroke-width="8"
+    stroke="#E36534"
+    stroke-miterlimit="10"
+    transform="scale(1.2) rotate(25 200 150)"
+  />
+</svg>
