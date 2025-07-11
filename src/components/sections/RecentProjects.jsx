@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import SectionTitle from '../ui/SectionTitle';
 import projectsData from '../../data/recent_projects.json';
+import { HiOutlinePhotograph } from 'react-icons/hi';
+import { FiArrowUpRight } from 'react-icons/fi';
 
 const RecentProjects = () => {
   const [projects, setProjects] = useState([]);
@@ -9,7 +11,7 @@ const RecentProjects = () => {
     setProjects(projectsData);
   }, []);
 
-  const ProjectItem = ({ project }) => {
+  const ProjectItem = ({ project, isFirst, isLast }) => {
     const handleProjectClick = () => {
       const url = project.demoUrl || project.githubUrl;
       if (url) {
@@ -20,7 +22,9 @@ const RecentProjects = () => {
     return (
       <div
         onClick={handleProjectClick}
-        className="group cursor-pointer py-8 border-b transition-all duration-300 hover:bg-opacity-50"
+        className={`group cursor-pointer py-8 transition-all duration-300 hover:bg-opacity-50 ${
+          isFirst ? 'border-t' : ''
+        } ${isLast ? '' : 'border-b'}`}
         style={{ borderColor: 'var(--card-border)' }}
       >
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
@@ -47,18 +51,10 @@ const RecentProjects = () => {
                 display: project.thumbnail ? 'none' : 'flex',
               }}
             >
-              <svg
+              <HiOutlinePhotograph
                 className="w-12 h-12 opacity-30"
                 style={{ color: 'var(--text-secondary)' }}
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              />
             </div>
           </div>
 
@@ -73,25 +69,15 @@ const RecentProjects = () => {
                 {project.title}
               </h3>
               <div className="ml-4 flex-shrink-0">
-                <svg
+                <FiArrowUpRight
                   className="w-6 h-6 opacity-40 group-hover:opacity-100 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all duration-300"
-                  style={{ color: 'var(--accent)' }}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M7 17l9.2-9.2M17 17V7H7"
-                  />
-                </svg>
+                  style={{ color: 'var(--accent)', strokeWidth: '2.5' }}
+                />
               </div>
             </div>
 
             {/* Tools/Frameworks */}
-            <div className="flex flex-wrap gap-2 mb-4">
+            <div className="flex flex-wrap gap-2 mb-4 group-hover:mb-6 transition-all duration-300">
               {project.tools.map((tool, index) => (
                 <span
                   key={index}
@@ -107,13 +93,15 @@ const RecentProjects = () => {
               ))}
             </div>
 
-            {/* Description */}
-            <p
-              className="text-paragraph leading-relaxed"
-              style={{ color: 'var(--text-secondary)' }}
-            >
-              {project.description}
-            </p>
+            {/* Description - Hidden by default, slides in on hover */}
+            <div className="overflow-hidden transition-all duration-500 ease-out max-h-0 opacity-0 group-hover:max-h-32 group-hover:opacity-100">
+              <p
+                className="text-paragraph leading-relaxed pb-2"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                {project.description}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -129,6 +117,7 @@ const RecentProjects = () => {
           <ProjectItem
             key={project.id}
             project={project}
+            isFirst={index === 0}
             isLast={index === projects.length - 1}
           />
         ))}
