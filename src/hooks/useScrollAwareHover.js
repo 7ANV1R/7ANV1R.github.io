@@ -57,6 +57,7 @@ export const useScrollAwareHover = () => {
       // Find the closest hoverable element
       const hoverableElement = findClosestHoverableElement(elementUnderMouse);
 
+      // Only apply scroll hover if we found a different element
       if (hoverableElement && hoverableElement !== lastHoveredElement.current) {
         // Remove previous scroll hover
         if (lastHoveredElement.current) {
@@ -67,9 +68,15 @@ export const useScrollAwareHover = () => {
         hoverableElement.classList.add('scroll-hover');
         lastHoveredElement.current = hoverableElement;
       }
+
+      // If no hoverable element found, clear any existing scroll hover
+      if (!hoverableElement && lastHoveredElement.current) {
+        lastHoveredElement.current.classList.remove('scroll-hover');
+        lastHoveredElement.current = null;
+      }
     });
 
-    // Clear scroll hover after scrolling stops
+    // Clear scroll hover after scrolling stops (increased timeout for stability)
     scrollTimeout.current = setTimeout(() => {
       isScrolling.current = false;
 
@@ -77,7 +84,7 @@ export const useScrollAwareHover = () => {
         lastHoveredElement.current.classList.remove('scroll-hover');
         lastHoveredElement.current = null;
       }
-    }, 100);
+    }, 150); // Increased from 100ms to 150ms for more stability
   }, []);
 
   // Find the closest element with hover effects
@@ -104,6 +111,9 @@ export const useScrollAwareHover = () => {
   // Check if an element should have hover effects
   const isHoverableElement = useCallback((element) => {
     if (!element || !element.classList) return false;
+
+    // Skip elements that explicitly opt out of scroll hover
+    if (element.classList.contains('no-scroll-hover')) return false;
 
     // Check for common hoverable classes
     const hoverableClasses = [

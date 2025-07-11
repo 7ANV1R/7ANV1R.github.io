@@ -25,7 +25,7 @@ const About = () => {
       {/* two button cards with responsive design */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-12 max-w-4xl lg:max-w-3xl">
         {/* Dynamic Animation & Motion Design Card */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-400 to-red-500 p-6 text-white group hover:scale-105 transition-transform duration-300 cursor-pointer w-full lg:max-w-sm">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-400 to-red-500 p-6 text-white group hover:scale-105 transition-transform duration-300 cursor-pointer w-full lg:max-w-sm no-scroll-hover">
           {/* Abstract background pattern */}
           <div className="absolute inset-0 opacity-100">
             <img
@@ -58,7 +58,7 @@ const About = () => {
         </div>
 
         {/* Framer, Figma, WordPress, ReactJS Card */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-lime-400 to-green-400 p-6 text-black group hover:scale-105 transition-transform duration-300 cursor-pointer w-full lg:max-w-sm">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-lime-400 to-green-400 p-6 text-black group hover:scale-105 transition-transform duration-300 cursor-pointer w-full lg:max-w-sm no-scroll-hover">
           {/* Abstract background pattern */}
           <div className="absolute inset-0 opacity-100">
             <img

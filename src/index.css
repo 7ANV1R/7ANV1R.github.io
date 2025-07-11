@@ -188,13 +188,17 @@ body {
   /* This will trigger group-hover styles on child elements */
 }
 
-/* Group hover effects for RecentProjects */
+/* Group hover effects for RecentProjects - Clean implementation */
 .scroll-hover.group .group-hover\:scale-\[1\.02\] {
   transform: scale(1.02) !important;
 }
 
 .scroll-hover.group .group-hover\:text-accent {
   color: var(--accent) !important;
+}
+
+.scroll-hover.group .group-hover\:opacity-100 {
+  opacity: 1 !important;
 }
 
 .scroll-hover.group .group-hover\:translate-x-1 {
@@ -213,35 +217,6 @@ body {
   max-height: 8rem !important;
 }
 
-/* Alternative approach: direct child selectors */
-.scroll-hover.group > div > div.group-hover\:scale-\[1\.02\] {
-  transform: scale(1.02) !important;
-}
-
-.scroll-hover.group > div > div > h3.group-hover\:text-accent {
-  color: var(--accent) !important;
-}
-
-.scroll-hover.group > div > div > div > svg.group-hover\:opacity-100 {
-  opacity: 1 !important;
-}
-
-.scroll-hover.group > div > div > div > svg.group-hover\:translate-x-1 {
-  transform: translateX(0.25rem) !important;
-}
-
-.scroll-hover.group > div > div > div > svg.group-hover\:-translate-y-1 {
-  transform: translateY(-0.25rem) !important;
-}
-
-.scroll-hover.group > div > div > div.group-hover\:mb-6 {
-  margin-bottom: 1.5rem !important;
-}
-
-.scroll-hover.group > div > div > div.group-hover\:max-h-32 {
-  max-height: 8rem !important;
-}
-
 /* Background opacity for project items */
 .scroll-hover.hover\:bg-opacity-50 {
   background-color: rgba(0, 0, 0, 0.05) !important;
@@ -249,24 +224,34 @@ body {
 
 /* For scale effects */
 .scroll-hover.hover\:scale-105 {
-  transform: scale(1.05);
+  transform: scale(1.05) !important;
 }
 
 .scroll-hover.hover\:scale-\[1\.02\] {
-  transform: scale(1.02);
+  transform: scale(1.02) !important;
 }
 
 .scroll-hover.hover\:scale-110 {
-  transform: scale(1.1);
-}
-
-/* For background effects */
-.scroll-hover.hover\:bg-opacity-50 {
-  background-opacity: 0.5;
+  transform: scale(1.1) !important;
 }
 
 /* For text color effects */
 .scroll-hover.hover\:text-accent {
+  color: var(--accent) !important;
+}
+
+/* Default text color for project titles */
+.text-h4 {
+  color: var(--text-primary) !important;
+}
+
+/* Ensure project titles have stable colors */
+.group .text-h4 {
+  color: var(--text-primary) !important;
+}
+
+.group:hover .text-h4,
+.scroll-hover.group .text-h4 {
   color: var(--accent) !important;
 }
 
