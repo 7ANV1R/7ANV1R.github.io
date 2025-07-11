@@ -180,12 +180,7 @@ body {
 
 /* Scroll-aware hover effects */
 .scroll-hover {
-  /* Apply the same styles as :hover for elements with hover effects */
-}
-
-/* For group hover effects */
-.scroll-hover.group {
-  /* This will trigger group-hover styles on child elements */
+  transition: all 0.3s ease;
 }
 
 /* Group hover effects for RecentProjects - Clean implementation */
@@ -266,41 +261,36 @@ body {
 
 /* For transform effects */
 .scroll-hover.hover\:translate-x-1 {
-  transform: translateX(0.25rem);
+  transform: translateX(0.25rem) !important;
 }
 
 .scroll-hover.hover\:-translate-y-1 {
-  transform: translateY(-0.25rem);
+  transform: translateY(-0.25rem) !important;
 }
 
 /* For margin effects */
 .scroll-hover.hover\:mb-6 {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.5rem !important;
 }
 
 /* For max-height effects (for expanding descriptions) */
 .scroll-hover.hover\:max-h-32 {
-  max-height: 8rem;
+  max-height: 8rem !important;
 }
 
 /* For button background effects */
-.scroll-hover.group-hover\:bg-white {
-  background-color: white;
+.scroll-hover.group .group-hover\:bg-white {
+  background-color: white !important;
 }
 
-.scroll-hover.group-hover\:text-orange-500 {
-  color: #f97316;
+.scroll-hover.group .group-hover\:text-orange-500 {
+  color: #f97316 !important;
 }
 
-.scroll-hover.group-hover\:bg-black {
-  background-color: black;
+.scroll-hover.group .group-hover\:bg-black {
+  background-color: black !important;
 }
 
-.scroll-hover.group-hover\:text-lime-400 {
-  color: #a3e635;
-}
-
-/* Ensure transitions work smoothly */
-.scroll-hover {
-  transition: all 0.3s ease;
+.scroll-hover.group .group-hover\:text-lime-400 {
+  color: #a3e635 !important;
 }

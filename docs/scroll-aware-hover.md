@@ -39,6 +39,7 @@ src/
 - **Mouse movement detection**: Debounced mouse movement to distinguish from scroll
 - **Element detection**: Uses `document.elementFromPoint()` to find elements under cursor
 - **Hoverable element detection**: Identifies elements with hover classes
+- **Performance optimization**: Element caching with WeakMap for better performance
 - **Memory management**: Proper cleanup of event listeners and timeouts
 
 #### Core Logic:

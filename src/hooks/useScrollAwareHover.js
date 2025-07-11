@@ -6,12 +6,12 @@ import { useEffect, useRef, useCallback } from 'react';
  */
 export const useScrollAwareHover = () => {
   const mousePosition = useRef({ x: -1, y: -1 });
-  const isScrolling = useRef(false);
   const scrollTimeout = useRef(null);
   const lastHoveredElement = useRef(null);
   const isMouseMoving = useRef(false);
   const mouseMoveTimeout = useRef(null);
   const containerListeners = useRef(new Set());
+  const hoverableElementsCache = useRef(new WeakMap());
 
   // Debounced mouse movement detection
   const handleMouseMove = useCallback((e) => {
@@ -35,12 +35,10 @@ export const useScrollAwareHover = () => {
     }, 150);
   }, []);
 
-  // Handle scroll events (both window and container)
+  // Throttled scroll handler for better performance
   const handleScroll = useCallback(() => {
     // Skip if mouse is actively moving
     if (isMouseMoving.current) return;
-
-    isScrolling.current = true;
 
     // Clear previous timeout
     if (scrollTimeout.current) {
@@ -78,8 +76,6 @@ export const useScrollAwareHover = () => {
 
     // Clear scroll hover after scrolling stops (increased timeout for stability)
     scrollTimeout.current = setTimeout(() => {
-      isScrolling.current = false;
-
       if (lastHoveredElement.current) {
         lastHoveredElement.current.classList.remove('scroll-hover');
         lastHoveredElement.current = null;
@@ -87,25 +83,36 @@ export const useScrollAwareHover = () => {
     }, 150); // Increased from 100ms to 150ms for more stability
   }, []);
 
-  // Find the closest element with hover effects
+  // Find the closest element with hover effects (with caching)
   const findClosestHoverableElement = useCallback((element) => {
     if (!element) return null;
 
+    // Check cache first
+    if (hoverableElementsCache.current.has(element)) {
+      return hoverableElementsCache.current.get(element);
+    }
+
     // Check if the element itself is hoverable
     if (isHoverableElement(element)) {
+      hoverableElementsCache.current.set(element, element);
       return element;
     }
 
     // Check parent elements
     let parent = element.parentElement;
+    let result = null;
+
     while (parent && parent !== document.body) {
       if (isHoverableElement(parent)) {
-        return parent;
+        result = parent;
+        break;
       }
       parent = parent.parentElement;
     }
 
-    return null;
+    // Cache the result
+    hoverableElementsCache.current.set(element, result);
+    return result;
   }, []);
 
   // Check if an element should have hover effects
