@@ -1,5 +1,10 @@
 import React from 'react';
 import SectionTitle from '../ui/SectionTitle';
+import {
+  HiOutlineCode,
+  HiOutlineTemplate,
+  HiOutlineArrowRight,
+} from 'react-icons/hi';
 
 const About = () => {
   return (
@@ -34,13 +39,7 @@ const About = () => {
           <div className="relative z-10 flex flex-col justify-between h-full min-h-[160px]">
             <div>
               <div className="w-6 h-6 border-2 border-white rounded-md flex items-center justify-center mb-3">
-                <svg
-                  className="w-4 h-4"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
-                </svg>
+                <HiOutlineCode className="w-4 h-4" />
               </div>
 
               <h3 className="text-lg font-bold mb-3 leading-tight">
@@ -52,17 +51,7 @@ const About = () => {
 
             <div className="flex justify-start">
               <button className="w-10 h-10 border-2 border-white rounded-lg flex items-center justify-center group-hover:bg-white group-hover:text-orange-500 transition-all duration-300 hover:scale-110">
-                <svg
-                  className="w-4 h-4"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <HiOutlineArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -83,17 +72,7 @@ const About = () => {
           <div className="relative z-10 flex flex-col justify-between h-full min-h-[160px]">
             <div>
               <div className="w-6 h-6 border-2 border-black rounded-md flex items-center justify-center mb-3">
-                <svg
-                  className="w-4 h-4"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <HiOutlineTemplate className="w-4 h-4" />
               </div>
 
               <h3 className="text-lg font-bold mb-3 leading-tight">
@@ -104,17 +83,7 @@ const About = () => {
 
             <div className="flex justify-start">
               <button className="w-10 h-10 border-2 border-black rounded-lg flex items-center justify-center group-hover:bg-black group-hover:text-lime-400 transition-all duration-300 hover:scale-110">
-                <svg
-                  className="w-4 h-4"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <HiOutlineArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>
