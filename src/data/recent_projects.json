@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "title": "E-Commerce Dashboard",
+    "description": "A modern dashboard for managing online store with real-time analytics, inventory management, and order tracking.",
+    "tools": ["React", "Node.js", "MongoDB"],
+    "thumbnail": "/src/assets/project1.jpg",
+    "githubUrl": "https://github.com/username/ecommerce-dashboard",
+    "demoUrl": "https://ecommerce-dashboard-demo.vercel.app"
+  },
+  {
+    "id": 2,
+    "title": "Task Management App",
+    "description": "A collaborative task management application with drag-and-drop functionality, team collaboration, and progress tracking.",
+    "tools": ["Vue.js", "Firebase", "Tailwind CSS"],
+    "thumbnail": null,
+    "githubUrl": "https://github.com/username/task-manager",
+    "demoUrl": null
+  },
+  {
+    "id": 3,
+    "title": "Weather Forecast App",
+    "description": "Real-time weather application with location-based forecasts, interactive maps, and weather alerts.",
+    "tools": ["React Native", "OpenWeather API", "Redux"],
+    "thumbnail": "/src/assets/project3.png",
+    "githubUrl": "https://github.com/username/weather-app",
+    "demoUrl": "https://weather-forecast-demo.netlify.app"
+  },
+  {
+    "id": 4,
+    "title": "Portfolio Website",
+    "description": "A responsive portfolio website showcasing projects, skills, and experience with smooth animations and modern design.",
+    "tools": ["Next.js", "Framer Motion", "SCSS"],
+    "thumbnail": null,
+    "githubUrl": "https://github.com/username/portfolio",
+    "demoUrl": "https://portfolio-demo.com"
+  }
+]

@@ -35,6 +35,7 @@ const MobileLayout = () => {
         <div ref={sectionRefs.about}>
           <About />
         </div>
+        <div style={{ height: 24 }} />
         <div ref={sectionRefs.projects}>
           <RecentProjects />
         </div>

@@ -57,6 +57,7 @@ const DesktopLayout = () => {
           <div ref={sectionRefs.about}>
             <About className="h-80" />
           </div>
+          <div style={{ height: 48 }} />
           <div ref={sectionRefs.projects}>
             <RecentProjects className="h-96" />
           </div>
