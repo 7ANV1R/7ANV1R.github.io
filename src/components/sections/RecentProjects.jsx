@@ -62,10 +62,7 @@ const RecentProjects = () => {
           <div className="flex-1 min-w-0">
             {/* Title and Arrow */}
             <div className="flex items-start justify-between mb-4">
-              <h3
-                className="text-h4 font-semibold group-hover:text-accent transition-colors duration-300"
-                style={{ color: 'var(--text-primary)' }}
-              >
+              <h3 className="text-h4 font-semibold group-hover:text-accent transition-colors duration-300">
                 {project.title}
               </h3>
               <div className="ml-4 flex-shrink-0">

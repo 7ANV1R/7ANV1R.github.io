@@ -177,3 +177,130 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #f36c38;
 }
+
+/* Scroll-aware hover effects */
+.scroll-hover {
+  /* Apply the same styles as :hover for elements with hover effects */
+}
+
+/* For group hover effects */
+.scroll-hover.group {
+  /* This will trigger group-hover styles on child elements */
+}
+
+/* Group hover effects for RecentProjects - Clean implementation */
+.scroll-hover.group .group-hover\:scale-\[1\.02\] {
+  transform: scale(1.02) !important;
+}
+
+.scroll-hover.group .group-hover\:text-accent {
+  color: var(--accent) !important;
+}
+
+.scroll-hover.group .group-hover\:opacity-100 {
+  opacity: 1 !important;
+}
+
+.scroll-hover.group .group-hover\:translate-x-1 {
+  transform: translateX(0.25rem) !important;
+}
+
+.scroll-hover.group .group-hover\:-translate-y-1 {
+  transform: translateY(-0.25rem) !important;
+}
+
+.scroll-hover.group .group-hover\:mb-6 {
+  margin-bottom: 1.5rem !important;
+}
+
+.scroll-hover.group .group-hover\:max-h-32 {
+  max-height: 8rem !important;
+}
+
+/* Background opacity for project items */
+.scroll-hover.hover\:bg-opacity-50 {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* For scale effects */
+.scroll-hover.hover\:scale-105 {
+  transform: scale(1.05) !important;
+}
+
+.scroll-hover.hover\:scale-\[1\.02\] {
+  transform: scale(1.02) !important;
+}
+
+.scroll-hover.hover\:scale-110 {
+  transform: scale(1.1) !important;
+}
+
+/* For text color effects */
+.scroll-hover.hover\:text-accent {
+  color: var(--accent) !important;
+}
+
+/* Default text color for project titles */
+.text-h4 {
+  color: var(--text-primary) !important;
+}
+
+/* Ensure project titles have stable colors */
+.group .text-h4 {
+  color: var(--text-primary) !important;
+}
+
+.group:hover .text-h4,
+.scroll-hover.group .text-h4 {
+  color: var(--accent) !important;
+}
+
+/* For opacity effects */
+.scroll-hover.hover\:opacity-100 {
+  opacity: 1 !important;
+}
+
+.scroll-hover.hover\:opacity-0 {
+  opacity: 0 !important;
+}
+
+/* For transform effects */
+.scroll-hover.hover\:translate-x-1 {
+  transform: translateX(0.25rem);
+}
+
+.scroll-hover.hover\:-translate-y-1 {
+  transform: translateY(-0.25rem);
+}
+
+/* For margin effects */
+.scroll-hover.hover\:mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+/* For max-height effects (for expanding descriptions) */
+.scroll-hover.hover\:max-h-32 {
+  max-height: 8rem;
+}
+
+/* For button background effects */
+.scroll-hover.group-hover\:bg-white {
+  background-color: white;
+}
+
+.scroll-hover.group-hover\:text-orange-500 {
+  color: #f97316;
+}
+
+.scroll-hover.group-hover\:bg-black {
+  background-color: black;
+}
+
+.scroll-hover.group-hover\:text-lime-400 {
+  color: #a3e635;
+}
+
+/* Ensure transitions work smoothly */
+.scroll-hover {
+  transition: all 0.3s ease;
+}
