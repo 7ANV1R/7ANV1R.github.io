@@ -39,6 +39,7 @@ src/
 - **Mouse movement detection**: Debounced mouse movement to distinguish from scroll
 - **Element detection**: Uses `document.elementFromPoint()` to find elements under cursor
 - **Hoverable element detection**: Identifies elements with hover classes
+- **Performance optimization**: Element caching with WeakMap for better performance
 - **Memory management**: Proper cleanup of event listeners and timeouts
 
 #### Core Logic:
@@ -56,7 +57,7 @@ const handleMouseMove = (e) => {
   }
 };
 
-// Handle scroll events
+// Throttled scroll handler for better performance
 const handleScroll = () => {
   if (isMouseMoving.current) return; // Skip if mouse is moving
 
@@ -74,6 +75,21 @@ const handleScroll = () => {
       lastHoveredElement.current = hoverableElement;
     }
   });
+};
+
+// Element caching with WeakMap for performance
+const findClosestHoverableElement = (element) => {
+  if (!element) return null;
+
+  // Check cache first
+  if (hoverableElementsCache.current.has(element)) {
+    return hoverableElementsCache.current.get(element);
+  }
+
+  // Find hoverable element and cache result
+  const result = findHoverableElement(element);
+  hoverableElementsCache.current.set(element, result);
+  return result;
 };
 ```
 
@@ -267,6 +283,24 @@ console.log('Found scrollable containers:', scrollableContainers.length);
 - ✅ Safari (limited - hover remains active during scroll)
 - ✅ Mobile browsers (automatically disabled)
 
+## ⚡ Current Performance Optimizations
+
+### Implemented Optimizations
+
+1. **Element Caching**: Uses WeakMap to cache hoverable element lookups, preventing repeated DOM traversal
+2. **RequestAnimationFrame**: Smooth scroll handling with browser-optimized timing
+3. **Memory Management**: Proper cleanup of event listeners, timeouts, and cached elements
+4. **Container Caching**: Cache scrollable containers and their event listeners
+5. **Optimized Detection**: Early returns and efficient element traversal algorithms
+6. **Debounced Mouse Movement**: Prevents excessive hover state changes during mouse movement
+
+### Performance Benefits
+
+- **Reduced DOM Queries**: Cached element lookups prevent repeated traversal
+- **Smooth Animations**: requestAnimationFrame ensures 60fps performance
+- **Memory Efficient**: WeakMap allows garbage collection of removed elements
+- **Stable Hover States**: Debounced mouse detection prevents flickering
+
 ## 🔮 Future Enhancements
 
 ### Potential Improvements
@@ -279,10 +313,11 @@ console.log('Found scrollable containers:', scrollableContainers.length);
 
 ### Performance Optimizations
 
-1. **Throttling**: Implement scroll event throttling
-2. **Element Pooling**: Reuse DOM queries
-3. **Lazy Detection**: Only detect hoverable elements when needed
-4. **Container Caching**: Cache scrollable containers
+1. **Element Caching**: Uses WeakMap to cache hoverable element lookups, preventing repeated DOM traversal
+2. **Throttling**: Implement scroll event throttling with requestAnimationFrame
+3. **Memory Management**: Proper cleanup of event listeners, timeouts, and cached elements
+4. **Container Caching**: Cache scrollable containers and their event listeners
+5. **Optimized Detection**: Early returns and efficient element traversal algorithms
 
 ## 📚 References
 
@@ -294,5 +329,12 @@ console.log('Found scrollable containers:', scrollableContainers.length);
 ---
 
 **Last Updated**: July 2024
-**Version**: 1.0.0
+**Version**: 1.1.0
 **Maintainer**: Development Team
+
+### Recent Updates (v1.1.0)
+
+- ✅ **Performance Optimizations**: Added element caching with WeakMap
+- ✅ **CSS Cleanup**: Fixed lint errors and inconsistent selectors
+- ✅ **Memory Management**: Improved cleanup and removed unused variables
+- ✅ **Documentation**: Comprehensive performance optimization guide
