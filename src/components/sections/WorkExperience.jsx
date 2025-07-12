@@ -76,7 +76,7 @@ const WorkExperience = () => {
 
     return (
       <div
-        className="flex items-stretch work-experience-item group cursor-pointer transition-all duration-300 hover:scale-[1.02]"
+        className="flex items-stretch work-experience-item"
         data-work-item={experience.id}
         data-company-logo={experience.companyLogo}
       >

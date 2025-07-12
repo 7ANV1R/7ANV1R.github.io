@@ -122,11 +122,15 @@ export const useScrollAwareHover = () => {
     // Skip elements that explicitly opt out of scroll hover
     if (element.classList.contains('no-scroll-hover')) return false;
 
-    // Check for work experience items
+    // Check for work experience items - only if they're within the work experience section
     if (
       element.classList.contains('work-experience-item') ||
       element.closest('.work-experience-item')
     ) {
+      // Must be within the work experience section
+      const workSection = element.closest('[data-section="work-experience"]');
+      if (!workSection) return false;
+
       return true;
     }
 

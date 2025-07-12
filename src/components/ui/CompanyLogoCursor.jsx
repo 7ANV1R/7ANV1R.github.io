@@ -69,17 +69,16 @@ const CompanyLogoCursor = () => {
   const isWorkExperienceItem = useCallback((element) => {
     if (!element) return false;
 
-    // Check if element has work experience specific classes or structure
+    // Must be within the work experience section
+    const workSection = element.closest('[data-section="work-experience"]');
+    if (!workSection) return false;
+
+    // Must be a work experience item or within one
     const hasWorkExpClasses =
       element.classList.contains('work-experience-item') ||
       element.closest('.work-experience-item');
 
-    // Check if element is within the work experience section
-    const isInWorkSection =
-      element.closest('[data-section="work-experience"]') ||
-      element.closest('.work-experience-section');
-
-    return hasWorkExpClasses || isInWorkSection;
+    return hasWorkExpClasses;
   }, []);
 
   // Get company logo from work experience item
@@ -126,6 +125,7 @@ const CompanyLogoCursor = () => {
           showCursor(logoPath);
         }
       } else {
+        // Hide cursor immediately when not over a work experience item
         if (currentLogoRef.current) {
           hideCursor();
         }
@@ -155,6 +155,7 @@ const CompanyLogoCursor = () => {
         showCursor(logoPath);
       }
     } else {
+      // Hide cursor immediately when not over a work experience item
       if (currentLogoRef.current) {
         hideCursor();
       }
@@ -182,10 +183,10 @@ const CompanyLogoCursor = () => {
             }
           }
 
-          // Check if scroll-hover was removed
+          // Check if scroll-hover was removed or element is no longer a work experience item
           if (
-            !target.classList.contains('scroll-hover') &&
-            isWorkExperienceItem(target)
+            !target.classList.contains('scroll-hover') ||
+            !isWorkExperienceItem(target)
           ) {
             if (currentLogoRef.current) {
               hideCursor();
@@ -242,9 +243,6 @@ const CompanyLogoCursor = () => {
     <div
       ref={cursorRef}
       className="fixed pointer-events-none z-[9999] w-[60px] h-[60px] opacity-0"
-      style={{
-        mixBlendMode: 'difference',
-      }}
     >
       {currentLogo && (
         <img
