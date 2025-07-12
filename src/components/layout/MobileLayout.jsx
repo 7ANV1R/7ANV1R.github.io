@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import ProfileCard from '../sections/ProfileCard';
 import About from '../sections/About';
 import RecentProjects from '../sections/RecentProjects';
+import WorkExperience from '../sections/WorkExperience';
 import Education from '../sections/Education';
 import FloatingNav from '../ui/FloatingNav';
 
@@ -10,6 +11,7 @@ const MobileLayout = () => {
     profile: useRef(null),
     about: useRef(null),
     projects: useRef(null),
+    experience: useRef(null),
     education: useRef(null),
   };
 
@@ -38,6 +40,10 @@ const MobileLayout = () => {
         <div style={{ height: 24 }} />
         <div ref={sectionRefs.projects}>
           <RecentProjects />
+        </div>
+        <div style={{ height: 24 }} />
+        <div ref={sectionRefs.experience}>
+          <WorkExperience />
         </div>
         <div ref={sectionRefs.education}>
           <Education />

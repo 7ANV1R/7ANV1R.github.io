@@ -4,6 +4,7 @@ import {
   HiOutlineInformationCircle,
   HiOutlineBriefcase,
   HiOutlineAcademicCap,
+  HiOutlineBuildingOffice,
 } from 'react-icons/hi2';
 import ThemeToggle from './ThemeToggle';
 
@@ -12,6 +13,7 @@ const FloatingNav = ({ onNavigate }) => {
     { id: 'profile', label: 'Profile', icon: HiOutlineUser },
     { id: 'about', label: 'About', icon: HiOutlineInformationCircle },
     { id: 'projects', label: 'Projects', icon: HiOutlineBriefcase },
+    { id: 'experience', label: 'Experience', icon: HiOutlineBuildingOffice },
     { id: 'education', label: 'Education', icon: HiOutlineAcademicCap },
   ];
 
