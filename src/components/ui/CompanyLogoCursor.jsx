@@ -21,8 +21,8 @@ const CompanyLogoCursor = () => {
     // Use requestAnimationFrame for smooth performance
     animationFrameRef.current = requestAnimationFrame(() => {
       gsap.to(cursorRef.current, {
-        x: x - 30, // Center the 60x60 cursor
-        y: y - 30,
+        x: x - 40, // Center the 80x80 cursor (increased from 60x60)
+        y: y - 40,
         duration: 0.3,
         ease: 'power2.out',
       });
@@ -279,13 +279,19 @@ const CompanyLogoCursor = () => {
   return (
     <div
       ref={cursorRef}
-      className="fixed pointer-events-none z-[9999] w-[60px] h-[60px] opacity-0"
+      className="fixed pointer-events-none z-[9999] w-[80px] h-[80px] opacity-0"
     >
       {currentLogo && (
         <img
           src={currentLogo}
           alt="Company Logo"
-          className="w-full h-full object-contain"
+          className="w-full h-full object-contain max-w-[120px] max-h-[80px]"
+          style={{
+            width: 'auto',
+            height: 'auto',
+            maxWidth: '120px',
+            maxHeight: '80px',
+          }}
           onError={(e) => {
             // Hide cursor if logo fails to load
             e.target.style.display = 'none';

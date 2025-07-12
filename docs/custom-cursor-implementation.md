@@ -224,14 +224,20 @@ if (
 - **File Type**: SVG (recommended for scalability)
 - **Location**: `src/assets/experience/` folder
 - **Naming**: Descriptive name with `_Logo.svg` suffix
-- **Size**: Optimized for 60x60px display
+- **Size**: Responsive - automatically scales to fit within 120x80px bounds
+- **Aspect Ratio**: Supports any aspect ratio (wide typography logos, tall logos, square logos)
+- **Optimization**: Keep file size reasonable for performance
 
 ### Cursor Configuration
 
 ```javascript
 // Cursor size and positioning
-const CURSOR_SIZE = 60; // 60x60px
-const CURSOR_OFFSET = 30; // Center offset
+const CURSOR_SIZE = 80; // 80x80px (increased from 60x60px)
+const CURSOR_OFFSET = 40; // Center offset (increased from 30px)
+
+// Logo size constraints
+const MAX_LOGO_WIDTH = 120; // Maximum width for wide logos
+const MAX_LOGO_HEIGHT = 80; // Maximum height for tall logos
 
 // Animation settings
 const ANIMATION_DURATION = 0.3;
@@ -500,13 +506,19 @@ const YourCustomCursor = () => {
   return (
     <div
       ref={cursorRef}
-      className="fixed pointer-events-none z-[9999] w-[60px] h-[60px] opacity-0"
+      className="fixed pointer-events-none z-[9999] w-[80px] h-[80px] opacity-0"
     >
       {currentLogo && (
         <img
           src={currentLogo}
           alt="Custom Logo"
-          className="w-full h-full object-contain"
+          className="w-full h-full object-contain max-w-[120px] max-h-[80px]"
+          style={{
+            width: 'auto',
+            height: 'auto',
+            maxWidth: '120px',
+            maxHeight: '80px',
+          }}
           onError={(e) => {
             e.target.style.display = 'none';
             hideCursor();
@@ -597,8 +609,12 @@ const App = () => {
 
 ```javascript
 // Cursor size and positioning
-const CURSOR_SIZE = 60; // Change cursor size
-const CURSOR_OFFSET = 30; // Adjust centering offset
+const CURSOR_SIZE = 80; // Change cursor size (80x80px)
+const CURSOR_OFFSET = 40; // Adjust centering offset
+
+// Logo size constraints
+const MAX_LOGO_WIDTH = 120; // Maximum width for wide logos
+const MAX_LOGO_HEIGHT = 80; // Maximum height for tall logos
 
 // Animation settings
 const ANIMATION_DURATION = 0.3; // Animation speed
