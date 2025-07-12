@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "company": "TechCorp Solutions",
+    "designation": "Senior Frontend Developer",
+    "timeFrame": "March 2023 - Present",
+    "objective": "Leading frontend development initiatives, mentoring junior developers, and implementing modern React patterns for scalable applications."
+  },
+  {
+    "id": 2,
+    "company": "Digital Innovations Inc",
+    "designation": "Full Stack Developer",
+    "timeFrame": "January 2022 - February 2023",
+    "objective": "Developed and maintained web applications using React, Node.js, and MongoDB. Collaborated with cross-functional teams to deliver high-quality software solutions."
+  },
+  {
+    "id": 3,
+    "company": "StartupHub",
+    "designation": "Frontend Developer",
+    "timeFrame": "June 2021 - December 2021",
+    "objective": "Built responsive user interfaces and implemented modern web technologies. Contributed to product development and user experience improvements."
+  },
+  {
+    "id": 4,
+    "company": "WebCraft Studio",
+    "designation": "Junior Developer",
+    "timeFrame": "March 2020 - May 2021",
+    "objective": "Assisted in developing web applications and learning industry best practices. Worked on bug fixes and feature implementations."
+  }
+]

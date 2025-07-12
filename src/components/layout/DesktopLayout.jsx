@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import ProfileCard from '../sections/ProfileCard';
 import About from '../sections/About';
 import RecentProjects from '../sections/RecentProjects';
+import WorkExperience from '../sections/WorkExperience';
 import Education from '../sections/Education';
 import FloatingNav from '../ui/FloatingNav';
 
@@ -11,6 +12,7 @@ const DesktopLayout = () => {
     profile: useRef(null),
     about: useRef(null),
     projects: useRef(null),
+    experience: useRef(null),
     education: useRef(null),
   };
 
@@ -60,6 +62,10 @@ const DesktopLayout = () => {
           <div style={{ height: 48 }} />
           <div ref={sectionRefs.projects}>
             <RecentProjects className="h-96" />
+          </div>
+          <div style={{ height: 48 }} />
+          <div ref={sectionRefs.experience}>
+            <WorkExperience className="h-96" />
           </div>
           <div ref={sectionRefs.education}>
             <Education className="h-80" />
