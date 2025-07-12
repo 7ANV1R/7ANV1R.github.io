@@ -14,10 +14,7 @@ const WorkExperience = () => {
     const isLast = index === totalItems - 1;
 
     return (
-      <div
-        className="flex items-stretch"
-        style={{ marginBottom: isLast ? '0' : '32px' }}
-      >
+      <div className="flex items-stretch">
         {/* Timeline Column - matches content height */}
         <div className="flex flex-col items-center w-24 flex-shrink-0">
           {/* Timeline Dot */}
@@ -34,7 +31,7 @@ const WorkExperience = () => {
             }}
           />
 
-          {/* Timeline Line - expands to match content height */}
+          {/* Timeline Line - expands to match content height + extra space */}
           {!isLast && (
             <div
               className="w-0.5 flex-1 mt-2"
@@ -85,6 +82,9 @@ const WorkExperience = () => {
           >
             {experience.objective}
           </p>
+
+          {/* Extra space after objectives - extends timeline line */}
+          {!isLast && <div className="h-12" />}
         </div>
       </div>
     );
