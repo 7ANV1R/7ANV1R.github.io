@@ -155,7 +155,7 @@ const CompanyLogoCursor = () => {
         showCursor(logoPath);
       }
     } else {
-      // Hide cursor immediately when not over a work experience item
+      // Only hide cursor if we're not over a work experience item
       if (currentLogoRef.current) {
         hideCursor();
       }
@@ -183,13 +183,21 @@ const CompanyLogoCursor = () => {
             }
           }
 
-          // Check if scroll-hover was removed or element is no longer a work experience item
-          if (
-            !target.classList.contains('scroll-hover') ||
-            !isWorkExperienceItem(target)
-          ) {
-            if (currentLogoRef.current) {
-              hideCursor();
+          // Check if scroll-hover was removed - but only hide if we're not over a work experience item
+          if (!target.classList.contains('scroll-hover')) {
+            // Check if mouse is still over a work experience item
+            const elementUnderMouse = document.elementFromPoint(
+              mouseRef.current.x,
+              mouseRef.current.y,
+            );
+
+            if (
+              !elementUnderMouse ||
+              !isWorkExperienceItem(elementUnderMouse)
+            ) {
+              if (currentLogoRef.current) {
+                hideCursor();
+              }
             }
           }
         }
@@ -211,6 +219,7 @@ const CompanyLogoCursor = () => {
     if ('ontouchstart' in window) return;
 
     let observer;
+    let periodicCheck;
 
     // Add event listeners
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
@@ -218,6 +227,23 @@ const CompanyLogoCursor = () => {
 
     // Setup scroll hover observer
     observer = observeScrollHover();
+
+    // Periodic check to maintain cursor when mouse is over work experience item
+    periodicCheck = setInterval(() => {
+      if (mouseRef.current.x && mouseRef.current.y) {
+        const elementUnderMouse = document.elementFromPoint(
+          mouseRef.current.x,
+          mouseRef.current.y,
+        );
+
+        if (elementUnderMouse && isWorkExperienceItem(elementUnderMouse)) {
+          const logoPath = getCompanyLogo(elementUnderMouse);
+          if (logoPath && !currentLogoRef.current) {
+            showCursor(logoPath);
+          }
+        }
+      }
+    }, 100); // Check every 100ms
 
     // Initial cursor position
     gsap.set(cursorRef.current, {
@@ -233,11 +259,22 @@ const CompanyLogoCursor = () => {
         observer.disconnect();
       }
 
+      if (periodicCheck) {
+        clearInterval(periodicCheck);
+      }
+
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [handleMouseMove, handleScrollHover, observeScrollHover]);
+  }, [
+    handleMouseMove,
+    handleScrollHover,
+    observeScrollHover,
+    isWorkExperienceItem,
+    getCompanyLogo,
+    showCursor,
+  ]);
 
   return (
     <div
