@@ -10,72 +10,77 @@ const WorkExperience = () => {
   }, []);
 
   const ExperienceItem = ({ experience, index, totalItems }) => {
-    return (
-      <div className="flex gap-6 md:gap-8">
-        {/* Timeline Column */}
-        <div className="flex flex-col items-center flex-shrink-0 relative">
-          {/* Timeline Line - extends full height */}
-          <div
-            className="absolute top-0 bottom-0 left-1/2 transform -translate-x-1/2 w-0.5"
-            style={{ backgroundColor: 'var(--card-border)' }}
-          />
+    const isCurrent = experience.timeFrame.includes('Present');
+    const isLast = index === totalItems - 1;
 
+    return (
+      <div
+        className="flex items-stretch"
+        style={{ marginBottom: isLast ? '0' : '32px' }}
+      >
+        {/* Timeline Column - matches content height */}
+        <div className="flex flex-col items-center w-24 flex-shrink-0">
           {/* Timeline Dot */}
           <div
-            className="w-4 h-4 rounded-full border-2 relative z-10 mt-6"
+            className={`w-4 h-4 rounded-full border-2 relative z-10 flex-shrink-0 ${
+              isCurrent ? 'shadow-lg' : ''
+            }`}
             style={{
-              backgroundColor: 'var(--bg-secondary)',
+              backgroundColor: isCurrent
+                ? 'var(--accent)'
+                : 'var(--bg-secondary)',
               borderColor: 'var(--accent)',
+              ...(isCurrent && { boxShadow: '0 0 0 3px var(--accent)20' }),
             }}
           />
 
-          {/* Current Position Indicator */}
-          {experience.timeFrame.includes('Present') && (
+          {/* Timeline Line - expands to match content height */}
+          {!isLast && (
             <div
-              className="absolute left-1/2 transform -translate-x-1/2 w-2 h-2 rounded-full animate-pulse mt-8"
-              style={{ backgroundColor: 'var(--accent)' }}
+              className="w-0.5 flex-1 mt-2"
+              style={{
+                backgroundColor: 'var(--card-border)',
+                minHeight: '20px',
+              }}
             />
           )}
         </div>
 
-        {/* Content */}
-        <div className="flex-1 pb-8">
-          {/* Time Frame Badge */}
+        {/* Content Column */}
+        <div className="flex-1 pl-8">
+          {/* Time Frame */}
           <div className="mb-4">
-            <div
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full"
+            <span
+              className="text-sm font-medium px-4 py-2 rounded-lg"
               style={{
                 backgroundColor: 'var(--bg-secondary)',
+                color: 'var(--text-secondary)',
                 border: '1px solid var(--card-border)',
               }}
             >
-              <div
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: 'var(--accent)' }}
-              />
-              <span
-                className="text-sm font-medium"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                {experience.timeFrame}
-              </span>
-            </div>
+              {experience.timeFrame}
+            </span>
           </div>
 
-          {/* Company and Designation */}
-          <div className="mb-3">
-            <h3 className="text-xl font-semibold mb-1">{experience.company}</h3>
-            <p
-              className="text-base font-medium"
-              style={{ color: 'var(--accent)' }}
-            >
-              {experience.designation}
-            </p>
-          </div>
+          {/* Company Name */}
+          <h3
+            className="text-h4 font-semibold mb-2"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            {experience.company}
+          </h3>
 
-          {/* Objective */}
+          {/* Designation */}
           <p
-            className="text-base leading-relaxed"
+            className="text-lg font-medium mb-4"
+            style={{ color: 'var(--accent)' }}
+          >
+            {experience.designation}
+          </p>
+
+          {/* Objectives */}
+          <p
+            className="text-base leading-relaxed max-w-3xl"
             style={{ color: 'var(--text-secondary)' }}
           >
             {experience.objective}
@@ -86,10 +91,12 @@ const WorkExperience = () => {
   };
 
   return (
-    <div className="space-y-8">
-      <SectionTitle primaryText="WORK" secondaryText="EXPERIENCE" />
+    <div className="w-full">
+      <div className="mb-16">
+        <SectionTitle primaryText="WORK" secondaryText="EXPERIENCE" />
+      </div>
 
-      <div className="space-y-0">
+      <div className="relative max-w-5xl">
         {experiences.map((experience, index) => (
           <ExperienceItem
             key={experience.id}
