@@ -1,0 +1,269 @@
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { gsap } from 'gsap';
+
+const CompanyLogoCursor = () => {
+  const cursorRef = useRef(null);
+  const mouseRef = useRef({ x: 0, y: 0 });
+  const currentLogoRef = useRef(null);
+  const isVisibleRef = useRef(false);
+  const animationFrameRef = useRef(null);
+  const [currentLogo, setCurrentLogo] = useState(null);
+
+  // GSAP animation for smooth cursor movement
+  const animateCursor = useCallback((x, y) => {
+    if (!cursorRef.current) return;
+
+    // Cancel any pending animation frame
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+
+    // Use requestAnimationFrame for smooth performance
+    animationFrameRef.current = requestAnimationFrame(() => {
+      gsap.to(cursorRef.current, {
+        x: x - 30, // Center the 60x60 cursor
+        y: y - 30,
+        duration: 0.3,
+        ease: 'power2.out',
+      });
+    });
+  }, []);
+
+  // Show cursor with logo
+  const showCursor = useCallback((logoPath) => {
+    if (
+      !cursorRef.current ||
+      (isVisibleRef.current && currentLogoRef.current === logoPath)
+    )
+      return;
+
+    isVisibleRef.current = true;
+    currentLogoRef.current = logoPath;
+    setCurrentLogo(logoPath);
+
+    gsap.to(cursorRef.current, {
+      opacity: 1,
+      scale: 1,
+      duration: 0.2,
+      ease: 'power2.out',
+    });
+  }, []);
+
+  // Hide cursor
+  const hideCursor = useCallback(() => {
+    if (!cursorRef.current || !isVisibleRef.current) return;
+
+    isVisibleRef.current = false;
+    currentLogoRef.current = null;
+    setCurrentLogo(null);
+
+    gsap.to(cursorRef.current, {
+      opacity: 0,
+      scale: 0.8,
+      duration: 0.2,
+      ease: 'power2.out',
+    });
+  }, []);
+
+  // Check if element is a work experience item
+  const isWorkExperienceItem = useCallback((element) => {
+    if (!element) return false;
+
+    // Check if element has work experience specific classes or structure
+    const hasWorkExpClasses =
+      element.classList.contains('work-experience-item') ||
+      element.closest('.work-experience-item');
+
+    // Check if element is within the work experience section
+    const isInWorkSection =
+      element.closest('[data-section="work-experience"]') ||
+      element.closest('.work-experience-section');
+
+    return hasWorkExpClasses || isInWorkSection;
+  }, []);
+
+  // Get company logo from work experience item
+  const getCompanyLogo = useCallback((element) => {
+    if (!element) return null;
+
+    // Find the closest work experience item
+    const workItem =
+      element.closest('.work-experience-item') ||
+      element.closest('[data-work-item]') ||
+      element;
+
+    // Try to get logo from data attribute first
+    const logoFromData = workItem.getAttribute('data-company-logo');
+    if (logoFromData) {
+      return logoFromData;
+    }
+
+    // Try to find logo in the DOM structure
+    const logoElement = workItem.querySelector('[data-company-logo]');
+    if (logoElement) {
+      const logoPath = logoElement.getAttribute('data-company-logo');
+      return logoPath;
+    }
+
+    return null;
+  }, []);
+
+  // Handle mouse movement
+  const handleMouseMove = useCallback(
+    (e) => {
+      mouseRef.current.x = e.clientX;
+      mouseRef.current.y = e.clientY;
+
+      // Animate cursor position
+      animateCursor(e.clientX, e.clientY);
+
+      // Check if mouse is over a work experience item
+      const elementUnderMouse = document.elementFromPoint(e.clientX, e.clientY);
+
+      if (elementUnderMouse && isWorkExperienceItem(elementUnderMouse)) {
+        const logoPath = getCompanyLogo(elementUnderMouse);
+        if (logoPath && logoPath !== currentLogoRef.current) {
+          showCursor(logoPath);
+        }
+      } else {
+        if (currentLogoRef.current) {
+          hideCursor();
+        }
+      }
+    },
+    [
+      animateCursor,
+      isWorkExperienceItem,
+      getCompanyLogo,
+      showCursor,
+      hideCursor,
+    ],
+  );
+
+  // Handle scroll-aware hover (integrate with existing system)
+  const handleScrollHover = useCallback(() => {
+    if (!mouseRef.current.x || !mouseRef.current.y) return;
+
+    const elementUnderMouse = document.elementFromPoint(
+      mouseRef.current.x,
+      mouseRef.current.y,
+    );
+
+    if (elementUnderMouse && isWorkExperienceItem(elementUnderMouse)) {
+      const logoPath = getCompanyLogo(elementUnderMouse);
+      if (logoPath && logoPath !== currentLogoRef.current) {
+        showCursor(logoPath);
+      }
+    } else {
+      if (currentLogoRef.current) {
+        hideCursor();
+      }
+    }
+  }, [isWorkExperienceItem, getCompanyLogo, showCursor, hideCursor]);
+
+  // Listen for scroll-hover class changes
+  const observeScrollHover = useCallback(() => {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (
+          mutation.type === 'attributes' &&
+          mutation.attributeName === 'class'
+        ) {
+          const target = mutation.target;
+
+          // Check if scroll-hover was added to a work experience item
+          if (
+            target.classList.contains('scroll-hover') &&
+            isWorkExperienceItem(target)
+          ) {
+            const logoPath = getCompanyLogo(target);
+            if (logoPath && logoPath !== currentLogoRef.current) {
+              showCursor(logoPath);
+            }
+          }
+
+          // Check if scroll-hover was removed
+          if (
+            !target.classList.contains('scroll-hover') &&
+            isWorkExperienceItem(target)
+          ) {
+            if (currentLogoRef.current) {
+              hideCursor();
+            }
+          }
+        }
+      });
+    });
+
+    // Observe the entire document for class changes
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['class'],
+      subtree: true,
+    });
+
+    return observer;
+  }, [isWorkExperienceItem, getCompanyLogo, showCursor, hideCursor]);
+
+  useEffect(() => {
+    // Skip on touch devices
+    if ('ontouchstart' in window) return;
+
+    let observer;
+
+    // Add event listeners
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener('scroll', handleScrollHover, { passive: true });
+
+    // Setup scroll hover observer
+    observer = observeScrollHover();
+
+    // Initial cursor position
+    gsap.set(cursorRef.current, {
+      opacity: 0,
+      scale: 0.8,
+    });
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('scroll', handleScrollHover);
+
+      if (observer) {
+        observer.disconnect();
+      }
+
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [handleMouseMove, handleScrollHover, observeScrollHover]);
+
+  return (
+    <div
+      ref={cursorRef}
+      className="fixed pointer-events-none z-[9999] w-[60px] h-[60px] opacity-0"
+      style={{
+        mixBlendMode: 'difference',
+      }}
+    >
+      {currentLogo && (
+        <img
+          src={currentLogo}
+          alt="Company Logo"
+          className="w-full h-full object-contain"
+          onError={(e) => {
+            // Hide cursor if logo fails to load
+            e.target.style.display = 'none';
+            hideCursor();
+          }}
+          onLoad={(e) => {
+            // Ensure image is visible when loaded
+            e.target.style.display = 'block';
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
+export default CompanyLogoCursor;

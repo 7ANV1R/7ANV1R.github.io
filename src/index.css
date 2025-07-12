@@ -183,6 +183,15 @@ body {
   transition: all 0.3s ease;
 }
 
+/* Work Experience hover effects */
+.scroll-hover.work-experience-item {
+  transform: scale(1.02) !important;
+}
+
+.scroll-hover.work-experience-item .group-hover\:scale-\[1\.02\] {
+  transform: scale(1.02) !important;
+}
+
 /* Group hover effects for RecentProjects - Clean implementation */
 .scroll-hover.group .group-hover\:scale-\[1\.02\] {
   transform: scale(1.02) !important;

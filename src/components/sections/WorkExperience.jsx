@@ -75,7 +75,11 @@ const WorkExperience = () => {
     const isLast = index === totalItems - 1;
 
     return (
-      <div className="flex items-stretch">
+      <div
+        className="flex items-stretch work-experience-item group cursor-pointer transition-all duration-300 hover:scale-[1.02]"
+        data-work-item={experience.id}
+        data-company-logo={experience.companyLogo}
+      >
         {/* Timeline Column */}
         <div className="flex flex-col items-center w-24 flex-shrink-0">
           <TimelineDot isCurrent={isCurrent} />
@@ -97,12 +101,12 @@ const WorkExperience = () => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full" data-section="work-experience">
       <div className="mb-16">
         <SectionTitle primaryText="WORK" secondaryText="EXPERIENCE" />
       </div>
 
-      <div className="relative max-w-5xl">
+      <div className="relative max-w-5xl work-experience-section">
         {experiences.map((experience, index) => (
           <ExperienceItem
             key={experience.id}
