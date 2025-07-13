@@ -1,0 +1,30 @@
+[
+  {
+    "name": "React",
+    "logoPath": "src/assets/skills/react.svg"
+  },
+  {
+    "name": "Node.js",
+    "logoPath": "src/assets/skills/node_js.svg"
+  },
+  {
+    "name": "Flutter",
+    "logoPath": "src/assets/skills/flutter.svg"
+  },
+  {
+    "name": "Firebase",
+    "logoPath": "src/assets/skills/firebase.svg"
+  },
+  {
+    "name": "Supabase",
+    "logoPath": "src/assets/skills/supabase.svg"
+  },
+  {
+    "name": "Figma",
+    "logoPath": "src/assets/skills/figma.svg"
+  },
+  {
+    "name": "Rive",
+    "logoPath": "src/assets/skills/rive.svg"
+  }
+]

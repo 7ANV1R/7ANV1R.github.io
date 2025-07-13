@@ -3,6 +3,7 @@ import ProfileCard from '../sections/ProfileCard';
 import About from '../sections/About';
 import RecentProjects from '../sections/RecentProjects';
 import WorkExperience from '../sections/WorkExperience';
+import ToolsAndTech from '../sections/ToolsAndTech';
 import FloatingNav from '../ui/FloatingNav';
 import GetInTouch from '../sections/GetInTouch';
 
@@ -13,6 +14,7 @@ const DesktopLayout = () => {
     about: useRef(null),
     projects: useRef(null),
     experience: useRef(null),
+    skills: useRef(null),
   };
 
   const handleNavigate = (sectionId) => {
@@ -54,19 +56,25 @@ const DesktopLayout = () => {
       {/* Right Side - Scrollable Content */}
       <div className="w-2/3 overflow-y-auto" ref={scrollContainerRef}>
         <div className="p-6 space-y-6">
-          <div style={{ height: 70 }} />
           <div ref={sectionRefs.about}>
             <About className="h-80" />
           </div>
-          <div style={{ height: 48 }} />
+
           <div ref={sectionRefs.projects}>
             <RecentProjects className="h-96" />
           </div>
-          <div style={{ height: 48 }} />
+
           <div ref={sectionRefs.experience}>
             <WorkExperience className="h-96" />
           </div>
-          <div style={{ height: 48 }} />
+
+          <div ref={sectionRefs.skills}>
+            <ToolsAndTech
+              className="h-96"
+              scrollContainerRef={scrollContainerRef}
+            />
+          </div>
+
           <div>
             <GetInTouch />
           </div>
