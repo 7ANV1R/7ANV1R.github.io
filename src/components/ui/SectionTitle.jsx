@@ -1,8 +1,13 @@
 import React from 'react';
 
-const SectionTitle = ({ primaryText, secondaryText, fontSize = '110px' }) => {
+const SectionTitle = ({
+  primaryText,
+  secondaryText,
+  fontSize = '110px',
+  className = '',
+}) => {
   return (
-    <div className="text-left leading-none">
+    <div className={`text-left leading-none ${className}`}>
       <h1
         className="font-semibold"
         style={{

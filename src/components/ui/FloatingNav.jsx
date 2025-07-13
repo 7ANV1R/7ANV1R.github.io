@@ -14,7 +14,6 @@ const FloatingNav = ({ onNavigate }) => {
     { id: 'about', label: 'About', icon: HiOutlineInformationCircle },
     { id: 'projects', label: 'Projects', icon: HiOutlineBriefcase },
     { id: 'experience', label: 'Experience', icon: HiOutlineBuildingOffice },
-    { id: 'education', label: 'Education', icon: HiOutlineAcademicCap },
   ];
 
   return (

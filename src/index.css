@@ -38,7 +38,7 @@
   --text-primary: #111827;
   --text-secondary: #6b7280;
   --accent: #f36c38;
-  --card-bg: #6b7280;
+  --card-bg: #ffffff;
   --card-border: #e5e7eb;
   --nav-bg: rgba(255, 255, 255, 0.9);
 }
@@ -50,7 +50,7 @@
   --text-primary: #ffffff;
   --text-secondary: #353334;
   --accent: #f36c38;
-  --card-bg: #ffffff;
+  --card-bg: #262222;
   --card-border: #353334;
   --nav-bg: rgba(22, 19, 18, 0.9);
 }
