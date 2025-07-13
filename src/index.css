@@ -39,8 +39,18 @@
   --text-secondary: #6b7280;
   --accent: #f36c38;
   --card-bg: #ffffff;
+  --card-bg-rgb: 255, 255, 255;
   --card-border: #e5e7eb;
   --nav-bg: rgba(255, 255, 255, 0.9);
+
+  /* Neumorphism colors for light theme */
+  --neuro-bg: #e6e7ee;
+  --neuro-bg-rgb: 230, 231, 238;
+  --neuro-shadow-dark: #a3a5aa;
+  --neuro-shadow-light: #ffffff;
+  --neuro-card-bg: #e6e7ee;
+  --neuro-card-shadow-inset-dark: rgba(163, 165, 170, 0.7);
+  --neuro-card-shadow-inset-light: rgba(255, 255, 255, 0.7);
 }
 
 [data-theme='dark'] {
@@ -51,8 +61,18 @@
   --text-secondary: #353334;
   --accent: #f36c38;
   --card-bg: #262222;
+  --card-bg-rgb: 38, 34, 34;
   --card-border: #353334;
   --nav-bg: rgba(22, 19, 18, 0.9);
+
+  /* Neumorphism colors for dark theme */
+  --neuro-bg: #2c2925;
+  --neuro-bg-rgb: 44, 41, 37;
+  --neuro-shadow-dark: #1a1814;
+  --neuro-shadow-light: #3e3a36;
+  --neuro-card-bg: #2c2925;
+  --neuro-card-shadow-inset-dark: rgba(26, 24, 20, 0.8);
+  --neuro-card-shadow-inset-light: rgba(62, 58, 54, 0.6);
 }
 
 body {
@@ -293,4 +313,34 @@ body {
 
 .scroll-hover.group .group-hover\:text-lime-400 {
   color: #a3e635 !important;
+}
+
+/* Neumorphism utility classes */
+.neuro-card {
+  background: var(--neuro-card-bg);
+  box-shadow: 12px 12px 24px var(--neuro-shadow-dark),
+    -12px -12px 24px var(--neuro-shadow-light);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.neuro-card:hover {
+  box-shadow: inset 4px 4px 12px var(--neuro-card-shadow-inset-dark),
+    inset -4px -4px 12px var(--neuro-card-shadow-inset-light),
+    8px 8px 16px var(--neuro-shadow-dark),
+    -8px -8px 16px var(--neuro-shadow-light);
+}
+
+.neuro-inset {
+  box-shadow: inset 8px 8px 16px var(--neuro-shadow-dark),
+    inset -8px -8px 16px var(--neuro-shadow-light);
+}
+
+.neuro-convex {
+  box-shadow: 6px 6px 12px var(--neuro-shadow-dark),
+    -6px -6px 12px var(--neuro-shadow-light);
+}
+
+/* Smooth transitions for theme changes */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
