@@ -1,0 +1,46 @@
+/* Mobile-specific styles for Tools and Tech section */
+
+/* Very small screens fallback */
+@media (max-width: 480px) and (orientation: portrait) {
+  .toolsGridFallback {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 16px;
+    margin-top: 32px;
+    padding: 20px;
+    border-radius: 24px;
+    background-color: var(--neuro-bg);
+    box-shadow: inset 6px 6px 12px var(--neuro-shadow-dark),
+      inset -6px -6px 12px var(--neuro-shadow-light);
+  }
+
+  .horizontalScrollContainer {
+    display: none;
+  }
+}
+
+/* Enhanced touch targets for mobile */
+@media (max-width: 768px) {
+  .toolCard {
+    min-height: 44px; /* iOS minimum touch target */
+    min-width: 44px;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .toolCard {
+    transition: none !important;
+  }
+
+  .toolCard:hover {
+    transform: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .toolCard {
+    border: 2px solid currentColor;
+  }
+}
