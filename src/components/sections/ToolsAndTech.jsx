@@ -5,19 +5,14 @@ import { ScrollTrigger } from 'gsap/all';
 import SectionTitle from '../ui/SectionTitle';
 import toolsData from '../../data/tools_and_tech.json';
 
-// Import all logo assets
+// Import logo assets
 import FlutterLogo from '../../assets/skills/flutter.svg';
 import ReactLogo from '../../assets/skills/react.svg';
 import NodeJsLogo from '../../assets/skills/node_js.svg';
-import NextJsLogo from '../../assets/skills/next_js.svg';
-import ExpoLogo from '../../assets/skills/expo.svg';
 import FirebaseLogo from '../../assets/skills/firebase.svg';
 import SupabaseLogo from '../../assets/skills/supabase.svg';
 import FigmaLogo from '../../assets/skills/figma.svg';
 import RiveLogo from '../../assets/skills/rive.svg';
-import PremiereProLogo from '../../assets/skills/premiere_pro.svg';
-import PostmanLogo from '../../assets/skills/postman.svg';
-import GithubLogo from '../../assets/skills/github.svg';
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
@@ -32,15 +27,10 @@ const ToolsAndTech = ({ scrollContainerRef }) => {
     Flutter: FlutterLogo,
     React: ReactLogo,
     'Node.js': NodeJsLogo,
-    'Next.js': NextJsLogo,
-    Expo: ExpoLogo,
     Firebase: FirebaseLogo,
     Supabase: SupabaseLogo,
     Figma: FigmaLogo,
     Rive: RiveLogo,
-    'Premiere Pro': PremiereProLogo,
-    Postman: PostmanLogo,
-    GitHub: GithubLogo,
   };
 
   useGSAP(
