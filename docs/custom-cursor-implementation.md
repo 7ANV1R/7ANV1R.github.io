@@ -7,6 +7,7 @@ This document describes the implementation of a custom cursor that displays comp
 ## 🎯 Features
 
 - **Company Logo Display**: Shows company logos as custom cursor when hovering over work experience items
+- **Dynamic Logo Sizing**: Automatically adjusts logo size based on aspect ratio (wide logos display larger)
 - **GSAP Animations**: Smooth cursor movement and transitions using GSAP
 - **Scroll-Aware Integration**: Works with existing scroll-aware hover system
 - **Performance Optimized**: Uses requestAnimationFrame and proper cleanup
@@ -59,6 +60,57 @@ src/
 #### Core Logic:
 
 ```javascript
+// Dynamic logo sizing based on aspect ratio
+const calculateLogoSize = useCallback((img) => {
+  if (!img || !img.naturalWidth || !img.naturalHeight) {
+    return {
+      width: 'auto',
+      height: 'auto',
+      maxWidth: '120px',
+      maxHeight: '80px',
+    };
+  }
+
+  const aspectRatio = img.naturalWidth / img.naturalHeight;
+
+  // For very wide logos (typography style like NexusLab), make them bigger
+  if (aspectRatio > 4) {
+    return {
+      width: 'auto',
+      height: 'auto',
+      maxWidth: '140px',
+      maxHeight: '35px',
+    };
+  }
+  // For wide logos
+  else if (aspectRatio > 2.5) {
+    return {
+      width: 'auto',
+      height: 'auto',
+      maxWidth: '120px',
+      maxHeight: '40px',
+    };
+  }
+  // For moderately wide logos
+  else if (aspectRatio > 1.5) {
+    return {
+      width: 'auto',
+      height: 'auto',
+      maxWidth: '100px',
+      maxHeight: '60px',
+    };
+  }
+  // For square-ish or tall logos, keep current size
+  else {
+    return {
+      width: 'auto',
+      height: 'auto',
+      maxWidth: '120px',
+      maxHeight: '80px',
+    };
+  }
+}, []);
+
 // GSAP animation for smooth cursor movement
 const animateCursor = useCallback((x, y) => {
   if (!cursorRef.current) return;
@@ -71,8 +123,8 @@ const animateCursor = useCallback((x, y) => {
   // Use requestAnimationFrame for smooth performance
   animationFrameRef.current = requestAnimationFrame(() => {
     gsap.to(cursorRef.current, {
-      x: x - 30, // Center the 60x60 cursor
-      y: y - 30,
+      x: x - 40, // Center the 80x80 cursor
+      y: y - 40,
       duration: 0.3,
       ease: 'power2.out',
     });
@@ -197,7 +249,43 @@ if (
 6. **Persistent Display**: Maintains cursor when scrolling stops
 7. **Periodic Checks**: Ensures cursor stays visible during scroll stops
 
-### 3. Logo Loading
+### 3. Dynamic Logo Sizing
+
+The cursor automatically adjusts logo size based on the logo's aspect ratio:
+
+#### Size Categories:
+
+- **Very Wide Logos** (aspect ratio > 4): 180px × 45px
+
+  - Examples: Typography-style logos like NexusLab
+  - Optimized for readability of text-based logos
+
+- **Wide Logos** (aspect ratio > 2.5): 150px × 50px
+
+  - Examples: Landscape-oriented company logos
+  - Good balance between size and visibility
+
+- **Moderately Wide Logos** (aspect ratio > 1.5): 120px × 70px
+
+  - Examples: Slightly rectangular logos
+  - Maintains good proportions
+
+- **Square/Tall Logos** (aspect ratio ≤ 1.5): 120px × 80px
+  - Examples: Icon-style or square logos
+  - Standard size for most logos
+
+#### Implementation:
+
+```javascript
+// Logo size calculation on image load
+onLoad={(e) => {
+  e.target.style.display = 'block';
+  const newStyle = calculateLogoSize(e.target);
+  setLogoStyle(newStyle);
+}}
+```
+
+### 4. Logo Loading
 
 1. **Path Validation**: Checks if logo path exists in work experience data
 2. **Image Loading**: Loads SVG logo from assets folder

@@ -1,5 +1,23 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { gsap } from 'gsap';
+
+// Constants for better maintainability and performance
+const CURSOR_CONFIG = {
+  SIZE: 80,
+  OFFSET: 40,
+  MAX_LOGO_WIDTH: 120,
+  MAX_LOGO_HEIGHT: 80,
+  ANIMATION_DURATION: 0.3,
+  ANIMATION_EASE: 'power2.out',
+  PERIODIC_CHECK_INTERVAL: 100,
+};
+
+const SELECTORS = {
+  WORK_SECTION: '[data-section="work-experience"]',
+  WORK_ITEM: '.work-experience-item',
+  WORK_ITEM_DATA: '[data-work-item]',
+  COMPANY_LOGO: '[data-company-logo]',
+};
 
 const CompanyLogoCursor = () => {
   const cursorRef = useRef(null);
@@ -8,6 +26,65 @@ const CompanyLogoCursor = () => {
   const isVisibleRef = useRef(false);
   const animationFrameRef = useRef(null);
   const [currentLogo, setCurrentLogo] = useState(null);
+
+  // Dynamic logo sizing based on aspect ratio
+  const [logoStyle, setLogoStyle] = useState({
+    width: 'auto',
+    height: 'auto',
+    maxWidth: `${CURSOR_CONFIG.MAX_LOGO_WIDTH}px`,
+    maxHeight: `${CURSOR_CONFIG.MAX_LOGO_HEIGHT}px`,
+  });
+
+  // Function to calculate logo size based on aspect ratio
+  const calculateLogoSize = useCallback((img) => {
+    if (!img || !img.naturalWidth || !img.naturalHeight) {
+      return {
+        width: 'auto',
+        height: 'auto',
+        maxWidth: `${CURSOR_CONFIG.MAX_LOGO_WIDTH}px`,
+        maxHeight: `${CURSOR_CONFIG.MAX_LOGO_HEIGHT}px`,
+      };
+    }
+
+    const aspectRatio = img.naturalWidth / img.naturalHeight;
+
+    // For very wide logos (typography style like NexusLab), make them bigger
+    if (aspectRatio > 4) {
+      return {
+        width: 'auto',
+        height: 'auto',
+        maxWidth: '180px',
+        maxHeight: '45px',
+      };
+    }
+    // For wide logos
+    else if (aspectRatio > 2.5) {
+      return {
+        width: 'auto',
+        height: 'auto',
+        maxWidth: '150px',
+        maxHeight: '50px',
+      };
+    }
+    // For moderately wide logos
+    else if (aspectRatio > 1.5) {
+      return {
+        width: 'auto',
+        height: 'auto',
+        maxWidth: '120px',
+        maxHeight: '70px',
+      };
+    }
+    // For square-ish or tall logos, keep current size
+    else {
+      return {
+        width: 'auto',
+        height: 'auto',
+        maxWidth: `${CURSOR_CONFIG.MAX_LOGO_WIDTH}px`,
+        maxHeight: `${CURSOR_CONFIG.MAX_LOGO_HEIGHT}px`,
+      };
+    }
+  }, []);
 
   // GSAP animation for smooth cursor movement
   const animateCursor = useCallback((x, y) => {
@@ -21,10 +98,10 @@ const CompanyLogoCursor = () => {
     // Use requestAnimationFrame for smooth performance
     animationFrameRef.current = requestAnimationFrame(() => {
       gsap.to(cursorRef.current, {
-        x: x - 40, // Center the 80x80 cursor (increased from 60x60)
-        y: y - 40,
-        duration: 0.3,
-        ease: 'power2.out',
+        x: x - CURSOR_CONFIG.OFFSET,
+        y: y - CURSOR_CONFIG.OFFSET,
+        duration: CURSOR_CONFIG.ANIMATION_DURATION,
+        ease: CURSOR_CONFIG.ANIMATION_EASE,
       });
     });
   }, []);
@@ -45,7 +122,7 @@ const CompanyLogoCursor = () => {
       opacity: 1,
       scale: 1,
       duration: 0.2,
-      ease: 'power2.out',
+      ease: CURSOR_CONFIG.ANIMATION_EASE,
     });
   }, []);
 
@@ -61,7 +138,7 @@ const CompanyLogoCursor = () => {
       opacity: 0,
       scale: 0.8,
       duration: 0.2,
-      ease: 'power2.out',
+      ease: CURSOR_CONFIG.ANIMATION_EASE,
     });
   }, []);
 
@@ -70,13 +147,13 @@ const CompanyLogoCursor = () => {
     if (!element) return false;
 
     // Must be within the work experience section
-    const workSection = element.closest('[data-section="work-experience"]');
+    const workSection = element.closest(SELECTORS.WORK_SECTION);
     if (!workSection) return false;
 
     // Must be a work experience item or within one
     const hasWorkExpClasses =
       element.classList.contains('work-experience-item') ||
-      element.closest('.work-experience-item');
+      element.closest(SELECTORS.WORK_ITEM);
 
     return hasWorkExpClasses;
   }, []);
@@ -87,8 +164,8 @@ const CompanyLogoCursor = () => {
 
     // Find the closest work experience item
     const workItem =
-      element.closest('.work-experience-item') ||
-      element.closest('[data-work-item]') ||
+      element.closest(SELECTORS.WORK_ITEM) ||
+      element.closest(SELECTORS.WORK_ITEM_DATA) ||
       element;
 
     // Try to get logo from data attribute first
@@ -98,7 +175,7 @@ const CompanyLogoCursor = () => {
     }
 
     // Try to find logo in the DOM structure
-    const logoElement = workItem.querySelector('[data-company-logo]');
+    const logoElement = workItem.querySelector(SELECTORS.COMPANY_LOGO);
     if (logoElement) {
       const logoPath = logoElement.getAttribute('data-company-logo');
       return logoPath;
@@ -214,6 +291,23 @@ const CompanyLogoCursor = () => {
     return observer;
   }, [isWorkExperienceItem, getCompanyLogo, showCursor, hideCursor]);
 
+  // Periodic check function
+  const performPeriodicCheck = useCallback(() => {
+    if (mouseRef.current.x && mouseRef.current.y) {
+      const elementUnderMouse = document.elementFromPoint(
+        mouseRef.current.x,
+        mouseRef.current.y,
+      );
+
+      if (elementUnderMouse && isWorkExperienceItem(elementUnderMouse)) {
+        const logoPath = getCompanyLogo(elementUnderMouse);
+        if (logoPath && !currentLogoRef.current) {
+          showCursor(logoPath);
+        }
+      }
+    }
+  }, [isWorkExperienceItem, getCompanyLogo, showCursor]);
+
   useEffect(() => {
     // Skip on touch devices
     if ('ontouchstart' in window) return;
@@ -229,21 +323,10 @@ const CompanyLogoCursor = () => {
     observer = observeScrollHover();
 
     // Periodic check to maintain cursor when mouse is over work experience item
-    periodicCheck = setInterval(() => {
-      if (mouseRef.current.x && mouseRef.current.y) {
-        const elementUnderMouse = document.elementFromPoint(
-          mouseRef.current.x,
-          mouseRef.current.y,
-        );
-
-        if (elementUnderMouse && isWorkExperienceItem(elementUnderMouse)) {
-          const logoPath = getCompanyLogo(elementUnderMouse);
-          if (logoPath && !currentLogoRef.current) {
-            showCursor(logoPath);
-          }
-        }
-      }
-    }, 100); // Check every 100ms
+    periodicCheck = setInterval(
+      performPeriodicCheck,
+      CURSOR_CONFIG.PERIODIC_CHECK_INTERVAL,
+    );
 
     // Initial cursor position
     gsap.set(cursorRef.current, {
@@ -271,9 +354,7 @@ const CompanyLogoCursor = () => {
     handleMouseMove,
     handleScrollHover,
     observeScrollHover,
-    isWorkExperienceItem,
-    getCompanyLogo,
-    showCursor,
+    performPeriodicCheck,
   ]);
 
   return (
@@ -285,13 +366,8 @@ const CompanyLogoCursor = () => {
         <img
           src={currentLogo}
           alt="Company Logo"
-          className="w-full h-full object-contain max-w-[120px] max-h-[80px]"
-          style={{
-            width: 'auto',
-            height: 'auto',
-            maxWidth: '120px',
-            maxHeight: '80px',
-          }}
+          className="w-full h-full object-contain"
+          style={logoStyle}
           onError={(e) => {
             // Hide cursor if logo fails to load
             e.target.style.display = 'none';
@@ -300,6 +376,9 @@ const CompanyLogoCursor = () => {
           onLoad={(e) => {
             // Ensure image is visible when loaded
             e.target.style.display = 'block';
+            // Calculate and set the appropriate size based on aspect ratio
+            const newStyle = calculateLogoSize(e.target);
+            setLogoStyle(newStyle);
           }}
         />
       )}

@@ -1,5 +1,33 @@
 import { useEffect, useRef, useCallback } from 'react';
 
+// Constants for better maintainability
+const TIMEOUTS = {
+  MOUSE_MOVE: 150,
+  SCROLL: 150,
+  SETUP_DELAY: 100,
+};
+
+const SELECTORS = {
+  SCROLLABLE_CONTAINERS:
+    '[class*="overflow-y-auto"], [class*="overflow-auto"], .overflow-y-auto, .overflow-auto',
+  WORK_SECTION: '[data-section="work-experience"]',
+  WORK_ITEM: '.work-experience-item',
+  NO_SCROLL_HOVER: 'no-scroll-hover',
+};
+
+const HOVERABLE_CLASSES = [
+  'group',
+  'cursor-pointer',
+  'transition',
+  'hover:scale',
+  'hover:bg',
+  'hover:text',
+  'hover:opacity',
+  'hover:translate',
+  'hover:mb',
+  'hover:max-h',
+];
+
 /**
  * Custom hook for scroll-aware hover effects
  * Provides hover effects during scroll without moving the mouse
@@ -32,7 +60,7 @@ export const useScrollAwareHover = () => {
     }
     mouseMoveTimeout.current = setTimeout(() => {
       isMouseMoving.current = false;
-    }, 150);
+    }, TIMEOUTS.MOUSE_MOVE);
   }, []);
 
   // Throttled scroll handler for better performance
@@ -74,13 +102,13 @@ export const useScrollAwareHover = () => {
       }
     });
 
-    // Clear scroll hover after scrolling stops (increased timeout for stability)
+    // Clear scroll hover after scrolling stops
     scrollTimeout.current = setTimeout(() => {
       if (lastHoveredElement.current) {
         lastHoveredElement.current.classList.remove('scroll-hover');
         lastHoveredElement.current = null;
       }
-    }, 150); // Increased from 100ms to 150ms for more stability
+    }, TIMEOUTS.SCROLL);
   }, []);
 
   // Find the closest element with hover effects (with caching)
@@ -120,36 +148,23 @@ export const useScrollAwareHover = () => {
     if (!element || !element.classList) return false;
 
     // Skip elements that explicitly opt out of scroll hover
-    if (element.classList.contains('no-scroll-hover')) return false;
+    if (element.classList.contains(SELECTORS.NO_SCROLL_HOVER)) return false;
 
     // Check for work experience items - only if they're within the work experience section
     if (
       element.classList.contains('work-experience-item') ||
-      element.closest('.work-experience-item')
+      element.closest(SELECTORS.WORK_ITEM)
     ) {
       // Must be within the work experience section
-      const workSection = element.closest('[data-section="work-experience"]');
+      const workSection = element.closest(SELECTORS.WORK_SECTION);
       if (!workSection) return false;
 
       return true;
     }
 
     // Check for common hoverable classes
-    const hoverableClasses = [
-      'group',
-      'cursor-pointer',
-      'transition',
-      'hover:scale',
-      'hover:bg',
-      'hover:text',
-      'hover:opacity',
-      'hover:translate',
-      'hover:mb',
-      'hover:max-h',
-    ];
-
     const classList = element.className;
-    return hoverableClasses.some((className) => classList.includes(className));
+    return HOVERABLE_CLASSES.some((className) => classList.includes(className));
   }, []);
 
   // Setup container listeners
@@ -162,7 +177,7 @@ export const useScrollAwareHover = () => {
 
     // Find all scrollable containers
     const scrollableContainers = document.querySelectorAll(
-      '[class*="overflow-y-auto"], [class*="overflow-auto"], .overflow-y-auto, .overflow-auto',
+      SELECTORS.SCROLLABLE_CONTAINERS,
     );
 
     scrollableContainers.forEach((container) => {
@@ -180,7 +195,7 @@ export const useScrollAwareHover = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     // Setup container listeners after a short delay to ensure DOM is ready
-    setTimeout(setupContainerListeners, 100);
+    setTimeout(setupContainerListeners, TIMEOUTS.SETUP_DELAY);
 
     // Also setup on window resize to catch new containers
     window.addEventListener('resize', setupContainerListeners);

@@ -12,14 +12,15 @@
     "company": "RetinaSoft",
     "companyLogo": "src/assets/experience/retinaSoft_Logo.svg",
     "designation": "Mobile Application Developer",
-    "timeFrame": "January 2023 - Augest 2024",
+    "timeFrame": "May 2023 - August 2024",
     "objective": "Habijabi Developed and maintained web applications using React, Node.js, and MongoDB. Collaborated with cross-functional teams to deliver high-quality software solutions."
   },
   {
     "id": 3,
     "company": "NexusLab",
+    "companyLogo": "src/assets/experience/nexusLab_Logo.svg",
     "designation": "Junior Flutter Developer",
-    "timeFrame": "June 2021 - December 2021",
+    "timeFrame": "August 2021 - September 2022",
     "objective": "Habijabi Built responsive user interfaces and implemented modern web technologies. Contributed to product development and user experience improvements."
   }
 ]

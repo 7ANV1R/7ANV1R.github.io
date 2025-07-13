@@ -1,13 +1,9 @@
-import { useState, useEffect } from 'react';
 import SectionTitle from '../ui/SectionTitle';
 import workExperienceData from '../../data/work_experience.json';
 
 const WorkExperience = () => {
-  const [experiences, setExperiences] = useState([]);
-
-  useEffect(() => {
-    setExperiences(workExperienceData);
-  }, []);
+  // Remove unnecessary state - data is static and doesn't need to be in state
+  const experiences = workExperienceData;
 
   const TimelineDot = ({ isCurrent }) => (
     <div
