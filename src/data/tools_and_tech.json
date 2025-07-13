@@ -1,15 +1,15 @@
 [
   {
-    "name": "Flutter",
-    "logoPath": "src/assets/skills/flutter.svg"
-  },
-  {
     "name": "React",
     "logoPath": "src/assets/skills/react.svg"
   },
   {
     "name": "Node.js",
     "logoPath": "src/assets/skills/node_js.svg"
+  },
+  {
+    "name": "Flutter",
+    "logoPath": "src/assets/skills/flutter.svg"
   },
   {
     "name": "Firebase",
