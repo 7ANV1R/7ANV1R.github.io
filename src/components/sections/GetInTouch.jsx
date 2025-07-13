@@ -44,10 +44,7 @@ const GetInTouch = () => {
   };
 
   return (
-    <div
-      className="w-full max-w-4xl mx-auto mt-16 mb-24 px-4"
-      data-section="get-in-touch"
-    >
+    <div className="space-y-8" data-section="get-in-touch">
       <Snackbar
         open={snackbarOpen}
         message="Message sent successfully! I'll get back to you soon."
@@ -55,9 +52,9 @@ const GetInTouch = () => {
       />
       
       {/* Section Header */}
-      <div className="mb-16 text-center">
+      <div className="space-y-8">
         <SectionTitle primaryText="GET IN" secondaryText="TOUCH" />
-        <div className="mt-8 max-w-2xl mx-auto">
+        <div className="max-w-2xl">
           <p 
             className="text-lg leading-relaxed"
             style={{ color: 'var(--text-secondary)' }}
@@ -68,14 +65,15 @@ const GetInTouch = () => {
       </div>
 
       {/* Contact Form Card */}
-      <div 
-        className="rounded-2xl p-8 lg:p-12 border transition-all duration-300 hover:shadow-lg"
-        style={{
-          backgroundColor: 'var(--card-bg)',
-          borderColor: 'var(--card-border)',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-        }}
-      >
+      <div className="max-w-4xl">
+        <div 
+          className="rounded-2xl p-8 lg:p-12 border transition-all duration-300 hover:shadow-lg"
+          style={{
+            backgroundColor: 'var(--card-bg)',
+            borderColor: 'var(--card-border)',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+          }}
+        >
         <form
           className="space-y-8"
           onSubmit={handleSubmit}
@@ -237,9 +235,10 @@ const GetInTouch = () => {
           </div>
         </form>
       </div>
-
+    </div>
+      
       {/* Additional Contact Info */}
-      <div className="mt-12 text-center">
+      <div className="max-w-2xl">
         <p 
           className="text-paragraph"
           style={{ color: 'var(--text-secondary)' }}
