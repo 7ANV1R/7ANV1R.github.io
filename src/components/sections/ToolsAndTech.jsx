@@ -80,14 +80,14 @@ const ToolsAndTech = ({ scrollContainerRef }) => {
 
     return (
       <div className="flex-shrink-0 group relative">
-        <div className="w-48 h-48 mx-4 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 p-6 hover:bg-white/10 transition-all duration-300 flex flex-col items-center justify-center gap-4">
+        <div className="w-48 h-48 mx-4 rounded-2xl bg-white/5 dark:bg-white/5 backdrop-blur-sm border border-gray-200/20 dark:border-white/10 p-6 hover:bg-gray-100/20 dark:hover:bg-white/10 transition-all duration-300 flex flex-col items-center justify-center gap-4 shadow-lg dark:shadow-none">
           {/* Logo */}
           <div className="w-16 h-16 flex items-center justify-center">
             {LogoComponent ? (
               <img
                 src={LogoComponent}
                 alt={`${tool.name} logo`}
-                className="w-full h-full object-contain filter brightness-0 invert opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+                className="w-full h-full object-contain filter dark:brightness-0 dark:invert opacity-80 group-hover:opacity-100 transition-opacity duration-300"
               />
             ) : (
               <div className="w-full h-full rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
@@ -120,14 +120,14 @@ const ToolsAndTech = ({ scrollContainerRef }) => {
         {/* Horizontal scroll container */}
         <div
           ref={containerRef}
-          className="relative overflow-hidden mt-12"
+          className="relative overflow-hidden mt-12 rounded-2xl bg-gray-50 dark:bg-gray-800 shadow-lg"
           style={{ height: '500px', width: '100%' }}
         >
           {/* Left fade gradient */}
-          <div className="absolute left-0 top-0 w-20 h-full bg-gradient-to-r from-black via-black/50 to-transparent z-10 pointer-events-none" />
+          <div className="absolute left-0 top-0 w-20 h-full bg-gradient-to-r from-gray-50 via-gray-50/80 to-transparent dark:from-black dark:via-black/90 z-10 pointer-events-none" />
 
           {/* Right fade gradient */}
-          <div className="absolute right-0 top-0 w-20 h-full bg-gradient-to-l from-black via-black/50 to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 w-20 h-full bg-gradient-to-l from-gray-50 via-gray-50/80 to-transparent dark:from-black dark:via-black/90 z-10 pointer-events-none" />
 
           {/* Tools container */}
           <div
