@@ -3,8 +3,8 @@ import ProfileCard from '../sections/ProfileCard';
 import About from '../sections/About';
 import RecentProjects from '../sections/RecentProjects';
 import WorkExperience from '../sections/WorkExperience';
-import Education from '../sections/Education';
 import FloatingNav from '../ui/FloatingNav';
+import GetInTouch from '../sections/GetInTouch';
 
 const DesktopLayout = () => {
   const scrollContainerRef = useRef(null);
@@ -13,7 +13,6 @@ const DesktopLayout = () => {
     about: useRef(null),
     projects: useRef(null),
     experience: useRef(null),
-    education: useRef(null),
   };
 
   const handleNavigate = (sectionId) => {
@@ -67,8 +66,9 @@ const DesktopLayout = () => {
           <div ref={sectionRefs.experience}>
             <WorkExperience className="h-96" />
           </div>
-          <div ref={sectionRefs.education}>
-            <Education className="h-80" />
+          <div style={{ height: 48 }} />
+          <div>
+            <GetInTouch />
           </div>
         </div>
       </div>
