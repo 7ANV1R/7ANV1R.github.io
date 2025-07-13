@@ -2,7 +2,7 @@
   {
     "id": 1,
     "company": "weDevs",
-    "companyLogo": "src/assets/experience/weDevs_Logo.svg",
+    "companyLogo": "/experience/weDevs_Logo.svg",
     "designation": "Software Engineer",
     "timeFrame": "September 2024 - Present",
     "objective": "Working on a SAAS-based ecommerce platform, specifically developing a white label customer mobile app. Successfully converted a React Native app to Flutter with comprehensive feature implementation, ensuring all missing functionalities were properly integrated and optimized for cross-platform performance."
@@ -10,7 +10,7 @@
   {
     "id": 2,
     "company": "RetinaSoft",
-    "companyLogo": "src/assets/experience/retinaSoft_Logo.svg",
+    "companyLogo": "/experience/retinaSoft_Logo.svg",
     "designation": "Mobile Application Developer",
     "timeFrame": "May 2023 - August 2024",
     "objective": "Developed comprehensive real estate buying and selling applications with advanced features including socket-based messaging, audio and video calling capabilities for seamless communication between users. Built a news portal mobile app supporting both user and reporter functionalities, enabling content creation, publishing, and consumption with real-time updates and interactive features."
@@ -18,7 +18,7 @@
   {
     "id": 3,
     "company": "NexusLab",
-    "companyLogo": "src/assets/experience/nexusLab_Logo.svg",
+    "companyLogo": "/experience/nexuslab_Logo.svg",
     "designation": "Junior Flutter Developer",
     "timeFrame": "August 2021 - September 2022",
     "objective": "Collaborated with design teams to translate mockups into functional and user-friendly app interfaces. Successfully integrated Google Maps and background location tracking features for real-time location awareness, including risk warning functionalities based on user reviews. Implemented chat functionality using sockets to enable real-time communication and enhance user engagement within the platform."

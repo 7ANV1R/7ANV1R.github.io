@@ -5,6 +5,8 @@ import {
   HiOutlineTemplate,
   HiOutlineArrowRight,
 } from 'react-icons/hi';
+import orangePattern from '../../assets/orange-pattern.svg';
+import greenPattern from '../../assets/green-pattern.svg';
 
 const About = () => {
   return (
@@ -30,7 +32,7 @@ const About = () => {
           {/* Abstract background pattern */}
           <div className="absolute inset-0 opacity-100">
             <img
-              src="/src/assets/orange-pattern.svg"
+              src={orangePattern}
               alt=""
               className="w-full h-full object-cover"
             />
@@ -63,7 +65,7 @@ const About = () => {
           {/* Abstract background pattern */}
           <div className="absolute inset-0 opacity-100">
             <img
-              src="/src/assets/green-pattern.svg"
+              src={greenPattern}
               alt=""
               className="w-full h-full object-cover"
             />

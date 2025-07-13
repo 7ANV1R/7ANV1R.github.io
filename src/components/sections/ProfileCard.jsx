@@ -1,6 +1,7 @@
 import Skeleton from '../ui/Skeleton';
 import SocialIcon from '../ui/SocialIcon';
 import { FiGithub, FiTwitter, FiMail } from 'react-icons/fi';
+import tanvirImg from '../../assets/tanvir.png';
 
 const ProfileCard = () => {
   return (
@@ -12,7 +13,7 @@ const ProfileCard = () => {
         {/* image */}
         <div className="flex items-center justify-center mb-4 w-full">
           <img
-            src="/src/assets/tanvir.png"
+            src={tanvirImg}
             alt="Profile"
             className="w-32 h-40 sm:w-40 sm:h-48 lg:w-48 lg:h-56 rounded-md object-cover"
           />
