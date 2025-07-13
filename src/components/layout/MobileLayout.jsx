@@ -29,18 +29,17 @@ const MobileLayout = () => {
       <FloatingNav onNavigate={handleNavigate} />
 
       <div className="container mx-auto px-4 py-6 space-y-6">
-        <div style={{ height: 70 }} />
         <div ref={sectionRefs.profile}>
           <ProfileCard className="h-64" />
         </div>
         <div ref={sectionRefs.about}>
           <About />
         </div>
-        <div style={{ height: 24 }} />
+
         <div ref={sectionRefs.projects}>
           <RecentProjects />
         </div>
-        <div style={{ height: 24 }} />
+
         <div ref={sectionRefs.experience}>
           <WorkExperience />
         </div>

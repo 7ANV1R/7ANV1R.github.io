@@ -9,6 +9,7 @@ import {
 const About = () => {
   return (
     <>
+      <div style={{ height: 80 }} />
       {/* large designation */}
       <SectionTitle primaryText="SOFTWARE" secondaryText="ENGINEER" />
 

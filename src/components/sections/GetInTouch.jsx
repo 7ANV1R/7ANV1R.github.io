@@ -118,192 +118,195 @@ const GetInTouch = () => {
   };
 
   return (
-    <section
-      className="space-y-8"
-      data-section="get-in-touch"
-      aria-labelledby="contact-heading"
-    >
-      <Snackbar
-        open={snackbarOpen}
-        message="Message sent successfully! I'll get back to you soon."
-        onClose={handleSnackbarClose}
-      />
-
-      {/* Section Header */}
-      <header className="space-y-8">
-        <SectionTitle
-          primaryText="GET IN"
-          secondaryText="TOUCH"
-          id="contact-heading"
+    <>
+      <div style={{ height: 80 }} />
+      <section
+        className="space-y-8"
+        data-section="get-in-touch"
+        aria-labelledby="contact-heading"
+      >
+        <Snackbar
+          open={snackbarOpen}
+          message="Message sent successfully! I'll get back to you soon."
+          onClose={handleSnackbarClose}
         />
-        <div className="max-w-2xl">
-          <p
-            className="text-lg leading-relaxed"
-            style={{ color: 'var(--text-secondary)' }}
-          >
-            Feel free to reach out if you'd like to connect, discuss technology,
-            or just say hello. I'm always happy to chat with fellow developers
-            and tech enthusiasts.
-          </p>
-        </div>
-      </header>
 
-      {/* Contact Form Card */}
-      <div className="max-w-4xl">
-        <div
-          className="rounded-2xl p-8 lg:p-12 border transition-all duration-300 hover:shadow-lg"
-          style={{
-            backgroundColor: 'var(--card-bg)',
-            borderColor: 'var(--card-border)',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-          }}
-        >
-          <form
-            className="space-y-8"
-            onSubmit={handleSubmit}
-            autoComplete="off"
-            noValidate
+        {/* Section Header */}
+        <header className="space-y-8">
+          <SectionTitle
+            primaryText="GET IN"
+            secondaryText="TOUCH"
+            id="contact-heading"
+          />
+          <div className="max-w-2xl">
+            <p
+              className="text-lg leading-relaxed"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              Feel free to reach out if you'd like to connect, discuss
+              technology, or just say hello. I'm always happy to chat with
+              fellow developers and tech enthusiasts.
+            </p>
+          </div>
+        </header>
+
+        {/* Contact Form Card */}
+        <div className="max-w-4xl">
+          <div
+            className="rounded-2xl p-8 lg:p-12 border transition-all duration-300 hover:shadow-lg"
+            style={{
+              backgroundColor: 'var(--card-bg)',
+              borderColor: 'var(--card-border)',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+            }}
           >
-            {/* Honeypot for spam protection */}
-            <input
-              type="text"
-              name="_honey"
-              style={{ display: 'none' }}
-              tabIndex={-1}
+            <form
+              className="space-y-8"
+              onSubmit={handleSubmit}
               autoComplete="off"
-              aria-hidden="true"
-            />
-            {/* Disable captcha */}
-            <input type="hidden" name="_captcha" value="false" />
+              noValidate
+            >
+              {/* Honeypot for spam protection */}
+              <input
+                type="text"
+                name="_honey"
+                style={{ display: 'none' }}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+              />
+              {/* Disable captcha */}
+              <input type="hidden" name="_captcha" value="false" />
 
-            {/* Form Fields Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Name Field */}
-              <div className="space-y-3">
-                <label
-                  htmlFor="contact-name"
-                  className="flex items-center gap-3 text-h6 font-semibold"
-                  style={{ color: 'var(--text-primary)' }}
-                >
-                  <AnimatedLabelIcon type="user" size={20} />
-                  Your Name
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    id="contact-name"
-                    name="name"
-                    value={form.name}
-                    onChange={handleChange}
-                    onFocus={handleInputFocus}
-                    onBlur={handleInputBlur}
-                    placeholder="Enter your full name"
-                    className={inputClassName}
-                    style={inputStyle}
-                    autoComplete="name"
-                    required
-                    disabled={submitting}
-                    aria-describedby="name-error"
-                  />
-                </div>
-              </div>
-
-              {/* Email Field */}
-              <div className="space-y-3">
-                <label
-                  htmlFor="contact-email"
-                  className="flex items-center gap-3 text-h6 font-semibold"
-                  style={{ color: 'var(--text-primary)' }}
-                >
-                  <AnimatedLabelIcon type="mail" size={20} />
-                  Email Address
-                </label>
-                <div className="relative">
-                  <input
-                    type="email"
-                    id="contact-email"
-                    name="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    onFocus={handleInputFocus}
-                    onBlur={handleInputBlur}
-                    placeholder="your@email.com"
-                    className={inputClassName}
-                    style={inputStyle}
-                    autoComplete="email"
-                    required
-                    disabled={submitting}
-                    aria-describedby="email-error"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Message Field */}
-            <div className="space-y-3">
-              <label
-                htmlFor="contact-message"
-                className="flex items-center gap-3 text-h6 font-semibold"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                <AnimatedLabelIcon type="message" size={20} />
-                Message
-              </label>
-              <div className="relative">
-                <textarea
-                  id="contact-message"
-                  name="message"
-                  value={form.message}
-                  onChange={handleChange}
-                  onFocus={handleInputFocus}
-                  onBlur={handleInputBlur}
-                  placeholder="Feel free to share your thoughts, ask questions, or just say hello! I'd love to hear from you."
-                  className={`${inputClassName} min-h-[140px] resize-none`}
-                  style={inputStyle}
-                  required
-                  disabled={submitting}
-                  rows={6}
-                  aria-describedby="message-error"
-                />
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <div className="pt-4">
-              <button
-                type="submit"
-                className="w-full py-4 px-8 rounded-xl font-bold text-lg tracking-wide transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-4 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                style={{
-                  backgroundColor: 'var(--accent)',
-                  color: '#ffffff',
-                  boxShadow: '0 4px 14px 0 var(--accent)40',
-                }}
-                onMouseEnter={handleButtonMouseEnter}
-                onMouseLeave={handleButtonMouseLeave}
-                disabled={submitting}
-                aria-describedby={submitting ? 'submit-status' : undefined}
-              >
-                {submitting ? (
-                  <span
-                    className="flex items-center justify-center gap-3"
-                    id="submit-status"
-                    aria-live="polite"
+              {/* Form Fields Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Name Field */}
+                <div className="space-y-3">
+                  <label
+                    htmlFor="contact-name"
+                    className="flex items-center gap-3 text-h6 font-semibold"
+                    style={{ color: 'var(--text-primary)' }}
                   >
-                    <div
-                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"
-                      aria-hidden="true"
+                    <AnimatedLabelIcon type="user" size={20} />
+                    Your Name
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      id="contact-name"
+                      name="name"
+                      value={form.name}
+                      onChange={handleChange}
+                      onFocus={handleInputFocus}
+                      onBlur={handleInputBlur}
+                      placeholder="Enter your full name"
+                      className={inputClassName}
+                      style={inputStyle}
+                      autoComplete="name"
+                      required
+                      disabled={submitting}
+                      aria-describedby="name-error"
                     />
-                    Sending...
-                  </span>
-                ) : (
-                  'Send Message'
-                )}
-              </button>
-            </div>
-          </form>
+                  </div>
+                </div>
+
+                {/* Email Field */}
+                <div className="space-y-3">
+                  <label
+                    htmlFor="contact-email"
+                    className="flex items-center gap-3 text-h6 font-semibold"
+                    style={{ color: 'var(--text-primary)' }}
+                  >
+                    <AnimatedLabelIcon type="mail" size={20} />
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="email"
+                      id="contact-email"
+                      name="email"
+                      value={form.email}
+                      onChange={handleChange}
+                      onFocus={handleInputFocus}
+                      onBlur={handleInputBlur}
+                      placeholder="your@email.com"
+                      className={inputClassName}
+                      style={inputStyle}
+                      autoComplete="email"
+                      required
+                      disabled={submitting}
+                      aria-describedby="email-error"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Message Field */}
+              <div className="space-y-3">
+                <label
+                  htmlFor="contact-message"
+                  className="flex items-center gap-3 text-h6 font-semibold"
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <AnimatedLabelIcon type="message" size={20} />
+                  Message
+                </label>
+                <div className="relative">
+                  <textarea
+                    id="contact-message"
+                    name="message"
+                    value={form.message}
+                    onChange={handleChange}
+                    onFocus={handleInputFocus}
+                    onBlur={handleInputBlur}
+                    placeholder="Feel free to share your thoughts, ask questions, or just say hello! I'd love to hear from you."
+                    className={`${inputClassName} min-h-[140px] resize-none`}
+                    style={inputStyle}
+                    required
+                    disabled={submitting}
+                    rows={6}
+                    aria-describedby="message-error"
+                  />
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  className="w-full py-4 px-8 rounded-xl font-bold text-lg tracking-wide transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-4 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  style={{
+                    backgroundColor: 'var(--accent)',
+                    color: '#ffffff',
+                    boxShadow: '0 4px 14px 0 var(--accent)40',
+                  }}
+                  onMouseEnter={handleButtonMouseEnter}
+                  onMouseLeave={handleButtonMouseLeave}
+                  disabled={submitting}
+                  aria-describedby={submitting ? 'submit-status' : undefined}
+                >
+                  {submitting ? (
+                    <span
+                      className="flex items-center justify-center gap-3"
+                      id="submit-status"
+                      aria-live="polite"
+                    >
+                      <div
+                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"
+                        aria-hidden="true"
+                      />
+                      Sending...
+                    </span>
+                  ) : (
+                    'Send Message'
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 };
 

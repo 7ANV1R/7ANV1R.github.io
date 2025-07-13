@@ -54,19 +54,18 @@ const DesktopLayout = () => {
       {/* Right Side - Scrollable Content */}
       <div className="w-2/3 overflow-y-auto" ref={scrollContainerRef}>
         <div className="p-6 space-y-6">
-          <div style={{ height: 70 }} />
           <div ref={sectionRefs.about}>
             <About className="h-80" />
           </div>
-          <div style={{ height: 48 }} />
+
           <div ref={sectionRefs.projects}>
             <RecentProjects className="h-96" />
           </div>
-          <div style={{ height: 48 }} />
+
           <div ref={sectionRefs.experience}>
             <WorkExperience className="h-96" />
           </div>
-          <div style={{ height: 48 }} />
+
           <div>
             <GetInTouch />
           </div>

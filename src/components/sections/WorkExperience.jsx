@@ -97,22 +97,25 @@ const WorkExperience = () => {
   };
 
   return (
-    <div className="w-full" data-section="work-experience">
-      <div className="mb-16">
-        <SectionTitle primaryText="WORK" secondaryText="EXPERIENCE" />
-      </div>
+    <>
+      <div style={{ height: 80 }} />
+      <div className="w-full" data-section="work-experience">
+        <div className="mb-16">
+          <SectionTitle primaryText="WORK" secondaryText="EXPERIENCE" />
+        </div>
 
-      <div className="relative max-w-5xl work-experience-section">
-        {experiences.map((experience, index) => (
-          <ExperienceItem
-            key={experience.id}
-            experience={experience}
-            index={index}
-            totalItems={experiences.length}
-          />
-        ))}
+        <div className="relative max-w-5xl work-experience-section">
+          {experiences.map((experience, index) => (
+            <ExperienceItem
+              key={experience.id}
+              experience={experience}
+              index={index}
+              totalItems={experiences.length}
+            />
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
