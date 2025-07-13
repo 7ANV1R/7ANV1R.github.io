@@ -1,13 +1,9 @@
-import { useState, useEffect } from 'react';
 import SectionTitle from '../ui/SectionTitle';
 import workExperienceData from '../../data/work_experience.json';
 
 const WorkExperience = () => {
-  const [experiences, setExperiences] = useState([]);
-
-  useEffect(() => {
-    setExperiences(workExperienceData);
-  }, []);
+  // Remove unnecessary state - data is static and doesn't need to be in state
+  const experiences = workExperienceData;
 
   const TimelineDot = ({ isCurrent }) => (
     <div
@@ -75,7 +71,11 @@ const WorkExperience = () => {
     const isLast = index === totalItems - 1;
 
     return (
-      <div className="flex items-stretch">
+      <div
+        className="flex items-stretch work-experience-item"
+        data-work-item={experience.id}
+        data-company-logo={experience.companyLogo}
+      >
         {/* Timeline Column */}
         <div className="flex flex-col items-center w-24 flex-shrink-0">
           <TimelineDot isCurrent={isCurrent} />
@@ -97,12 +97,12 @@ const WorkExperience = () => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full" data-section="work-experience">
       <div className="mb-16">
         <SectionTitle primaryText="WORK" secondaryText="EXPERIENCE" />
       </div>
 
-      <div className="relative max-w-5xl">
+      <div className="relative max-w-5xl work-experience-section">
         {experiences.map((experience, index) => (
           <ExperienceItem
             key={experience.id}
