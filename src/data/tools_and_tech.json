@@ -1,0 +1,46 @@
+[
+  {
+    "name": "Flutter",
+    "logo": "flutter.svg"
+  },
+  {
+    "name": "React",
+    "logo": "react.svg"
+  },
+  {
+    "name": "Node.js",
+    "logo": "node_js.svg"
+  },
+  {
+    "name": "Next.js",
+    "logo": "next_js.svg"
+  },
+  {
+    "name": "Expo",
+    "logo": "expo.svg"
+  },
+  {
+    "name": "Firebase",
+    "logo": "firebase.svg"
+  },
+  {
+    "name": "Supabase",
+    "logo": "supabase.svg"
+  },
+  {
+    "name": "Figma",
+    "logo": "figma.svg"
+  },
+  {
+    "name": "Rive",
+    "logo": "rive.png"
+  },
+  {
+    "name": "Premiere Pro",
+    "logo": "premiere_pro.svg"
+  },
+  {
+    "name": "Postman",
+    "logo": "postman.svg"
+  }
+]
