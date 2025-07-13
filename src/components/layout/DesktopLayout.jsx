@@ -69,7 +69,10 @@ const DesktopLayout = () => {
           </div>
 
           <div ref={sectionRefs.skills}>
-            <ToolsAndTech className="h-96" />
+            <ToolsAndTech
+              className="h-96"
+              scrollContainerRef={scrollContainerRef}
+            />
           </div>
 
           <div>

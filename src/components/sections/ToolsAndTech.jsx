@@ -1,81 +1,120 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/all';
 import SectionTitle from '../ui/SectionTitle';
-import {
-  HiOutlineCodeBracket,
-  HiOutlineWrenchScrewdriver,
-  HiOutlineEye,
-  HiOutlineLightBulb,
-} from 'react-icons/hi2';
+import toolsData from '../../data/tools_and_tech.json';
 
-const ToolsAndTech = () => {
-  const categories = [
-    {
-      id: 'programming',
-      title: 'Programming',
-      icon: HiOutlineCodeBracket,
-      items: [
-        'Dart',
-        'Flutter',
-        'JavaScript',
-        'Node.js',
-        'Express.js',
-        'SQL',
-        'MongoDB',
-      ],
-    },
-    {
-      id: 'tools',
-      title: 'Tools',
-      icon: HiOutlineWrenchScrewdriver,
-      items: ['Firebase', 'Supabase', 'Git', 'Docker', 'Postman'],
-    },
-    {
-      id: 'design',
-      title: 'Design',
-      icon: HiOutlineEye,
-      items: ['Figma', 'Rive', 'Photoshop', 'Premiere Pro'],
-    },
-    {
-      id: 'interests',
-      title: 'Interests',
-      icon: HiOutlineLightBulb,
-      items: ['Interactive Design', '3D Design', 'Cinematography'],
-    },
-  ];
+// Import all logo assets
+import FlutterLogo from '../../assets/skills/flutter.svg';
+import ReactLogo from '../../assets/skills/react.svg';
+import NodeJsLogo from '../../assets/skills/node_js.svg';
+import NextJsLogo from '../../assets/skills/next_js.svg';
+import ExpoLogo from '../../assets/skills/expo.svg';
+import FirebaseLogo from '../../assets/skills/firebase.svg';
+import SupabaseLogo from '../../assets/skills/supabase.svg';
+import FigmaLogo from '../../assets/skills/figma.svg';
+import RiveLogo from '../../assets/skills/rive.svg';
+import PremiereProLogo from '../../assets/skills/premiere_pro.svg';
+import PostmanLogo from '../../assets/skills/postman.svg';
+import GithubLogo from '../../assets/skills/github.svg';
 
-  const CategoryCard = ({ category }) => {
-    const IconComponent = category.icon;
+// Register GSAP plugins
+gsap.registerPlugin(ScrollTrigger);
+
+const ToolsAndTech = ({ scrollContainerRef }) => {
+  const sectionRef = useRef();
+  const containerRef = useRef();
+  const toolsRef = useRef();
+
+  // Map logo imports to tool names
+  const logoMap = {
+    Flutter: FlutterLogo,
+    React: ReactLogo,
+    'Node.js': NodeJsLogo,
+    'Next.js': NextJsLogo,
+    Expo: ExpoLogo,
+    Firebase: FirebaseLogo,
+    Supabase: SupabaseLogo,
+    Figma: FigmaLogo,
+    Rive: RiveLogo,
+    'Premiere Pro': PremiereProLogo,
+    Postman: PostmanLogo,
+    GitHub: GithubLogo,
+  };
+
+  useGSAP(
+    () => {
+      // Wait for the next tick to ensure DOM is ready
+      setTimeout(() => {
+        const container = containerRef.current;
+        const tools = toolsRef.current;
+
+        if (!container || !tools) {
+          console.log('Container or tools not found');
+          return;
+        }
+
+        // Calculate the total width of the tools container
+        const toolsWidth = tools.scrollWidth;
+        const containerWidth = container.offsetWidth;
+        const scrollDistance = toolsWidth - containerWidth;
+
+        // Create the horizontal scroll animation
+        gsap.to(tools, {
+          x: -scrollDistance,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            scroller: scrollContainerRef?.current,
+            start: 'top 5%',
+            end: '+=30%',
+            scrub: 1,
+            pin: false,
+          },
+        });
+      }, 100);
+    },
+    { scope: sectionRef },
+  );
+
+  // Cleanup ScrollTrigger on unmount
+  useEffect(() => {
+    return () => {
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+    };
+  }, []);
+
+  const ToolCard = ({ tool }) => {
+    const LogoComponent = logoMap[tool.name];
 
     return (
-      <div className="group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 p-6 hover:bg-white/10 transition-all duration-300">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-            <IconComponent className="w-5 h-5 text-white" />
+      <div className="flex-shrink-0 group relative">
+        <div className="w-48 h-48 mx-4 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 p-6 hover:bg-white/10 transition-all duration-300 flex flex-col items-center justify-center gap-4">
+          {/* Logo */}
+          <div className="w-16 h-16 flex items-center justify-center">
+            {LogoComponent ? (
+              <img
+                src={LogoComponent}
+                alt={`${tool.name} logo`}
+                className="w-full h-full object-contain filter brightness-0 invert opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+              />
+            ) : (
+              <div className="w-full h-full rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <span className="text-white font-bold text-lg">
+                  {tool.name.charAt(0)}
+                </span>
+              </div>
+            )}
           </div>
+
+          {/* Tool name */}
           <h3
-            className="text-xl font-semibold"
+            className="text-lg font-semibold text-center"
             style={{ color: 'var(--text-primary)' }}
           >
-            {category.title}
+            {tool.name}
           </h3>
-        </div>
-
-        {/* Skills grid */}
-        <div className="grid grid-cols-2 gap-3">
-          {category.items.map((item, index) => (
-            <div
-              key={index}
-              className="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105"
-              style={{
-                backgroundColor: 'var(--bg-secondary)',
-                color: 'var(--text-secondary)',
-                border: '1px solid var(--card-border)',
-              }}
-            >
-              {item}
-            </div>
-          ))}
         </div>
       </div>
     );
@@ -85,13 +124,36 @@ const ToolsAndTech = () => {
     <>
       <div style={{ height: 80 }} />
 
-      <div className="space-y-8">
+      <div ref={sectionRef} className="relative">
         <SectionTitle primaryText="TOOLS &" secondaryText="TECHNOLOGIES" />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl">
-          {categories.map((category) => (
-            <CategoryCard key={category.id} category={category} />
-          ))}
+        {/* Horizontal scroll container */}
+        <div
+          ref={containerRef}
+          className="relative overflow-hidden mt-12"
+          style={{ height: '500px', width: '100%' }}
+        >
+          {/* Left fade gradient */}
+          <div className="absolute left-0 top-0 w-20 h-full bg-gradient-to-r from-black via-black/50 to-transparent z-10 pointer-events-none" />
+
+          {/* Right fade gradient */}
+          <div className="absolute right-0 top-0 w-20 h-full bg-gradient-to-l from-black via-black/50 to-transparent z-10 pointer-events-none" />
+
+          {/* Tools container */}
+          <div
+            ref={toolsRef}
+            className="flex items-center h-full"
+            style={{
+              width: 'max-content',
+              minWidth: '100%',
+              paddingLeft: '100px',
+              paddingRight: '100px',
+            }}
+          >
+            {toolsData.map((tool, index) => (
+              <ToolCard key={index} tool={tool} />
+            ))}
+          </div>
         </div>
       </div>
     </>
