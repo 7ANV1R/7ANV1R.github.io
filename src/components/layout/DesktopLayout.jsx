@@ -3,6 +3,7 @@ import ProfileCard from '../sections/ProfileCard';
 import About from '../sections/About';
 import RecentProjects from '../sections/RecentProjects';
 import WorkExperience from '../sections/WorkExperience';
+import ToolsAndTech from '../sections/ToolsAndTech';
 import FloatingNav from '../ui/FloatingNav';
 import GetInTouch from '../sections/GetInTouch';
 
@@ -13,6 +14,7 @@ const DesktopLayout = () => {
     about: useRef(null),
     projects: useRef(null),
     experience: useRef(null),
+    skills: useRef(null),
   };
 
   const handleNavigate = (sectionId) => {
@@ -64,6 +66,10 @@ const DesktopLayout = () => {
 
           <div ref={sectionRefs.experience}>
             <WorkExperience className="h-96" />
+          </div>
+
+          <div ref={sectionRefs.skills}>
+            <ToolsAndTech className="h-96" />
           </div>
 
           <div>
