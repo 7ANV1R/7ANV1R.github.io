@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { gsap } from 'gsap';
 
 // Enhanced SVG paths with more detailed animations
@@ -47,128 +47,179 @@ const iconPaths = {
   ],
 };
 
+/**
+ * AnimatedLabelIcon Component
+ *
+ * A sophisticated animated SVG icon component with drawing animations and hover effects.
+ *
+ * @param {Object} props - Component props
+ * @param {'user'|'mail'|'message'} props.type - The type of icon to display
+ * @param {number} props.size - The size of the icon in pixels
+ * @param {string} props.color - The color of the icon (CSS variable or hex)
+ * @returns {JSX.Element} The animated icon component
+ */
 const AnimatedLabelIcon = ({
   type = 'user',
   size = 20,
   color = 'var(--accent)',
 }) => {
-  const svgRef = useRef();
+  const svgRef = useRef(null);
+  const timeoutRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
 
+  // Memoize hover handlers to prevent unnecessary re-renders
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+  }, []);
+
+  // Initial drawing animation effect
   useEffect(() => {
-    if (svgRef.current && !hasAnimated) {
-      const paths = svgRef.current.querySelectorAll('path');
-      
-      // Set up initial state for each path
-      paths.forEach((path) => {
-        const length = path.getTotalLength();
-        gsap.set(path, {
-          strokeDasharray: length,
-          strokeDashoffset: length,
-          opacity: 0.4,
-        });
-      });
+    if (!svgRef.current || hasAnimated) return;
 
-      // Animate paths drawing with individual delays
-      paths.forEach((path, index) => {
-        const pathData = iconPaths[type][index];
-        gsap.to(path, {
-          strokeDashoffset: 0,
-          opacity: 1,
-          duration: 1.2,
-          ease: 'power2.out',
-          delay: pathData.delay,
-          onComplete: () => {
-            // Create a subtle pulse effect after drawing
-            gsap.to(path, {
-              opacity: 0.8,
-              duration: 0.8,
-              ease: 'power2.inOut',
-              yoyo: true,
-              repeat: 1,
-            });
-          }
-        });
-      });
+    const paths = svgRef.current.querySelectorAll('path');
+    const currentPaths = iconPaths[type];
 
-      // Remove dash arrays after animation for cleaner look
-      setTimeout(() => {
-        paths.forEach(path => {
+    if (!paths.length || !currentPaths) return;
+
+    // Set up initial state for each path
+    paths.forEach((path) => {
+      const length = path.getTotalLength();
+      gsap.set(path, {
+        strokeDasharray: length,
+        strokeDashoffset: length,
+        opacity: 0.4,
+      });
+    });
+
+    // Animate paths drawing with individual delays
+    paths.forEach((path, index) => {
+      const pathData = currentPaths[index];
+      if (!pathData) return;
+
+      gsap.to(path, {
+        strokeDashoffset: 0,
+        opacity: 1,
+        duration: 1.2,
+        ease: 'power2.out',
+        delay: pathData.delay,
+        onComplete: () => {
+          // Create a subtle pulse effect after drawing
+          gsap.to(path, {
+            opacity: 0.8,
+            duration: 0.8,
+            ease: 'power2.inOut',
+            yoyo: true,
+            repeat: 1,
+          });
+        },
+      });
+    });
+
+    // Clean up dash arrays after animation for better performance
+    timeoutRef.current = setTimeout(() => {
+      if (svgRef.current) {
+        const currentPaths = svgRef.current.querySelectorAll('path');
+        currentPaths.forEach((path) => {
           gsap.set(path, { strokeDasharray: 'none' });
         });
-      }, 2000);
+      }
+    }, 2000);
 
-      setHasAnimated(true);
-    }
+    setHasAnimated(true);
   }, [type, hasAnimated]);
 
+  // Hover animation effect
   useEffect(() => {
-    if (svgRef.current) {
-      const paths = svgRef.current.querySelectorAll('path');
-      
-      if (isHovered) {
-        // Hover: Scale up and create wave effect
-        gsap.to(svgRef.current, {
-          scale: 1.1,
-          duration: 0.3,
-          ease: 'back.out(1.7)',
-        });
-        
-        // Wave animation through paths
-        paths.forEach((path, index) => {
-          const pathData = iconPaths[type][index];
-          gsap.to(path, {
-            strokeWidth: pathData.strokeWidth * 1.2,
-            duration: 0.3,
-            ease: 'power2.out',
-            delay: index * 0.05,
-          });
-        });
+    if (!svgRef.current) return;
 
-        // Create morphing effect
-        gsap.to(paths, {
-          transformOrigin: 'center',
-          scaleY: 1.05,
-          duration: 0.6,
-          ease: 'elastic.out(1, 0.3)',
-          stagger: 0.1,
-        });
-      } else {
-        // Reset animations
-        gsap.to(svgRef.current, {
-          scale: 1,
-          duration: 0.2,
+    const paths = svgRef.current.querySelectorAll('path');
+    const currentPaths = iconPaths[type];
+
+    if (!paths.length || !currentPaths) return;
+
+    if (isHovered) {
+      // Hover: Scale up and create wave effect
+      gsap.to(svgRef.current, {
+        scale: 1.1,
+        duration: 0.3,
+        ease: 'back.out(1.7)',
+      });
+
+      // Wave animation through paths
+      paths.forEach((path, index) => {
+        const pathData = currentPaths[index];
+        if (!pathData) return;
+
+        gsap.to(path, {
+          strokeWidth: pathData.strokeWidth * 1.2,
+          duration: 0.3,
           ease: 'power2.out',
+          delay: index * 0.05,
         });
-        
-        paths.forEach((path, index) => {
-          const pathData = iconPaths[type][index];
-          gsap.to(path, {
-            strokeWidth: pathData.strokeWidth,
-            scaleY: 1,
-            duration: 0.3,
-            ease: 'power2.out',
-            delay: index * 0.02,
-          });
+      });
+
+      // Create morphing effect
+      gsap.to(paths, {
+        transformOrigin: 'center',
+        scaleY: 1.05,
+        duration: 0.6,
+        ease: 'elastic.out(1, 0.3)',
+        stagger: 0.1,
+      });
+    } else {
+      // Reset animations
+      gsap.to(svgRef.current, {
+        scale: 1,
+        duration: 0.2,
+        ease: 'power2.out',
+      });
+
+      paths.forEach((path, index) => {
+        const pathData = currentPaths[index];
+        if (!pathData) return;
+
+        gsap.to(path, {
+          strokeWidth: pathData.strokeWidth,
+          scaleY: 1,
+          duration: 0.3,
+          ease: 'power2.out',
+          delay: index * 0.02,
         });
-      }
+      });
     }
   }, [isHovered, type]);
+
+  // Cleanup effect
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const paths = iconPaths[type] || iconPaths.user;
 
   return (
     <div
       className="inline-flex items-center justify-center cursor-pointer"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{ 
-        minWidth: size + 6, 
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        minWidth: size + 6,
         minHeight: size + 6,
-        filter: isHovered ? `drop-shadow(0 0 20px ${color}40) brightness(1.2)` : 'none',
+        filter: isHovered
+          ? `drop-shadow(0 0 20px ${color}40) brightness(1.2)`
+          : 'none',
         transition: 'filter 0.4s ease',
       }}
+      role="img"
+      aria-label={`${type} icon`}
     >
       <svg
         ref={svgRef}
@@ -184,6 +235,7 @@ const AnimatedLabelIcon = ({
           transformOrigin: 'center',
           overflow: 'visible',
         }}
+        aria-hidden="true"
       >
         {paths.map((pathData) => (
           <path
