@@ -216,6 +216,30 @@ body {
   opacity: 1 !important;
 }
 
+/* Arrow animation - smooth combined transform */
+.arrow-icon {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+}
+
+/* Regular group hover */
+.group:hover .arrow-icon {
+  transform: translate(0.25rem, -0.25rem) !important;
+  opacity: 1 !important;
+}
+
+/* Scroll-hover support */
+.scroll-hover.group .arrow-icon {
+  transform: translate(0.25rem, -0.25rem) !important;
+  opacity: 1 !important;
+}
+
+/* Combined transform for arrow (translate-x-1 and -translate-y-1) */
+.scroll-hover.group .group-hover\:translate-x-1.group-hover\:-translate-y-1,
+.group:hover .group-hover\:translate-x-1.group-hover\:-translate-y-1 {
+  transform: translate(0.25rem, -0.25rem) !important;
+}
+
+/* Individual transforms (fallback) */
 .scroll-hover.group .group-hover\:translate-x-1 {
   transform: translateX(0.25rem) !important;
 }
@@ -277,15 +301,6 @@ body {
 
 .scroll-hover.hover\:opacity-0 {
   opacity: 0 !important;
-}
-
-/* For transform effects */
-.scroll-hover.hover\:translate-x-1 {
-  transform: translateX(0.25rem);
-}
-
-.scroll-hover.hover\:-translate-y-1 {
-  transform: translateY(-0.25rem) !important;
 }
 
 /* For margin effects */
@@ -362,7 +377,58 @@ body {
   transform: rotate(-45deg) !important;
 }
 
+/* Video scroll-hover effects - Scale video containers during scroll */
+.scroll-hover.group .video-container {
+  transform: scale(1.02) !important;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* For VideoPreview components with CSS modules */
+.scroll-hover .video-container,
+.scroll-hover.video-container {
+  transform: scale(1.02) !important;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
 /* Smooth transitions for theme changes */
 * {
   transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* 3D Rotation Effect for Project Descriptions */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.description-content {
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              max-height 0.7s ease-out,
+              opacity 0.7s ease-out;
+}
+
+.rotate-x-90 {
+  transform: rotateX(90deg);
+}
+
+.rotate-x-0 {
+  transform: rotateX(0deg);
+}
+
+.origin-top {
+  transform-origin: top;
+}
+
+/* Regular group-hover support for 3D rotation */
+.group:hover .description-content {
+  transform: rotateX(0deg) !important;
+  max-height: 8rem !important;
+  opacity: 1 !important;
+}
+
+/* Scroll-hover support for 3D rotation */
+.scroll-hover.group .description-content {
+  transform: rotateX(0deg) !important;
+  max-height: 8rem !important;
+  opacity: 1 !important;
 }

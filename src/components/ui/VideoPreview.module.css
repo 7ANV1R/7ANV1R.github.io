@@ -2,7 +2,7 @@
 .videoContainer {
   position: relative;
   aspect-ratio: 4/3;
-  isolation: isolate; /* Create new stacking context */
+  isolation: isolate; /* Prevents stacking context conflicts */
 }
 
 .video {
@@ -10,9 +10,10 @@
   object-fit: cover;
 }
 
-/* Smooth scaling animation - only on desktop and only when not conflicting with scroll-aware hover */
+/* Smooth scaling animation - on hover OR scroll-hover */
 @media (min-width: 1024px) {
-  .videoContainer:not(.scroll-hover):hover {
+  .videoContainer:hover,
+  .videoContainer.scroll-hover {
     transform: scale(1.02);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -24,8 +25,7 @@
 }
 
 @keyframes pulse {
-  0%,
-  100% {
+  0%, 100% {
     opacity: 1;
   }
   50% {
@@ -38,7 +38,7 @@
   .videoContainer {
     transform: none;
   }
-
+  
   .videoContainer:hover {
     transform: none;
   }
@@ -50,11 +50,11 @@
     transform: none !important;
     transition: none !important;
   }
-
+  
   .videoContainer:hover {
     transform: none !important;
   }
-
+  
   .loadingPulse {
     animation: none;
   }

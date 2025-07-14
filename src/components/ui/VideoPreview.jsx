@@ -6,7 +6,9 @@ const VideoPreview = ({ videoSrc, className, onHover = false }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isScrollHovered, setIsScrollHovered] = useState(false);
   const [shouldLoad, setShouldLoad] = useState(false);
+  const [isInView, setIsInView] = useState(false);
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -22,7 +24,7 @@ const VideoPreview = ({ videoSrc, className, onHover = false }) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Intersection Observer for lazy loading
+  // Intersection Observer for lazy loading and mobile viewport tracking
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -30,16 +32,43 @@ const VideoPreview = ({ videoSrc, className, onHover = false }) => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          setIsInView(entry.isIntersecting);
           if (entry.isIntersecting) {
             setShouldLoad(true);
-            observer.unobserve(container);
+            // Don't unobserve if mobile - we need to track viewport for play/pause
+            if (!isMobile) {
+              observer.unobserve(container);
+            }
           }
         });
       },
-      { rootMargin: '50px' },
+      { rootMargin: '50px', threshold: 0.3 },
     );
 
     observer.observe(container);
+    return () => observer.disconnect();
+  }, [isMobile]);
+
+  // Scroll-hover detection
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleScrollHover = () => {
+      const hasScrollHover = container.classList.contains('scroll-hover');
+      setIsScrollHovered(hasScrollHover);
+    };
+
+    // Use MutationObserver to watch for scroll-hover class changes
+    const observer = new MutationObserver(handleScrollHover);
+    observer.observe(container, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    // Initial check
+    handleScrollHover();
+
     return () => observer.disconnect();
   }, []);
 
@@ -73,18 +102,22 @@ const VideoPreview = ({ videoSrc, className, onHover = false }) => {
     if (!video || !isLoaded || hasError) return;
 
     if (isMobile) {
-      // On mobile, always play in loop
-      video.play().catch(console.error);
-    } else {
-      // On desktop, play on hover
-      if (isHovered && onHover) {
+      // On mobile, only play when in viewport
+      if (isInView) {
         video.play().catch(console.error);
-      } else if (!isHovered) {
+      } else {
+        video.pause();
+      }
+    } else {
+      // On desktop, play on hover OR scroll-hover
+      if ((isHovered || isScrollHovered) && onHover) {
+        video.play().catch(console.error);
+      } else if (!isHovered && !isScrollHovered) {
         video.pause();
         video.currentTime = 0;
       }
     }
-  }, [isHovered, isLoaded, hasError, isMobile, onHover]);
+  }, [isHovered, isScrollHovered, isInView, isLoaded, hasError, isMobile, onHover]);
 
   const handleMouseEnter = () => {
     setIsHovered(true);
@@ -111,7 +144,7 @@ const VideoPreview = ({ videoSrc, className, onHover = false }) => {
   return (
     <div
       ref={containerRef}
-      className={`${className} ${styles.videoContainer} no-scroll-hover relative rounded-xl overflow-hidden`}
+      className={`${className} ${styles.videoContainer} group cursor-pointer relative rounded-xl overflow-hidden`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{ aspectRatio: '4/3' }}

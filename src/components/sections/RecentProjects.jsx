@@ -25,7 +25,7 @@ const RecentProjects = () => {
       <>
         <div
           onClick={handleProjectClick}
-          className={`group cursor-pointer py-8 transition-all duration-300 hover:bg-opacity-50 no-scroll-hover ${
+          className={`group cursor-pointer py-8 transition-all duration-300 hover:bg-opacity-50 ${
             isFirst ? 'border-t' : ''
           } ${isLast ? '' : 'border-b'}`}
           style={{ borderColor: 'var(--card-border)' }}
@@ -80,7 +80,7 @@ const RecentProjects = () => {
                 </h3>
                 <div className="ml-4 flex-shrink-0">
                   <FiArrowUpRight
-                    className="w-6 h-6 opacity-40 group-hover:opacity-100 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all duration-300"
+                    className="arrow-icon w-6 h-6 opacity-40 group-hover:opacity-100 transition-all duration-300"
                     style={{ color: 'var(--accent)', strokeWidth: '2.5' }}
                   />
                 </div>
@@ -103,14 +103,16 @@ const RecentProjects = () => {
                 ))}
               </div>
 
-              {/* Description - Hidden by default, slides in on hover */}
-              <div className="overflow-hidden transition-all duration-500 ease-out max-h-0 opacity-0 group-hover:max-h-32 group-hover:opacity-100">
-                <p
-                  className="text-paragraph leading-relaxed pb-2"
-                  style={{ color: 'var(--text-secondary)' }}
-                >
-                  {project.description}
-                </p>
+              {/* Description - 3D rotation reveal effect */}
+              <div className="description-container perspective-1000">
+                <div className="description-content overflow-hidden transition-all duration-700 ease-out max-h-0 opacity-0 group-hover:max-h-32 group-hover:opacity-100 transform rotate-x-90 origin-top group-hover:rotate-x-0">
+                  <p
+                    className="text-paragraph leading-relaxed pb-2"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
+                    {project.description}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
