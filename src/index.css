@@ -574,3 +574,13 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* Hide default cursor when mask cursor is active */
+.cursor-none {
+  cursor: none !important;
+}
+
+/* Ensure mask cursor is visible */
+.mask-cursor {
+  mix-blend-mode: difference;
+}
