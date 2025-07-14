@@ -43,20 +43,51 @@ const WorkExperience = () => {
     </div>
   );
 
-  const CompanyInfo = ({ company, designation }) => (
+  const CompanyInfo = ({ company, designation, companyLogo }) => (
     <div className="mb-3 md:mb-4">
-      <h3
-        className="text-lg md:text-h4 font-semibold mb-1 md:mb-2"
-        style={{ color: 'var(--text-primary)' }}
-      >
-        {company}
-      </h3>
-      <p
-        className="text-base md:text-lg font-medium"
-        style={{ color: 'var(--accent)' }}
-      >
-        {designation}
-      </p>
+      {/* Mobile Company Logo - Only visible on mobile */}
+      <div className="flex items-center justify-between gap-4 mb-2 md:hidden">
+        <div className="flex-1">
+          <h3
+            className="text-lg font-semibold mb-1"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            {company}
+          </h3>
+          <p
+            className="text-base font-medium"
+            style={{ color: 'var(--accent)' }}
+          >
+            {designation}
+          </p>
+        </div>
+        <div
+          className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
+          style={{
+            backgroundColor: 'var(--bg-secondary)',
+            border: '1px solid var(--card-border)',
+          }}
+        >
+          <img
+            src={companyLogo}
+            alt={`${company} logo`}
+            className="w-8 h-8 object-contain"
+          />
+        </div>
+      </div>
+
+      {/* Desktop Layout - Hidden on mobile */}
+      <div className="hidden md:block">
+        <h3
+          className="text-h4 font-semibold mb-2"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          {company}
+        </h3>
+        <p className="text-lg font-medium" style={{ color: 'var(--accent)' }}>
+          {designation}
+        </p>
+      </div>
     </div>
   );
 
@@ -91,6 +122,7 @@ const WorkExperience = () => {
           <CompanyInfo
             company={experience.company}
             designation={experience.designation}
+            companyLogo={experience.companyLogo}
           />
           <Objective objective={experience.objective} />
           {!isLast && <div className="h-8 md:h-12" />}
