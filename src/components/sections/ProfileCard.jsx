@@ -2,7 +2,6 @@ import Skeleton from '../ui/Skeleton';
 import SocialIcon from '../ui/SocialIcon';
 import { FiGithub, FiTwitter, FiMail } from 'react-icons/fi';
 import tanvirImg from '../../assets/tanvir.png';
-import tanvirLogo from '../../assets/tanvir_logo.svg';
 
 const ProfileCard = () => {
   return (
@@ -28,9 +27,7 @@ const ProfileCard = () => {
             {/* Marquee logo layer */}
             <div className="absolute inset-0 rounded-md overflow-hidden flex items-center justify-center z-5">
               <div className="marquee-container">
-                <div className="marquee-content">
-                  <img src={tanvirLogo} alt="" className="marquee-logo" />
-                </div>
+                <div className="marquee-content"></div>
               </div>
             </div>
 
