@@ -12,11 +12,18 @@ const ProfileCard = () => {
       >
         {/* image */}
         <div className="flex items-center justify-center mb-4 w-full">
-          <img
-            src={tanvirImg}
-            alt="Profile"
-            className="w-32 h-40 sm:w-40 sm:h-48 lg:w-48 lg:h-56 rounded-md object-cover"
-          />
+          <div className="relative w-32 h-40 sm:w-40 sm:h-48 lg:w-48 lg:h-56">
+            {/* Animated gradient background */}
+            <div className="absolute inset-0 rounded-md overflow-hidden">
+              <div className="w-[200%] h-full bg-gradient-to-r from-orange-400 to-red-500 animate-pulse-slide"></div>
+            </div>
+            {/* Profile image */}
+            <img
+              src={tanvirImg}
+              alt="Profile"
+              className="relative z-10 w-full h-full rounded-md object-cover"
+            />
+          </div>
         </div>
 
         {/* name */}
