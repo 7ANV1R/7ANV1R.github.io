@@ -28,13 +28,13 @@ const About = () => {
       <SectionTitle primaryText="SOFTWARE" secondaryText="ENGINEER" />
 
       {/* short bio with reveal effect */}
-      <div className="flex flex-col items-start justify-center mt-8 w-full max-w-3xl">
-        <div
-          ref={paragraphRef}
-          className="reveal-paragraph relative text-lg text-gray-500 cursor-none w-full text-left"
-          onMouseEnter={() => setIsHovering(true)}
-          onMouseLeave={() => setIsHovering(false)}
-        >
+      <div 
+        ref={paragraphRef}
+        className="flex flex-col items-start justify-center mt-8 w-full max-w-3xl cursor-none"
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+      >
+        <div className="reveal-paragraph relative text-lg text-gray-500 w-full text-left">
           {/* Formal paragraph (default - always visible except in circle) */}
           <div
             className="formal-text-container relative z-10"

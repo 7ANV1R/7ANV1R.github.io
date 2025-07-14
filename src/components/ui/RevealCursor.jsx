@@ -4,7 +4,6 @@ import { gsap } from 'gsap';
 const RevealCursor = ({ isActive, targetRef, onMouseMove }) => {
   const cursorRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
-  const animationRef = useRef(null);
   const currentPosition = useRef({ x: -200, y: -200 });
   const targetPosition = useRef({ x: -200, y: -200 });
   const currentMaskPosition = useRef({ x: -200, y: -200 });
@@ -24,8 +23,8 @@ const RevealCursor = ({ isActive, targetRef, onMouseMove }) => {
       ease: "power2.out",
       onUpdate: () => {
         if (cursorRef.current) {
-          cursorRef.current.style.left = `${currentPosition.current.x - 75}px`;
-          cursorRef.current.style.top = `${currentPosition.current.y - 75}px`;
+          cursorRef.current.style.left = `${currentPosition.current.x - 115}px`;
+          cursorRef.current.style.top = `${currentPosition.current.y - 115}px`;
         }
       }
     });
@@ -63,11 +62,21 @@ const RevealCursor = ({ isActive, targetRef, onMouseMove }) => {
 
       if (isActive && targetRef.current) {
         const rect = targetRef.current.getBoundingClientRect();
+        
+        // Expand detection area by 30px around the text section
+        const proximityDistance = 30;
+        const expandedRect = {
+          left: rect.left - proximityDistance,
+          right: rect.right + proximityDistance,
+          top: rect.top - proximityDistance,
+          bottom: rect.bottom + proximityDistance
+        };
+        
         const isInsideTarget =
-          e.clientX >= rect.left &&
-          e.clientX <= rect.right &&
-          e.clientY >= rect.top &&
-          e.clientY <= rect.bottom;
+          e.clientX >= expandedRect.left &&
+          e.clientX <= expandedRect.right &&
+          e.clientY >= expandedRect.top &&
+          e.clientY <= expandedRect.bottom;
 
         if (isInsideTarget) {
           // Show cursor and update target position
@@ -81,15 +90,15 @@ const RevealCursor = ({ isActive, targetRef, onMouseMove }) => {
             currentPosition.current.y = e.clientY;
             currentMaskPosition.current.x = relativeX;
             currentMaskPosition.current.y = relativeY;
-            currentMaskSize.current = 75; // Set initial size
+            currentMaskSize.current = 115; // Set initial size
             
             // Position cursor immediately at mouse location
-            cursorRef.current.style.left = `${e.clientX - 75}px`;
-            cursorRef.current.style.top = `${e.clientY - 75}px`;
+            cursorRef.current.style.left = `${e.clientX - 115}px`;
+            cursorRef.current.style.top = `${e.clientY - 115}px`;
             
             // Show mask immediately at correct position
             if (onMouseMove) {
-              onMouseMove(relativeX, relativeY, 75);
+              onMouseMove(relativeX, relativeY, 115);
             }
             
             gsap.to(cursorRef.current, {
@@ -109,7 +118,7 @@ const RevealCursor = ({ isActive, targetRef, onMouseMove }) => {
           const relativeY = e.clientY - rect.top;
           targetMaskPosition.current.x = relativeX;
           targetMaskPosition.current.y = relativeY;
-          targetMaskSize.current = 75; // Keep size at 75px while hovering
+          targetMaskSize.current = 115; // Keep size at 115px while hovering
           
           animateCursor();
         } else {
@@ -215,8 +224,8 @@ const RevealCursor = ({ isActive, targetRef, onMouseMove }) => {
         position: 'fixed',
         left: '-200px',
         top: '-200px',
-        width: '150px',
-        height: '150px',
+        width: '230px',
+        height: '230px',
         borderRadius: '50%',
         backgroundColor: 'transparent',
         border: '2px solid #f36c38',
