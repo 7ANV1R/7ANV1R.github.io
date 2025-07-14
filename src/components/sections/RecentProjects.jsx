@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import SectionTitle from '../ui/SectionTitle';
+import VideoPreview from '../ui/VideoPreview';
+// import useVideoPreloader from '../../hooks/useVideoPreloader'; // Temporarily disabled
 import projectsData from '../../data/recent_projects.json';
 import { HiOutlinePhotograph } from 'react-icons/hi';
 import { FiArrowUpRight } from 'react-icons/fi';
@@ -29,34 +31,44 @@ const RecentProjects = () => {
           style={{ borderColor: 'var(--card-border)' }}
         >
           <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
-            {/* Thumbnail */}
-            <div className="w-full lg:w-80 h-48 lg:h-32 rounded-xl overflow-hidden flex-shrink-0 group-hover:scale-[1.02] transition-transform duration-300">
-              {project.thumbnail ? (
-                <img
-                  src={project.thumbnail}
-                  alt={project.title}
-                  className="w-full h-full object-cover"
-                  style={{ backgroundColor: 'var(--bg-secondary)' }}
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
+            {/* Video Preview */}
+            <div className="w-full lg:w-80 flex-shrink-0">
+              {project.videoPreview ? (
+                <VideoPreview
+                  videoSrc={project.videoPreview}
+                  className="w-full"
+                  onHover={true}
+                />
+              ) : project.thumbnail ? (
+                <div
+                  className="w-full rounded-xl overflow-hidden"
+                  style={{ aspectRatio: '4/3' }}
+                >
+                  <img
+                    src={project.thumbnail}
+                    alt={project.title}
+                    className="w-full h-full object-cover"
+                    style={{ backgroundColor: 'var(--bg-secondary)' }}
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                </div>
+              ) : (
+                <div
+                  className="w-full flex items-center justify-center rounded-xl"
+                  style={{
+                    backgroundColor: 'var(--bg-secondary)',
+                    aspectRatio: '4/3',
                   }}
-                />
-              ) : null}
-              <div
-                className={`${
-                  project.thumbnail ? 'hidden' : 'flex'
-                } w-full h-full items-center justify-center rounded-xl`}
-                style={{
-                  backgroundColor: 'var(--bg-secondary)',
-                  display: project.thumbnail ? 'none' : 'flex',
-                }}
-              >
-                <HiOutlinePhotograph
-                  className="w-12 h-12 opacity-30"
-                  style={{ color: 'var(--text-secondary)' }}
-                />
-              </div>
+                >
+                  <HiOutlinePhotograph
+                    className="w-12 h-12 opacity-30"
+                    style={{ color: 'var(--text-secondary)' }}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Content */}
@@ -68,7 +80,7 @@ const RecentProjects = () => {
                 </h3>
                 <div className="ml-4 flex-shrink-0">
                   <FiArrowUpRight
-                    className="w-6 h-6 opacity-40 group-hover:opacity-100 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all duration-300"
+                    className="arrow-icon w-6 h-6 opacity-40 group-hover:opacity-100 transition-all duration-300"
                     style={{ color: 'var(--accent)', strokeWidth: '2.5' }}
                   />
                 </div>
@@ -91,14 +103,16 @@ const RecentProjects = () => {
                 ))}
               </div>
 
-              {/* Description - Hidden by default, slides in on hover */}
-              <div className="overflow-hidden transition-all duration-500 ease-out max-h-0 opacity-0 group-hover:max-h-32 group-hover:opacity-100">
-                <p
-                  className="text-paragraph leading-relaxed pb-2"
-                  style={{ color: 'var(--text-secondary)' }}
-                >
-                  {project.description}
-                </p>
+              {/* Description - 3D rotation reveal effect on desktop, always visible on mobile */}
+              <div className="description-container perspective-1000">
+                <div className="description-content overflow-hidden transition-all duration-700 ease-out lg:max-h-0 lg:opacity-0 lg:group-hover:max-h-32 lg:group-hover:opacity-100 transform lg:rotate-x-90 origin-top lg:group-hover:rotate-x-0">
+                  <p
+                    className="text-paragraph leading-relaxed pb-2"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
+                    {project.description}
+                  </p>
+                </div>
               </div>
             </div>
           </div>

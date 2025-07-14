@@ -1,0 +1,61 @@
+/* Video optimization styles */
+.videoContainer {
+  position: relative;
+  aspect-ratio: 4/3;
+  isolation: isolate; /* Prevents stacking context conflicts */
+}
+
+.video {
+  aspect-ratio: 4/3;
+  object-fit: cover;
+}
+
+/* Smooth scaling animation - on hover OR scroll-hover */
+@media (min-width: 1024px) {
+  .videoContainer:hover,
+  .videoContainer.scroll-hover {
+    transform: scale(1.02);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Loading animation */
+.loadingPulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Mobile and tablet optimization */
+@media (max-width: 1023px) {
+  .videoContainer {
+    transform: none;
+  }
+  
+  .videoContainer:hover {
+    transform: none;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .videoContainer {
+    transform: none !important;
+    transition: none !important;
+  }
+  
+  .videoContainer:hover {
+    transform: none !important;
+  }
+  
+  .loadingPulse {
+    animation: none;
+  }
+}
