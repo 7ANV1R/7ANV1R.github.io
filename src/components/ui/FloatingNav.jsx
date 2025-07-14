@@ -52,7 +52,12 @@ const FloatingNav = ({ onNavigate }) => {
           );
         })}
 
-        <div className="w-px h-6 bg-white/40 dark:bg-gray-600/40 mx-3" />
+        <div
+          className="w-px h-6 mx-3"
+          style={{
+            backgroundColor: 'var(--border-color, rgba(156, 163, 175, 0.8))',
+          }}
+        />
 
         <ThemeToggle />
       </div>
