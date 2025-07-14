@@ -7,7 +7,7 @@ const WorkExperience = () => {
 
   const TimelineDot = ({ isCurrent }) => (
     <div
-      className={`w-4 h-4 rounded-full border-2 relative z-10 flex-shrink-0 ${
+      className={`w-3 h-3 md:w-4 md:h-4 rounded-full border-2 relative z-10 flex-shrink-0 ${
         isCurrent ? 'shadow-lg' : ''
       }`}
       style={{
@@ -29,9 +29,9 @@ const WorkExperience = () => {
   );
 
   const TimeFrameBadge = ({ timeFrame }) => (
-    <div className="mb-4">
+    <div className="mb-3 md:mb-4">
       <span
-        className="text-sm font-medium px-4 py-2 rounded-lg"
+        className="text-xs md:text-sm font-medium px-3 md:px-4 py-1.5 md:py-2 rounded-lg"
         style={{
           backgroundColor: 'var(--bg-secondary)',
           color: 'var(--text-secondary)',
@@ -43,23 +43,57 @@ const WorkExperience = () => {
     </div>
   );
 
-  const CompanyInfo = ({ company, designation }) => (
-    <div className="mb-4">
-      <h3
-        className="text-h4 font-semibold mb-2"
-        style={{ color: 'var(--text-primary)' }}
-      >
-        {company}
-      </h3>
-      <p className="text-lg font-medium" style={{ color: 'var(--accent)' }}>
-        {designation}
-      </p>
+  const CompanyInfo = ({ company, designation, companyLogo }) => (
+    <div className="mb-3 md:mb-4">
+      {/* Mobile Company Logo - Only visible on mobile */}
+      <div className="flex items-center justify-between gap-4 mb-2 md:hidden">
+        <div className="flex-1">
+          <h3
+            className="text-lg font-semibold mb-1"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            {company}
+          </h3>
+          <p
+            className="text-base font-medium"
+            style={{ color: 'var(--accent)' }}
+          >
+            {designation}
+          </p>
+        </div>
+        <div
+          className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
+          style={{
+            backgroundColor: 'var(--bg-secondary)',
+            border: '1px solid var(--card-border)',
+          }}
+        >
+          <img
+            src={companyLogo}
+            alt={`${company} logo`}
+            className="w-8 h-8 object-contain"
+          />
+        </div>
+      </div>
+
+      {/* Desktop Layout - Hidden on mobile */}
+      <div className="hidden md:block">
+        <h3
+          className="text-h4 font-semibold mb-2"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          {company}
+        </h3>
+        <p className="text-lg font-medium" style={{ color: 'var(--accent)' }}>
+          {designation}
+        </p>
+      </div>
     </div>
   );
 
   const Objective = ({ objective }) => (
     <p
-      className="text-base leading-relaxed max-w-3xl"
+      className="text-sm md:text-base leading-relaxed max-w-3xl"
       style={{ color: 'var(--text-secondary)' }}
     >
       {objective}
@@ -76,21 +110,22 @@ const WorkExperience = () => {
         data-work-item={experience.id}
         data-company-logo={experience.companyLogo}
       >
-        {/* Timeline Column */}
-        <div className="flex flex-col items-center w-24 flex-shrink-0">
+        {/* Timeline Column - Responsive width */}
+        <div className="flex flex-col items-center w-16 md:w-24 flex-shrink-0">
           <TimelineDot isCurrent={isCurrent} />
           {!isLast && <TimelineLine />}
         </div>
 
-        {/* Content Column */}
-        <div className="flex-1 pl-8">
+        {/* Content Column - Responsive padding */}
+        <div className="flex-1 pl-4 md:pl-8">
           <TimeFrameBadge timeFrame={experience.timeFrame} />
           <CompanyInfo
             company={experience.company}
             designation={experience.designation}
+            companyLogo={experience.companyLogo}
           />
           <Objective objective={experience.objective} />
-          {!isLast && <div className="h-12" />}
+          {!isLast && <div className="h-8 md:h-12" />}
         </div>
       </div>
     );
@@ -100,7 +135,7 @@ const WorkExperience = () => {
     <>
       <div style={{ height: 80 }} />
       <div className="w-full" data-section="work-experience">
-        <div className="mb-16">
+        <div className="mb-8 md:mb-16">
           <SectionTitle primaryText="WORK" secondaryText="EXPERIENCE" />
         </div>
 

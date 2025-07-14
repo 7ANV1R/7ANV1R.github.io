@@ -194,7 +194,7 @@ const ToolsAndTech = ({ scrollContainerRef }) => {
 
   return (
     <>
-      <div style={{ height: 120 }} />
+      <div style={{ height: 80 }} />
 
       <div ref={sectionRef} className="relative px-2 sm:px-4">
         <SectionTitle primaryText="TOOLS &" secondaryText="TECHNOLOGIES" />

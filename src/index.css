@@ -340,6 +340,28 @@ body {
     -6px -6px 12px var(--neuro-shadow-light);
 }
 
+/* Custom smooth hover animations for About page cards */
+.about-card-orange,
+.about-card-green {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.about-card-orange:hover,
+.about-card-green:hover {
+  transform: scale(1.05);
+}
+
+/* Arrow rotation effects for About page cards */
+.about-arrow-icon {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transform: rotate(0deg);
+}
+
+.group:hover .about-arrow-icon,
+.scroll-hover.group .about-arrow-icon {
+  transform: rotate(-45deg) !important;
+}
+
 /* Smooth transitions for theme changes */
 * {
   transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
