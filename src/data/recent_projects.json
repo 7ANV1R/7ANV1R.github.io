@@ -1,38 +1,20 @@
 [
   {
     "id": 1,
-    "title": "E-Commerce Dashboard",
-    "description": "A modern dashboard for managing online store with real-time analytics, inventory management, and order tracking.",
-    "tools": ["React", "Node.js", "MongoDB"],
-    "thumbnail": "/src/assets/project1.jpg",
-    "githubUrl": "https://github.com/username/ecommerce-dashboard",
-    "demoUrl": "https://ecommerce-dashboard-demo.vercel.app"
-  },
-  {
-    "id": 2,
-    "title": "Task Management App",
-    "description": "A collaborative task management application with drag-and-drop functionality, team collaboration, and progress tracking.",
-    "tools": ["Vue.js", "Firebase", "Tailwind CSS"],
+    "title": "Weather Assistant - Flutter MCP",
+    "description": "A weather assistant chatbot built with Flutter and dart mcp. Users can chat naturally to ask for weather information in any location. The app uses mcp for intent recognition, triggering AI calls as needed, and fetches real-time weather data using the OpenWeather API. Designed for a seamless conversational experience and accurate weather updates.",
+    "tools": ["Flutter", "mcp_dart", "openAI", "open_weather_api"],
     "thumbnail": null,
-    "githubUrl": "https://github.com/username/task-manager",
+    "githubUrl": "https://github.com/7ANV1R/flutter-mcp-chatbot",
     "demoUrl": null
   },
   {
-    "id": 3,
-    "title": "Weather Forecast App",
-    "description": "Real-time weather application with location-based forecasts, interactive maps, and weather alerts.",
-    "tools": ["React Native", "OpenWeather API", "Redux"],
-    "thumbnail": "/src/assets/project3.png",
-    "githubUrl": "https://github.com/username/weather-app",
-    "demoUrl": "https://weather-forecast-demo.netlify.app"
-  },
-  {
-    "id": 4,
-    "title": "Portfolio Website",
-    "description": "A responsive portfolio website showcasing projects, skills, and experience with smooth animations and modern design.",
-    "tools": ["Next.js", "Framer Motion", "SCSS"],
+    "id": 2,
+    "title": "Tyke - Shoe App",
+    "description": "A demo UI project designed to showcase a carousel slider animation for browsing a curated shoe collection. The app features smooth transitions, allowing users to swipe through various shoes, view detailed descriptions, and explore product highlights. Built to demonstrate interactive UI patterns and clean design for product-focused applications.",
+    "tools": ["Flutter", "flutter_animate"],
     "thumbnail": null,
-    "githubUrl": "https://github.com/username/portfolio",
-    "demoUrl": "https://portfolio-demo.com"
+    "githubUrl": "https://github.com/7ANV1R/shoe_app",
+    "demoUrl": null
   }
 ]
