@@ -14,9 +14,11 @@ const About = () => {
   const casualTextRef = useRef(null);
   const [isHovering, setIsHovering] = useState(false);
   const [maskPosition, setMaskPosition] = useState({ x: -200, y: -200 });
+  const [maskSize, setMaskSize] = useState(0);
 
-  const handleMouseMove = (x, y) => {
+  const handleMouseMove = (x, y, size = 75) => {
     setMaskPosition({ x, y });
+    setMaskSize(size);
   };
 
   return (
@@ -37,8 +39,8 @@ const About = () => {
           <div
             className="formal-text-container relative z-10"
             style={{
-              maskImage: `radial-gradient(circle 75px at ${maskPosition.x}px ${maskPosition.y}px, transparent 100%, black 100%)`,
-              WebkitMaskImage: `radial-gradient(circle 75px at ${maskPosition.x}px ${maskPosition.y}px, transparent 100%, black 100%)`,
+              maskImage: `radial-gradient(circle ${maskSize}px at ${maskPosition.x}px ${maskPosition.y}px, transparent 100%, black 100%)`,
+              WebkitMaskImage: `radial-gradient(circle ${maskSize}px at ${maskPosition.x}px ${maskPosition.y}px, transparent 100%, black 100%)`,
               maskRepeat: 'no-repeat',
               WebkitMaskRepeat: 'no-repeat',
             }}
@@ -56,8 +58,8 @@ const About = () => {
             ref={casualTextRef}
             className="casual-text-container absolute inset-0 z-20 select-none"
             style={{
-              maskImage: `radial-gradient(circle 75px at ${maskPosition.x}px ${maskPosition.y}px, black 100%, transparent 100%)`,
-              WebkitMaskImage: `radial-gradient(circle 75px at ${maskPosition.x}px ${maskPosition.y}px, black 100%, transparent 100%)`,
+              maskImage: `radial-gradient(circle ${maskSize}px at ${maskPosition.x}px ${maskPosition.y}px, black 100%, transparent 100%)`,
+              WebkitMaskImage: `radial-gradient(circle ${maskSize}px at ${maskPosition.x}px ${maskPosition.y}px, black 100%, transparent 100%)`,
               maskRepeat: 'no-repeat',
               WebkitMaskRepeat: 'no-repeat',
             }}

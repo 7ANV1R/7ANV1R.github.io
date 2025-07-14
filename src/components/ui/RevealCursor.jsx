@@ -1,8 +1,60 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { gsap } from 'gsap';
 
 const RevealCursor = ({ isActive, targetRef, onMouseMove }) => {
   const cursorRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
+  const animationRef = useRef(null);
+  const currentPosition = useRef({ x: -200, y: -200 });
+  const targetPosition = useRef({ x: -200, y: -200 });
+  const currentMaskPosition = useRef({ x: -200, y: -200 });
+  const targetMaskPosition = useRef({ x: -200, y: -200 });
+  const currentMaskSize = useRef(0);
+  const targetMaskSize = useRef(0);
+
+  // Smooth animation loop for lazy following
+  const animateCursor = useCallback(() => {
+    if (!cursorRef.current) return;
+
+    // Animate cursor position with easing
+    gsap.to(currentPosition.current, {
+      x: targetPosition.current.x,
+      y: targetPosition.current.y,
+      duration: 0.8,
+      ease: "power2.out",
+      onUpdate: () => {
+        if (cursorRef.current) {
+          cursorRef.current.style.left = `${currentPosition.current.x - 75}px`;
+          cursorRef.current.style.top = `${currentPosition.current.y - 75}px`;
+        }
+      }
+    });
+
+    // Animate mask position with same timing
+    gsap.to(currentMaskPosition.current, {
+      x: targetMaskPosition.current.x,
+      y: targetMaskPosition.current.y,
+      duration: 0.8,
+      ease: "power2.out",
+      onUpdate: () => {
+        if (onMouseMove) {
+          onMouseMove(currentMaskPosition.current.x, currentMaskPosition.current.y, currentMaskSize.current);
+        }
+      }
+    });
+
+    // Animate mask size
+    gsap.to(currentMaskSize, {
+      current: targetMaskSize.current,
+      duration: 0.8,
+      ease: "power2.out",
+      onUpdate: () => {
+        if (onMouseMove) {
+          onMouseMove(currentMaskPosition.current.x, currentMaskPosition.current.y, currentMaskSize.current);
+        }
+      }
+    });
+  }, [onMouseMove]);
 
   // Handle mouse movement
   const handleMouseMove = useCallback(
@@ -18,47 +70,130 @@ const RevealCursor = ({ isActive, targetRef, onMouseMove }) => {
           e.clientY <= rect.bottom;
 
         if (isInsideTarget) {
-          // Show cursor and update position
+          // Show cursor and update target position
           if (!isVisible) {
             setIsVisible(true);
-            cursorRef.current.style.opacity = '1';
-            cursorRef.current.style.transform = 'scale(1)';
-          }
-
-          // Update cursor position
-          cursorRef.current.style.left = `${e.clientX - 75}px`;
-          cursorRef.current.style.top = `${e.clientY - 75}px`;
-
-          // Update mask position
-          if (onMouseMove) {
+            
+            // Set initial positions to current mouse position to avoid glitch
             const relativeX = e.clientX - rect.left;
             const relativeY = e.clientY - rect.top;
-            onMouseMove(relativeX, relativeY);
+            currentPosition.current.x = e.clientX;
+            currentPosition.current.y = e.clientY;
+            currentMaskPosition.current.x = relativeX;
+            currentMaskPosition.current.y = relativeY;
+            currentMaskSize.current = 75; // Set initial size
+            
+            // Position cursor immediately at mouse location
+            cursorRef.current.style.left = `${e.clientX - 75}px`;
+            cursorRef.current.style.top = `${e.clientY - 75}px`;
+            
+            // Show mask immediately at correct position
+            if (onMouseMove) {
+              onMouseMove(relativeX, relativeY, 75);
+            }
+            
+            gsap.to(cursorRef.current, {
+              opacity: 1,
+              scale: 1,
+              duration: 0.3,
+              ease: "back.out(1.7)"
+            });
           }
+
+          // Update target position for smooth animation
+          targetPosition.current.x = e.clientX;
+          targetPosition.current.y = e.clientY;
+          
+          // Update mask target position (relative to target element)
+          const relativeX = e.clientX - rect.left;
+          const relativeY = e.clientY - rect.top;
+          targetMaskPosition.current.x = relativeX;
+          targetMaskPosition.current.y = relativeY;
+          targetMaskSize.current = 75; // Keep size at 75px while hovering
+          
+          animateCursor();
         } else {
           // Hide cursor
           if (isVisible) {
             setIsVisible(false);
-            cursorRef.current.style.opacity = '0';
-            cursorRef.current.style.transform = 'scale(0)';
-            if (onMouseMove) {
-              onMouseMove(-200, -200); // Hide mask
-            }
+            
+            // Kill ongoing position animations
+            gsap.killTweensOf(currentPosition.current);
+            gsap.killTweensOf(currentMaskPosition.current);
+            
+            // Keep mask at current position but shrink to 0 smoothly
+            targetMaskSize.current = 0;
+            
+            // Smooth exit animation - only shrink the mask, don't move it
+            gsap.to(currentMaskSize, {
+              current: 0,
+              duration: 0.3,
+              ease: "power2.in",
+              onUpdate: () => {
+                if (onMouseMove) {
+                  onMouseMove(currentMaskPosition.current.x, currentMaskPosition.current.y, currentMaskSize.current);
+                }
+              },
+              onComplete: () => {
+                // Only move off-screen after shrinking is complete
+                currentMaskPosition.current.x = -200;
+                currentMaskPosition.current.y = -200;
+                if (onMouseMove) {
+                  onMouseMove(-200, -200, 0);
+                }
+              }
+            });
+            
+            gsap.to(cursorRef.current, {
+              opacity: 0,
+              scale: 0,
+              duration: 0.3,
+              ease: "power2.in"
+            });
           }
         }
       } else {
         // Hide cursor when not active
         if (isVisible) {
           setIsVisible(false);
-          cursorRef.current.style.opacity = '0';
-          cursorRef.current.style.transform = 'scale(0)';
-          if (onMouseMove) {
-            onMouseMove(-200, -200); // Hide mask
-          }
+          
+          // Kill ongoing position animations
+          gsap.killTweensOf(currentPosition.current);
+          gsap.killTweensOf(currentMaskPosition.current);
+          
+          // Keep mask at current position but shrink to 0 smoothly
+          targetMaskSize.current = 0;
+          
+          // Smooth exit animation - only shrink the mask, don't move it
+          gsap.to(currentMaskSize, {
+            current: 0,
+            duration: 0.3,
+            ease: "power2.in",
+            onUpdate: () => {
+              if (onMouseMove) {
+                onMouseMove(currentMaskPosition.current.x, currentMaskPosition.current.y, currentMaskSize.current);
+              }
+            },
+            onComplete: () => {
+              // Only move off-screen after shrinking is complete
+              currentMaskPosition.current.x = -200;
+              currentMaskPosition.current.y = -200;
+              if (onMouseMove) {
+                onMouseMove(-200, -200, 0);
+              }
+            }
+          });
+          
+          gsap.to(cursorRef.current, {
+            opacity: 0,
+            scale: 0,
+            duration: 0.3,
+            ease: "power2.in"
+          });
         }
       }
     },
-    [isActive, targetRef, onMouseMove, isVisible],
+    [isActive, targetRef, onMouseMove, isVisible, animateCursor],
   );
 
   useEffect(() => {
@@ -89,7 +224,6 @@ const RevealCursor = ({ isActive, targetRef, onMouseMove }) => {
         zIndex: 9999,
         opacity: 0,
         transform: 'scale(0)',
-        transition: 'opacity 0.3s ease, transform 0.3s ease',
         boxShadow:
           '0 0 0 2px rgba(243, 108, 56, 0.2), 0 0 20px rgba(243, 108, 56, 0.4)',
         backdropFilter: 'none',
