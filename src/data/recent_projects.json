@@ -5,6 +5,7 @@
     "description": "A weather assistant chatbot built with Flutter and dart mcp. Users can chat naturally to ask for weather information in any location. The app uses mcp for intent recognition, triggering AI calls as needed, and fetches real-time weather data using the OpenWeather API. Designed for a seamless conversational experience and accurate weather updates.",
     "tools": ["Flutter", "mcp_dart", "openAI", "open_weather_api"],
     "thumbnail": null,
+    "videoPreview": "/videos/mcp_chat_preview.mp4",
     "githubUrl": "https://github.com/7ANV1R/flutter-mcp-chatbot",
     "demoUrl": null
   },
@@ -14,6 +15,7 @@
     "description": "A demo UI project designed to showcase a carousel slider animation for browsing a curated shoe collection. The app features smooth transitions, allowing users to swipe through various shoes, view detailed descriptions, and explore product highlights. Built to demonstrate interactive UI patterns and clean design for product-focused applications.",
     "tools": ["Flutter", "flutter_animate"],
     "thumbnail": null,
+    "videoPreview": "/videos/shoe_app_preview.mp4",
     "githubUrl": "https://github.com/7ANV1R/shoe_app",
     "demoUrl": null
   }

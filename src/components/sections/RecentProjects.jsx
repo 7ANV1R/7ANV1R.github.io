@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import SectionTitle from '../ui/SectionTitle';
+import VideoPreview from '../ui/VideoPreview';
+// import useVideoPreloader from '../../hooks/useVideoPreloader'; // Temporarily disabled
 import projectsData from '../../data/recent_projects.json';
 import { HiOutlinePhotograph } from 'react-icons/hi';
 import { FiArrowUpRight } from 'react-icons/fi';
@@ -23,40 +25,50 @@ const RecentProjects = () => {
       <>
         <div
           onClick={handleProjectClick}
-          className={`group cursor-pointer py-8 transition-all duration-300 hover:bg-opacity-50 ${
+          className={`group cursor-pointer py-8 transition-all duration-300 hover:bg-opacity-50 no-scroll-hover ${
             isFirst ? 'border-t' : ''
           } ${isLast ? '' : 'border-b'}`}
           style={{ borderColor: 'var(--card-border)' }}
         >
           <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
-            {/* Thumbnail */}
-            <div className="w-full lg:w-80 h-48 lg:h-32 rounded-xl overflow-hidden flex-shrink-0 group-hover:scale-[1.02] transition-transform duration-300">
-              {project.thumbnail ? (
-                <img
-                  src={project.thumbnail}
-                  alt={project.title}
-                  className="w-full h-full object-cover"
-                  style={{ backgroundColor: 'var(--bg-secondary)' }}
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
+            {/* Video Preview */}
+            <div className="w-full lg:w-80 flex-shrink-0">
+              {project.videoPreview ? (
+                <VideoPreview
+                  videoSrc={project.videoPreview}
+                  className="w-full"
+                  onHover={true}
+                />
+              ) : project.thumbnail ? (
+                <div
+                  className="w-full rounded-xl overflow-hidden"
+                  style={{ aspectRatio: '4/3' }}
+                >
+                  <img
+                    src={project.thumbnail}
+                    alt={project.title}
+                    className="w-full h-full object-cover"
+                    style={{ backgroundColor: 'var(--bg-secondary)' }}
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                </div>
+              ) : (
+                <div
+                  className="w-full flex items-center justify-center rounded-xl"
+                  style={{
+                    backgroundColor: 'var(--bg-secondary)',
+                    aspectRatio: '4/3',
                   }}
-                />
-              ) : null}
-              <div
-                className={`${
-                  project.thumbnail ? 'hidden' : 'flex'
-                } w-full h-full items-center justify-center rounded-xl`}
-                style={{
-                  backgroundColor: 'var(--bg-secondary)',
-                  display: project.thumbnail ? 'none' : 'flex',
-                }}
-              >
-                <HiOutlinePhotograph
-                  className="w-12 h-12 opacity-30"
-                  style={{ color: 'var(--text-secondary)' }}
-                />
-              </div>
+                >
+                  <HiOutlinePhotograph
+                    className="w-12 h-12 opacity-30"
+                    style={{ color: 'var(--text-secondary)' }}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Content */}
