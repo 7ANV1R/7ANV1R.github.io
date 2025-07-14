@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import SectionTitle from '../ui/SectionTitle';
+import RevealCursor from '../ui/RevealCursor';
 import {
   HiOutlineCode,
   HiOutlineTemplate,
@@ -9,21 +10,73 @@ import orangePattern from '../../assets/orange-pattern.svg';
 import greenPattern from '../../assets/green-pattern.svg';
 
 const About = () => {
+  const paragraphRef = useRef(null);
+  const casualTextRef = useRef(null);
+  const [isHovering, setIsHovering] = useState(false);
+  const [maskPosition, setMaskPosition] = useState({ x: -200, y: -200 });
+
+  const handleMouseMove = (x, y) => {
+    setMaskPosition({ x, y });
+  };
+
   return (
     <>
       <div style={{ height: 80 }} />
       {/* large designation */}
       <SectionTitle primaryText="SOFTWARE" secondaryText="ENGINEER" />
 
-      {/* short bio */}
-      <div className="flex flex-col items-center justify-center mt-8">
-        <p className="text-lg text-gray-500">
-          I am a software engineer currently focused on building cross-platform
-          mobile apps with Flutter. I enjoy exploring mobile app UI designs and
-          bringing them to life in Flutter, always aiming to write clean,
-          collaborative, and maintainable code.
-        </p>
+      {/* short bio with reveal effect */}
+      <div className="flex flex-col items-start justify-center mt-8 w-full max-w-3xl">
+        <div 
+          ref={paragraphRef}
+          className="reveal-paragraph relative text-lg text-gray-500 cursor-none w-full text-left"
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => setIsHovering(false)}
+        >
+          {/* Formal paragraph (default - always visible except in circle) */}
+          <div 
+            className="formal-text-container relative z-10"
+            style={{
+              maskImage: `radial-gradient(circle 75px at ${maskPosition.x}px ${maskPosition.y}px, transparent 100%, black 100%)`,
+              WebkitMaskImage: `radial-gradient(circle 75px at ${maskPosition.x}px ${maskPosition.y}px, transparent 100%, black 100%)`,
+              maskRepeat: 'no-repeat',
+              WebkitMaskRepeat: 'no-repeat',
+            }}
+          >
+            <p className="select-none">
+              I am a software engineer currently focused on building cross-platform
+              mobile apps with Flutter. I enjoy exploring mobile app UI designs and
+              bringing them to life in Flutter, always aiming to write clean,
+              collaborative, and maintainable code.
+            </p>
+          </div>
+          
+          {/* Casual paragraph (only visible in circle) */}
+          <div 
+            ref={casualTextRef}
+            className="casual-text-container absolute inset-0 z-20 select-none"
+            style={{
+              maskImage: `radial-gradient(circle 75px at ${maskPosition.x}px ${maskPosition.y}px, black 100%, transparent 100%)`,
+              WebkitMaskImage: `radial-gradient(circle 75px at ${maskPosition.x}px ${maskPosition.y}px, black 100%, transparent 100%)`,
+              maskRepeat: 'no-repeat',
+              WebkitMaskRepeat: 'no-repeat',
+            }}
+          >
+            <p className="text-lg font-semibold text-orange-500">
+              I'm basically a lazy person who somehow became obsessed with pixel-perfect details. 
+              I'll spend hours adjusting margins by 1px that no one will notice and 
+              procrastinate for weeks before starting projects, always aiming to write clean, 
+              collaborative, and maintainable code while being completely unproductive.
+            </p>
+          </div>
+        </div>
       </div>
+
+      <RevealCursor 
+        isActive={isHovering} 
+        targetRef={paragraphRef} 
+        onMouseMove={handleMouseMove}
+      />
 
       {/* two button cards with responsive design */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-12 max-w-4xl lg:max-w-3xl">

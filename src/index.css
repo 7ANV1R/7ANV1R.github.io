@@ -524,3 +524,53 @@ body {
 .profile-image-hover:hover {
   transform: scale(1.1);
 }
+
+/* Paragraph Reveal Effect */
+.reveal-paragraph {
+  position: relative;
+  cursor: none;
+}
+
+.formal-text-container {
+  pointer-events: none;
+}
+
+.casual-text-container {
+  pointer-events: none;
+}
+
+/* Custom cursor styles */
+.reveal-cursor {
+  will-change: transform, opacity;
+}
+
+/* Disable cursor on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .reveal-paragraph {
+    cursor: default;
+  }
+  
+  .reveal-cursor {
+    display: none;
+  }
+  
+  .casual-text {
+    display: none;
+  }
+}
+
+/* Enhance the reveal effect */
+.casual-text p {
+  background: linear-gradient(135deg, var(--accent) 0%, #ff7a47 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 600;
+}
+
+[data-theme='dark'] .casual-text p {
+  background: linear-gradient(135deg, #ff7a47 0%, #ffab47 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
