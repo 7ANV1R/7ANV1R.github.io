@@ -514,3 +514,13 @@ body {
 .animate-marquee-logo {
   animation: none;
 }
+
+/* Ultra smooth hover effect for profile image */
+.profile-image-hover {
+  transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: bottom;
+}
+
+.profile-image-hover:hover {
+  transform: scale(1.1);
+}

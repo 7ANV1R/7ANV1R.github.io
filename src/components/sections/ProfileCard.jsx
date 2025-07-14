@@ -44,7 +44,7 @@ const ProfileCard = () => {
             <img
               src={tanvirImg}
               alt="Profile"
-              className="relative z-10 w-full h-full rounded-md object-cover"
+              className="relative z-10 w-full h-full rounded-md object-cover profile-image-hover"
             />
           </div>
         </div>
