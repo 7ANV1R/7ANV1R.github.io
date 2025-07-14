@@ -28,7 +28,10 @@ const About = () => {
       {/* two button cards with responsive design */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-12 max-w-4xl lg:max-w-3xl">
         {/* Dynamic Animation & Motion Design Card */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-400 to-red-500 p-6 text-white group hover:scale-105 transition-transform duration-300 cursor-pointer w-full lg:max-w-sm no-scroll-hover">
+        <div
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-400 to-red-500 p-6 text-white group hover:scale-105 transition-transform duration-300 ease-in-out cursor-pointer w-full lg:max-w-sm no-scroll-hover"
+          onClick={() => window.open('https://github.com/7ANV1R', '_blank')}
+        >
           {/* Abstract background pattern */}
           <div className="absolute inset-0 opacity-100">
             <img
@@ -53,7 +56,7 @@ const About = () => {
             </div>
 
             <div className="flex justify-start">
-              <button className="w-10 h-10 border-2 border-white rounded-lg flex items-center justify-center group-hover:bg-white group-hover:text-orange-500 transition-all duration-300 hover:scale-110">
+              <button className="w-10 h-10 border-2 border-white rounded-lg flex items-center justify-center group-hover:bg-white group-hover:text-orange-500 transition-all duration-300 ease-in-out hover:scale-110">
                 <HiOutlineArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -61,7 +64,12 @@ const About = () => {
         </div>
 
         {/* Framer, Figma, WordPress, ReactJS Card */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-lime-400 to-green-400 p-6 text-black group hover:scale-105 transition-transform duration-300 cursor-pointer w-full lg:max-w-sm no-scroll-hover">
+        <div
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-lime-400 to-green-400 p-6 text-black group hover:scale-105 transition-transform duration-300 ease-in-out cursor-pointer w-full lg:max-w-sm no-scroll-hover"
+          onClick={() =>
+            window.open('https://www.behance.net/Tanvir_ibn_mizan', '_blank')
+          }
+        >
           {/* Abstract background pattern */}
           <div className="absolute inset-0 opacity-100">
             <img
@@ -85,7 +93,7 @@ const About = () => {
             </div>
 
             <div className="flex justify-start">
-              <button className="w-10 h-10 border-2 border-black rounded-lg flex items-center justify-center group-hover:bg-black group-hover:text-lime-400 transition-all duration-300 hover:scale-110">
+              <button className="w-10 h-10 border-2 border-black rounded-lg flex items-center justify-center group-hover:bg-black group-hover:text-lime-400 transition-all duration-300 ease-in-out hover:scale-110">
                 <HiOutlineArrowRight className="w-4 h-4" />
               </button>
             </div>

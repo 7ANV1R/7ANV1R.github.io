@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   HiOutlineUser,
-  HiOutlineInformationCircle,
   HiOutlineBriefcase,
   HiOutlineAcademicCap,
   HiOutlineBuildingOffice,
@@ -12,7 +11,6 @@ import ThemeToggle from './ThemeToggle';
 const FloatingNav = ({ onNavigate }) => {
   const navItems = [
     { id: 'profile', label: 'Profile', icon: HiOutlineUser },
-    { id: 'about', label: 'About', icon: HiOutlineInformationCircle },
     { id: 'projects', label: 'Projects', icon: HiOutlineBriefcase },
     { id: 'experience', label: 'Experience', icon: HiOutlineBuildingOffice },
     { id: 'skills', label: 'Tools', icon: HiOutlineWrenchScrewdriver },
