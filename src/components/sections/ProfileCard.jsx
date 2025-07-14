@@ -15,7 +15,13 @@ const ProfileCard = () => {
           <div className="relative w-32 h-40 sm:w-40 sm:h-48 lg:w-48 lg:h-56">
             {/* Animated gradient background */}
             <div className="absolute inset-0 rounded-md overflow-hidden">
-              <div className="w-[200%] h-full bg-gradient-to-r from-orange-400 to-red-500 animate-pulse-slide"></div>
+              <div
+                className="w-[500%] h-full animate-pulse-slide"
+                style={{
+                  background:
+                    'linear-gradient(to right, #fb923c 0%, #ef4444 20%, #a3e635 40%, #4ade80 60%, #fb923c 80%, #ef4444 100%)',
+                }}
+              ></div>
             </div>
             {/* Profile image */}
             <img

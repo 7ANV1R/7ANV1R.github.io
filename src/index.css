@@ -449,7 +449,7 @@ body {
 /* Custom animation for sliding gradient background */
 @keyframes pulse-slide {
   0% {
-    transform: translateX(-50%);
+    transform: translateX(-80%);
   }
   100% {
     transform: translateX(0%);
@@ -457,5 +457,5 @@ body {
 }
 
 .animate-pulse-slide {
-  animation: pulse-slide 3s ease-in-out infinite alternate;
+  animation: pulse-slide 20s linear infinite;
 }
