@@ -432,3 +432,17 @@ body {
   max-height: 8rem !important;
   opacity: 1 !important;
 }
+
+/* Mobile responsive fixes for descriptions */
+@media (max-width: 1023px) {
+  .description-content {
+    max-height: none !important;
+    opacity: 1 !important;
+    transform: rotateX(0deg) !important;
+  }
+  
+  /* Disable 3D effects on mobile */
+  .perspective-1000 {
+    perspective: none;
+  }
+}

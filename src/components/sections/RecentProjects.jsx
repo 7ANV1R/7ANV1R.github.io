@@ -103,9 +103,9 @@ const RecentProjects = () => {
                 ))}
               </div>
 
-              {/* Description - 3D rotation reveal effect */}
+              {/* Description - 3D rotation reveal effect on desktop, always visible on mobile */}
               <div className="description-container perspective-1000">
-                <div className="description-content overflow-hidden transition-all duration-700 ease-out max-h-0 opacity-0 group-hover:max-h-32 group-hover:opacity-100 transform rotate-x-90 origin-top group-hover:rotate-x-0">
+                <div className="description-content overflow-hidden transition-all duration-700 ease-out lg:max-h-0 lg:opacity-0 lg:group-hover:max-h-32 lg:group-hover:opacity-100 transform lg:rotate-x-90 origin-top lg:group-hover:rotate-x-0">
                   <p
                     className="text-paragraph leading-relaxed pb-2"
                     style={{ color: 'var(--text-secondary)' }}
