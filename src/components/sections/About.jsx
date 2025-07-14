@@ -27,14 +27,14 @@ const About = () => {
 
       {/* short bio with reveal effect */}
       <div className="flex flex-col items-start justify-center mt-8 w-full max-w-3xl">
-        <div 
+        <div
           ref={paragraphRef}
           className="reveal-paragraph relative text-lg text-gray-500 cursor-none w-full text-left"
           onMouseEnter={() => setIsHovering(true)}
           onMouseLeave={() => setIsHovering(false)}
         >
           {/* Formal paragraph (default - always visible except in circle) */}
-          <div 
+          <div
             className="formal-text-container relative z-10"
             style={{
               maskImage: `radial-gradient(circle 75px at ${maskPosition.x}px ${maskPosition.y}px, transparent 100%, black 100%)`,
@@ -44,15 +44,15 @@ const About = () => {
             }}
           >
             <p className="select-none">
-              I am a software engineer currently focused on building cross-platform
-              mobile apps with Flutter. I enjoy exploring mobile app UI designs and
-              bringing them to life in Flutter, always aiming to write clean,
-              collaborative, and maintainable code.
+              I am a software engineer currently focused on building
+              cross-platform mobile apps with Flutter. I enjoy exploring mobile
+              app UI designs and bringing them to life in Flutter, always aiming
+              to write clean, collaborative, and maintainable code.
             </p>
           </div>
-          
+
           {/* Casual paragraph (only visible in circle) */}
-          <div 
+          <div
             ref={casualTextRef}
             className="casual-text-container absolute inset-0 z-20 select-none"
             style={{
@@ -63,18 +63,16 @@ const About = () => {
             }}
           >
             <p className="text-lg font-semibold text-orange-500">
-              I'm basically a lazy person who somehow became obsessed with pixel-perfect details. 
-              I'll spend hours adjusting margins by 1px that no one will notice and 
-              procrastinate for weeks before starting projects, always aiming to write clean, 
-              collaborative, and maintainable code while being completely unproductive.
+              Still not replaced by AI so still trying to make good shit and make 
+              code impactful. Basically lazy developer who loves watching good design.
             </p>
           </div>
         </div>
       </div>
 
-      <RevealCursor 
-        isActive={isHovering} 
-        targetRef={paragraphRef} 
+      <RevealCursor
+        isActive={isHovering}
+        targetRef={paragraphRef}
         onMouseMove={handleMouseMove}
       />
 
