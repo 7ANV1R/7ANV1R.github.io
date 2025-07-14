@@ -24,11 +24,20 @@ const ProfileCard = () => {
               ></div>
             </div>
 
-            {/* Marquee logo layer */}
-            <div className="absolute inset-0 rounded-md overflow-hidden flex items-center justify-center z-5">
-              <div className="marquee-container">
-                <div className="marquee-content"></div>
-              </div>
+            {/* Marquee logo layers */}
+            <div className="absolute inset-0 rounded-md overflow-hidden z-5">
+              {/* Generate 10 marquee lines from 40% to bottom with smaller gaps */}
+              {Array.from({ length: 10 }, (_, index) => (
+                <div 
+                  key={index}
+                  className="absolute left-0 right-0 flex items-center justify-center"
+                  style={{ top: `${40 + (index * 60) / 9}%` }}
+                >
+                  <div className="marquee-container">
+                    <div className={index % 2 === 0 ? "marquee-content" : "marquee-content-reverse"}></div>
+                  </div>
+                </div>
+              ))}
             </div>
 
             {/* Profile image */}

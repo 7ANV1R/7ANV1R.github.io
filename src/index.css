@@ -476,7 +476,7 @@ body {
   background-repeat: repeat-x;
   background-size: auto 24px;
   background-position: 0 center;
-  opacity: 0.15;
+  opacity: 0.2; /* Increased from 0.1 for better visibility over red */
   animation: marquee-logo-bg 20s linear infinite;
 }
 
@@ -486,6 +486,27 @@ body {
   }
   100% {
     background-position-x: -200px; /* Adjust based on your logo width + spacing */
+  }
+}
+
+/* Reverse marquee animation (left to right) */
+.marquee-content-reverse {
+  width: 200%;
+  height: 24px; /* h-6 equivalent */
+  background-image: url('/src/assets/tanvir_logo.svg');
+  background-repeat: repeat-x;
+  background-size: auto 24px;
+  background-position: 0 center;
+  opacity: 0.2; /* Increased from 0.1 for better visibility over red */
+  animation: marquee-logo-reverse 25s linear infinite;
+}
+
+@keyframes marquee-logo-reverse {
+  0% {
+    background-position-x: -200px;
+  }
+  100% {
+    background-position-x: 0px;
   }
 }
 
