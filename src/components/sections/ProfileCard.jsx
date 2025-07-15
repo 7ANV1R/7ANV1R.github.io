@@ -1,4 +1,4 @@
-import { FiGithub, FiTwitter, FiMail } from 'react-icons/fi';
+import { FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
 import tanvirImg from '../../assets/tanvir.png';
 import { useTheme } from '../../hooks/useTheme';
 
@@ -82,7 +82,7 @@ const ProfileCard = () => {
             href="https://github.com/7anv1r"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xl p-2 rounded-lg transition-all duration-300"
+            className="text-lg p-2 rounded-lg transition-all duration-300"
             style={{
               color: oppositeThemeColors.textSecondary,
               backgroundColor: 'transparent',
@@ -99,7 +99,7 @@ const ProfileCard = () => {
             <FiGithub />
           </a>
           <a
-            href="https://twitter.com/tanvir_ibn_mizan"
+            href="https://linkedin.com/in/7anv1r"
             target="_blank"
             rel="noopener noreferrer"
             className="text-xl p-2 rounded-lg transition-all duration-300"
@@ -116,7 +116,7 @@ const ProfileCard = () => {
               e.target.style.color = oppositeThemeColors.textSecondary;
             }}
           >
-            <FiTwitter />
+            <FiLinkedin />
           </a>
           <a
             href="mailto:tanvir.inquiries@gmail.com"

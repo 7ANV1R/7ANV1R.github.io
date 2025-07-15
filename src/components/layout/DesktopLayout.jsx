@@ -6,7 +6,6 @@ import WorkExperience from '../sections/WorkExperience';
 import ToolsAndTech from '../sections/ToolsAndTech';
 import FloatingNav from '../ui/FloatingNav';
 import GetInTouch from '../sections/GetInTouch';
-import Resume from '../sections/Resume';
 import Footer from '../sections/Footer';
 
 const DesktopLayout = () => {
@@ -81,14 +80,10 @@ const DesktopLayout = () => {
             <div>
               <GetInTouch />
             </div>
-
-            <div ref={sectionRefs.resume}>
-              <Resume className="h-96" />
-            </div>
           </div>
         </div>
       </div>
-      
+
       {/* Full Width Footer */}
       <Footer />
     </div>
