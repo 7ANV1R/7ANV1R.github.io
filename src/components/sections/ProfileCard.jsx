@@ -8,7 +8,7 @@ const ProfileCard = () => {
   // Define opposite theme colors
   const oppositeThemeColors = {
     cardBg: isDark ? '#ffffff' : '#262222',
-    textSecondary: isDark ? '#6b7280' : '#353334',
+    textSecondary: isDark ? '#000000' : '#ffffff',
     cardBorder: isDark ? '#e5e7eb' : '#353334',
   };
 
