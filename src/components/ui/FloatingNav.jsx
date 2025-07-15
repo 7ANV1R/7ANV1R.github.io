@@ -18,7 +18,7 @@ const FloatingNav = ({ onNavigate }) => {
 
   return (
     <nav
-      className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 backdrop-blur-xl bg-white/25 dark:bg-gray-900/25 border border-white/30 dark:border-gray-700/30 rounded-2xl px-8 py-2 shadow-2xl shadow-black/20 dark:shadow-black/50"
+      className="fixed top-4 lg:top-6 left-1/2 transform -translate-x-1/2 z-50 backdrop-blur-xl bg-white/25 dark:bg-gray-900/25 border border-white/30 dark:border-gray-700/30 rounded-2xl px-6 lg:px-8 py-2 shadow-2xl shadow-black/20 dark:shadow-black/50"
       style={{
         backdropFilter: 'blur(20px) saturate(180%)',
       }}

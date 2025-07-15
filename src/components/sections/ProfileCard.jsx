@@ -15,7 +15,7 @@ const ProfileCard = () => {
   return (
     <>
       <div
-        className="flex flex-col items-center justify-center p-4 sm:p-6 mx-2 sm:mx-4 lg:mx-12 rounded-lg shadow-md transition-all duration-300"
+        className="flex flex-col items-center justify-center p-3 sm:p-6 mx-2 sm:mx-4 lg:mx-12 rounded-lg shadow-md transition-all duration-300"
         style={{
           backgroundColor: oppositeThemeColors.cardBg,
           borderColor: oppositeThemeColors.cardBorder,
@@ -23,8 +23,8 @@ const ProfileCard = () => {
         }}
       >
         {/* image */}
-        <div className="flex items-center justify-center mb-4 w-full">
-          <div className="relative w-32 h-40 sm:w-40 sm:h-48 lg:w-48 lg:h-56">
+        <div className="flex items-center justify-center mb-3 sm:mb-4 w-full">
+          <div className="relative w-40 h-48 sm:w-40 sm:h-48 lg:w-48 lg:h-56">
             {/* Animated gradient background */}
             <div className="absolute inset-0 rounded-md overflow-hidden">
               <div
@@ -69,14 +69,14 @@ const ProfileCard = () => {
 
         {/* name */}
         <h2
-          className="text-lg sm:text-xl lg:text-2xl font-semibold mb-2 text-center transition-colors duration-300"
+          className="text-lg sm:text-xl lg:text-2xl font-semibold mb-1 sm:mb-2 text-center transition-colors duration-300"
           style={{ color: oppositeThemeColors.textSecondary }}
         >
           Tanvir Ibn Mizan
         </h2>
 
         {/* social link icon */}
-        <div className="flex space-x-3 sm:space-x-4 mt-2 sm:mt-4">
+        <div className="flex space-x-3 sm:space-x-4 mt-1 sm:mt-4">
           <a
             href="https://github.com/7anv1r"
             target="_blank"
