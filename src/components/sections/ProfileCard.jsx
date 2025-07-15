@@ -19,7 +19,8 @@ const ProfileCard = () => {
         style={{
           backgroundColor: oppositeThemeColors.cardBg,
           borderColor: oppositeThemeColors.cardBorder,
-          border: '1px solid',
+          borderWidth: '1px',
+          borderStyle: 'solid',
         }}
       >
         {/* image */}
