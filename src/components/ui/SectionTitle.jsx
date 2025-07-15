@@ -12,7 +12,7 @@ const SectionTitle = ({
         className="font-semibold"
         style={{
           color: 'var(--text-primary)',
-          fontSize: `clamp(2.5rem, 10vw, ${fontSize})`,
+          fontSize: `clamp(3.5rem, 10vw, ${fontSize})`,
           lineHeight: '0.8',
           marginBottom: '0',
         }}
@@ -23,7 +23,7 @@ const SectionTitle = ({
         className="font-semibold"
         style={{
           color: 'var(--text-secondary)',
-          fontSize: `clamp(2.5rem, 10vw, ${fontSize})`,
+          fontSize: `clamp(3.5rem, 10vw, ${fontSize})`,
           lineHeight: '0.8',
           marginTop: '0',
           marginBottom: '0',
