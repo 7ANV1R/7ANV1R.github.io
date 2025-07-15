@@ -6,6 +6,7 @@ import WorkExperience from '../sections/WorkExperience';
 import ToolsAndTech from '../sections/ToolsAndTech';
 import FloatingNav from '../ui/FloatingNav';
 import GetInTouch from '../sections/GetInTouch';
+import Footer from '../sections/Footer';
 
 const MobileLayout = () => {
   const sectionRefs = {
@@ -59,6 +60,9 @@ const MobileLayout = () => {
         </div>
         <div>
           <GetInTouch />
+        </div>
+        <div>
+          <Footer />
         </div>
       </div>
     </div>

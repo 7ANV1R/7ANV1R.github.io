@@ -6,6 +6,8 @@ import WorkExperience from '../sections/WorkExperience';
 import ToolsAndTech from '../sections/ToolsAndTech';
 import FloatingNav from '../ui/FloatingNav';
 import GetInTouch from '../sections/GetInTouch';
+import Resume from '../sections/Resume';
+import Footer from '../sections/Footer';
 
 const DesktopLayout = () => {
   const scrollContainerRef = useRef(null);
@@ -43,43 +45,52 @@ const DesktopLayout = () => {
   };
 
   return (
-    <div className="hidden lg:flex h-screen">
+    <div className="hidden lg:flex h-screen flex-col">
       <FloatingNav onNavigate={handleNavigate} />
 
-      {/* Left Side - Pinned Card */}
-      <div className="w-1/3 p-6 transition-colors duration-300">
-        <div className="sticky top-6" ref={sectionRefs.profile}>
-          <ProfileCard className="h-96" />
-        </div>
-      </div>
-
-      {/* Right Side - Scrollable Content */}
-      <div className="w-2/3 overflow-y-auto" ref={scrollContainerRef}>
-        <div className="p-6 space-y-6">
-          <div ref={sectionRefs.about}>
-            <About className="h-80" />
-          </div>
-
-          <div ref={sectionRefs.projects}>
-            <RecentProjects className="h-96" />
-          </div>
-
-          <div ref={sectionRefs.experience}>
-            <WorkExperience className="h-96" />
-          </div>
-
-          <div ref={sectionRefs.skills}>
-            <ToolsAndTech
-              className="h-96"
-              scrollContainerRef={scrollContainerRef}
-            />
-          </div>
-
-          <div>
-            <GetInTouch />
+      <div className="flex flex-1">
+        {/* Left Side - Pinned Card */}
+        <div className="w-1/3 p-6 transition-colors duration-300">
+          <div className="sticky top-6" ref={sectionRefs.profile}>
+            <ProfileCard className="h-96" />
           </div>
         </div>
+
+        {/* Right Side - Scrollable Content */}
+        <div className="w-2/3 overflow-y-auto" ref={scrollContainerRef}>
+          <div className="p-6 space-y-6">
+            <div ref={sectionRefs.about}>
+              <About className="h-80" />
+            </div>
+
+            <div ref={sectionRefs.projects}>
+              <RecentProjects className="h-96" />
+            </div>
+
+            <div ref={sectionRefs.experience}>
+              <WorkExperience className="h-96" />
+            </div>
+
+            <div ref={sectionRefs.skills}>
+              <ToolsAndTech
+                className="h-96"
+                scrollContainerRef={scrollContainerRef}
+              />
+            </div>
+
+            <div>
+              <GetInTouch />
+            </div>
+
+            <div ref={sectionRefs.resume}>
+              <Resume className="h-96" />
+            </div>
+          </div>
+        </div>
       </div>
+      
+      {/* Full Width Footer */}
+      <Footer />
     </div>
   );
 };
