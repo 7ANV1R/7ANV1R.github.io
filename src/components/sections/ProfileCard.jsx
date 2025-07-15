@@ -1,14 +1,26 @@
-import Skeleton from '../ui/Skeleton';
-import SocialIcon from '../ui/SocialIcon';
 import { FiGithub, FiTwitter, FiMail } from 'react-icons/fi';
 import tanvirImg from '../../assets/tanvir.png';
+import { useTheme } from '../../hooks/useTheme';
 
 const ProfileCard = () => {
+  const { isDark } = useTheme();
+
+  // Define opposite theme colors
+  const oppositeThemeColors = {
+    cardBg: isDark ? '#ffffff' : '#262222',
+    textSecondary: isDark ? '#6b7280' : '#353334',
+    cardBorder: isDark ? '#e5e7eb' : '#353334',
+  };
+
   return (
     <>
       <div
-        className="flex flex-col items-center justify-center p-4 sm:p-6 mx-2 sm:mx-4 lg:mx-12 rounded-lg shadow-md"
-        style={{ backgroundColor: 'var(--card-bg)' }}
+        className="flex flex-col items-center justify-center p-4 sm:p-6 mx-2 sm:mx-4 lg:mx-12 rounded-lg shadow-md transition-all duration-300"
+        style={{
+          backgroundColor: oppositeThemeColors.cardBg,
+          borderColor: oppositeThemeColors.cardBorder,
+          border: '1px solid',
+        }}
       >
         {/* image */}
         <div className="flex items-center justify-center mb-4 w-full">
@@ -28,13 +40,19 @@ const ProfileCard = () => {
             <div className="absolute inset-0 rounded-md overflow-hidden z-5">
               {/* Generate 10 marquee lines from 40% to bottom with smaller gaps */}
               {Array.from({ length: 10 }, (_, index) => (
-                <div 
+                <div
                   key={index}
                   className="absolute left-0 right-0 flex items-center justify-center"
                   style={{ top: `${40 + (index * 60) / 9}%` }}
                 >
                   <div className="marquee-container">
-                    <div className={index % 2 === 0 ? "marquee-content" : "marquee-content-reverse"}></div>
+                    <div
+                      className={
+                        index % 2 === 0
+                          ? 'marquee-content'
+                          : 'marquee-content-reverse'
+                      }
+                    ></div>
                   </div>
                 </div>
               ))}
@@ -51,20 +69,72 @@ const ProfileCard = () => {
 
         {/* name */}
         <h2
-          className="text-lg sm:text-xl lg:text-2xl font-semibold mb-2 text-center"
-          style={{ color: 'var(--text-secondary)' }}
+          className="text-lg sm:text-xl lg:text-2xl font-semibold mb-2 text-center transition-colors duration-300"
+          style={{ color: oppositeThemeColors.textSecondary }}
         >
           Tanvir Ibn Mizan
         </h2>
 
         {/* social link icon */}
         <div className="flex space-x-3 sm:space-x-4 mt-2 sm:mt-4">
-          <SocialIcon icon={FiGithub} href="https://github.com/7anv1r" />
-          <SocialIcon
-            icon={FiTwitter}
+          <a
+            href="https://github.com/7anv1r"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xl p-2 rounded-lg transition-all duration-300"
+            style={{
+              color: oppositeThemeColors.textSecondary,
+              backgroundColor: 'transparent',
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = isDark ? '#e5e7eb' : '#353334';
+              e.target.style.color = isDark ? '#111827' : '#ffffff';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'transparent';
+              e.target.style.color = oppositeThemeColors.textSecondary;
+            }}
+          >
+            <FiGithub />
+          </a>
+          <a
             href="https://twitter.com/tanvir_ibn_mizan"
-          />
-          <SocialIcon icon={FiMail} href="mailto:tanvir.inquiries@gmail.com" />
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xl p-2 rounded-lg transition-all duration-300"
+            style={{
+              color: oppositeThemeColors.textSecondary,
+              backgroundColor: 'transparent',
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = isDark ? '#e5e7eb' : '#353334';
+              e.target.style.color = isDark ? '#111827' : '#ffffff';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'transparent';
+              e.target.style.color = oppositeThemeColors.textSecondary;
+            }}
+          >
+            <FiTwitter />
+          </a>
+          <a
+            href="mailto:tanvir.inquiries@gmail.com"
+            className="text-xl p-2 rounded-lg transition-all duration-300"
+            style={{
+              color: oppositeThemeColors.textSecondary,
+              backgroundColor: 'transparent',
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = isDark ? '#e5e7eb' : '#353334';
+              e.target.style.color = isDark ? '#111827' : '#ffffff';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'transparent';
+              e.target.style.color = oppositeThemeColors.textSecondary;
+            }}
+          >
+            <FiMail />
+          </a>
         </div>
       </div>
     </>
