@@ -17,6 +17,15 @@ const MobileLayout = () => {
   };
 
   const handleNavigate = (sectionId) => {
+    if (sectionId === 'profile') {
+      // For profile, scroll to top of page
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+      return;
+    }
+
     const targetRef = sectionRefs[sectionId];
     if (targetRef.current) {
       targetRef.current.scrollIntoView({
