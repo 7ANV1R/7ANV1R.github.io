@@ -1,8 +1,6 @@
-import React from 'react';
 import {
   HiOutlineUser,
   HiOutlineBriefcase,
-  HiOutlineAcademicCap,
   HiOutlineBuildingOffice,
   HiOutlineWrenchScrewdriver,
 } from 'react-icons/hi2';
