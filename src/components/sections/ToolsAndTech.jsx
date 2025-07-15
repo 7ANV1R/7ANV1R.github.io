@@ -52,19 +52,33 @@ const ToolsAndTech = ({ scrollContainerRef }) => {
 
         // Only create animation if there's content to scroll
         if (scrollDistance > 0) {
-          // Create the horizontal scroll animation - works on all devices
+          // Get the first card element to use as trigger
+          const firstCard = tools.querySelector('.flex-shrink-0');
+
+          // Create the horizontal scroll animation with improved timing
           gsap.to(tools, {
             x: -scrollDistance,
-            ease: 'power1.inOut',
+            ease: 'none', // Linear scrolling
             scrollTrigger: {
-              trigger: sectionRef.current,
+              trigger: firstCard || sectionRef.current, // Use first card as trigger, fallback to section
               scroller: scrollContainerRef?.current,
-              start: 'top 15%',
-              end: '+=50%',
-              scrub: 2, // Balanced scrub value for all devices
+              start: 'bottom 90%', // Start when the first card's bottom edge is 90% from viewport bottom
+              end: 'bottom 40%', // End when section bottom is 40% from top
+              scrub: 1, // Smoother scrub for better responsiveness
               pin: false,
               invalidateOnRefresh: true,
               anticipatePin: 1,
+              // Responsive adjustments
+              onUpdate: (self) => {
+                // Optional: Add responsive behavior based on screen size
+                const isMobile = window.innerWidth < 768;
+                if (isMobile) {
+                  // Slightly adjust timing for mobile
+                  self.scrub = 1.5;
+                } else {
+                  self.scrub = 1;
+                }
+              },
             },
           });
         }
