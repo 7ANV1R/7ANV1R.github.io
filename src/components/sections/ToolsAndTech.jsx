@@ -197,7 +197,7 @@ const ToolsAndTech = ({ scrollContainerRef }) => {
       <div style={{ height: 80 }} />
 
       <div ref={sectionRef} className="relative px-2 sm:px-4">
-        <SectionTitle primaryText="TOOLS &" secondaryText="TECHNOLOGIES" />
+        <SectionTitle primaryText="TOOLS" secondaryText="&& TECH" />
 
         {/* Responsive neumorphic horizontal scroll container */}
         <div
