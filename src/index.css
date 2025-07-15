@@ -41,7 +41,9 @@
   --card-bg: #ffffff;
   --card-bg-rgb: 255, 255, 255;
   --card-border: #e5e7eb;
-  --nav-bg: rgba(255, 255, 255, 0.9);
+  --nav-bg: rgba(255, 255, 255, 0.15);
+  --nav-border: rgba(255, 255, 255, 0.3);
+  --nav-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
 
   /* Neumorphism colors for light theme */
   --neuro-bg: #e6e7ee;
@@ -63,7 +65,9 @@
   --card-bg: #262222;
   --card-bg-rgb: 38, 34, 34;
   --card-border: #353334;
-  --nav-bg: rgba(22, 19, 18, 0.9);
+  --nav-bg: rgba(60, 55, 52, 0.8);
+  --nav-border: rgba(120, 110, 105, 0.4);
+  --nav-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
 
   /* Neumorphism colors for dark theme */
   --neuro-bg: #2c2925;
