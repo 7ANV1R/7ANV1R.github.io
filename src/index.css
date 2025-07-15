@@ -65,8 +65,8 @@
   --card-bg: #262222;
   --card-bg-rgb: 38, 34, 34;
   --card-border: #353334;
-  --nav-bg: rgba(60, 55, 52, 0.8);
-  --nav-border: rgba(120, 110, 105, 0.4);
+  --nav-bg: rgba(60, 55, 52, 0.35);
+  --nav-border: rgba(80, 72, 68, 0.2);
   --nav-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
 
   /* Neumorphism colors for dark theme */
