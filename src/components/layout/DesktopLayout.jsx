@@ -7,9 +7,16 @@ import ToolsAndTech from '../sections/ToolsAndTech';
 import FloatingNav from '../ui/FloatingNav';
 import GetInTouch from '../sections/GetInTouch';
 import Footer from '../sections/Footer';
+import useLenis from '../../hooks/useLenis';
+import useMediaQuery from '../../hooks/useMediaQuery';
 
 const DesktopLayout = () => {
   const scrollContainerRef = useRef(null);
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
+  // The page scrolls the window (the .overflow-y-auto container is not height-
+  // capped, so it grows to full content and never scrolls internally). Bind
+  // Lenis to the window, not the container.
+  const lenisRef = useLenis({ enabled: isDesktop });
   const sectionRefs = {
     profile: useRef(null),
     about: useRef(null),
@@ -19,27 +26,24 @@ const DesktopLayout = () => {
   };
 
   const handleNavigate = (sectionId) => {
+    const lenis = lenisRef.current;
+
     if (sectionId === 'profile') {
-      // For profile, scroll to top of right container
-      if (scrollContainerRef.current) {
-        scrollContainerRef.current.scrollTo({
-          top: 0,
-          behavior: 'smooth',
-        });
+      if (lenis) {
+        lenis.scrollTo(0);
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
       return;
     }
 
     const targetRef = sectionRefs[sectionId];
-    if (targetRef.current && scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      const target = targetRef.current;
-      const targetTop = target.offsetTop - container.offsetTop - 24;
+    if (!targetRef.current) return;
 
-      container.scrollTo({
-        top: targetTop,
-        behavior: 'smooth',
-      });
+    if (lenis) {
+      lenis.scrollTo(targetRef.current, { offset: -24 });
+    } else {
+      targetRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 

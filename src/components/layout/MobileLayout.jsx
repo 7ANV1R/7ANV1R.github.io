@@ -7,8 +7,12 @@ import ToolsAndTech from '../sections/ToolsAndTech';
 import FloatingNav from '../ui/FloatingNav';
 import GetInTouch from '../sections/GetInTouch';
 import Footer from '../sections/Footer';
+import useLenis from '../../hooks/useLenis';
+import useMediaQuery from '../../hooks/useMediaQuery';
 
 const MobileLayout = () => {
+  const isMobile = useMediaQuery('(max-width: 1023px)');
+  const lenisRef = useLenis({ enabled: isMobile }); // window scroll
   const sectionRefs = {
     profile: useRef(null),
     about: useRef(null),
@@ -18,21 +22,26 @@ const MobileLayout = () => {
   };
 
   const handleNavigate = (sectionId) => {
+    const lenis = lenisRef.current;
+
     if (sectionId === 'profile') {
       // For profile, scroll to top of page
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-      });
+      if (lenis) {
+        lenis.scrollTo(0);
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
       return;
     }
 
     const targetRef = sectionRefs[sectionId];
-    if (targetRef.current) {
-      targetRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
+    if (!targetRef.current) return;
+
+    if (lenis) {
+      // Offset clears the floating nav that overlays the top of the page.
+      lenis.scrollTo(targetRef.current, { offset: -96 });
+    } else {
+      targetRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
