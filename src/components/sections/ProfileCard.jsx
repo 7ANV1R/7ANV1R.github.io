@@ -5,11 +5,12 @@ import { useTheme } from '../../hooks/useTheme';
 const ProfileCard = () => {
   const { isDark } = useTheme();
 
-  // Define opposite theme colors
-  const oppositeThemeColors = {
-    cardBg: isDark ? '#ffffff' : '#262222',
-    textSecondary: isDark ? '#000000' : '#ffffff',
-    cardBorder: isDark ? '#e5e7eb' : '#353334',
+  // Same-theme colors, a distinct shade from the section background
+  const cardColors = {
+    cardBg: isDark ? '#262222' : '#f3f4f6',
+    textColor: isDark ? '#ffffff' : '#111827',
+    cardBorder: isDark ? '#353334' : '#e5e7eb',
+    iconHoverBg: isDark ? '#353334' : '#e5e7eb',
   };
 
   return (
@@ -17,8 +18,8 @@ const ProfileCard = () => {
       <div
         className="flex flex-col items-center justify-center p-3 sm:p-6 mx-2 sm:mx-4 lg:mx-12 rounded-lg shadow-md transition-all duration-300"
         style={{
-          backgroundColor: oppositeThemeColors.cardBg,
-          borderColor: oppositeThemeColors.cardBorder,
+          backgroundColor: cardColors.cardBg,
+          borderColor: cardColors.cardBorder,
           borderWidth: '1px',
           borderStyle: 'solid',
         }}
@@ -71,7 +72,7 @@ const ProfileCard = () => {
         {/* name */}
         <h2
           className="text-lg sm:text-xl lg:text-2xl font-semibold mb-1 sm:mb-2 text-center transition-colors duration-300"
-          style={{ color: oppositeThemeColors.textSecondary }}
+          style={{ color: cardColors.textColor }}
         >
           Tanvir Ibn Mizan
         </h2>
@@ -84,16 +85,16 @@ const ProfileCard = () => {
             rel="noopener noreferrer"
             className="text-lg p-2 rounded-lg transition-all duration-300"
             style={{
-              color: oppositeThemeColors.textSecondary,
+              color: cardColors.textColor,
               backgroundColor: 'transparent',
             }}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = isDark ? '#e5e7eb' : '#353334';
-              e.target.style.color = isDark ? '#111827' : '#ffffff';
+              e.target.style.backgroundColor = cardColors.iconHoverBg;
+              e.target.style.color = cardColors.textColor;
             }}
             onMouseLeave={(e) => {
               e.target.style.backgroundColor = 'transparent';
-              e.target.style.color = oppositeThemeColors.textSecondary;
+              e.target.style.color = cardColors.textColor;
             }}
           >
             <FiGithub />
@@ -104,16 +105,16 @@ const ProfileCard = () => {
             rel="noopener noreferrer"
             className="text-xl p-2 rounded-lg transition-all duration-300"
             style={{
-              color: oppositeThemeColors.textSecondary,
+              color: cardColors.textColor,
               backgroundColor: 'transparent',
             }}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = isDark ? '#e5e7eb' : '#353334';
-              e.target.style.color = isDark ? '#111827' : '#ffffff';
+              e.target.style.backgroundColor = cardColors.iconHoverBg;
+              e.target.style.color = cardColors.textColor;
             }}
             onMouseLeave={(e) => {
               e.target.style.backgroundColor = 'transparent';
-              e.target.style.color = oppositeThemeColors.textSecondary;
+              e.target.style.color = cardColors.textColor;
             }}
           >
             <FiLinkedin />
@@ -122,16 +123,16 @@ const ProfileCard = () => {
             href="mailto:tanvir.inquiries@gmail.com"
             className="text-xl p-2 rounded-lg transition-all duration-300"
             style={{
-              color: oppositeThemeColors.textSecondary,
+              color: cardColors.textColor,
               backgroundColor: 'transparent',
             }}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = isDark ? '#e5e7eb' : '#353334';
-              e.target.style.color = isDark ? '#111827' : '#ffffff';
+              e.target.style.backgroundColor = cardColors.iconHoverBg;
+              e.target.style.color = cardColors.textColor;
             }}
             onMouseLeave={(e) => {
               e.target.style.backgroundColor = 'transparent';
-              e.target.style.color = oppositeThemeColors.textSecondary;
+              e.target.style.color = cardColors.textColor;
             }}
           >
             <FiMail />

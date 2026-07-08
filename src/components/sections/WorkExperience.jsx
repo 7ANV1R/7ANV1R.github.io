@@ -1,9 +1,59 @@
+import { useRef } from 'react';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/all';
+import { SplitText } from 'gsap/SplitText';
 import SectionTitle from '../ui/SectionTitle';
 import workExperienceData from '../../data/work_experience.json';
 
-const WorkExperience = () => {
+gsap.registerPlugin(ScrollTrigger, SplitText);
+
+const WorkExperience = ({ scrollContainerRef }) => {
   // Remove unnecessary state - data is static and doesn't need to be in state
   const experiences = workExperienceData;
+  const sectionRef = useRef();
+
+  // Scroll-driven reveal, one trigger per objective: words start dim and
+  // brighten to full in reading order (left-to-right), tied to scroll via
+  // `scrub`. Explicit set(dim) -> to(bright) is monotonic, so the sweep stays a
+  // single clean boundary (no stranded/partial words). Each objective is driven
+  // by its own position, so they reveal one after another as you scroll down.
+  useGSAP(
+    () => {
+      const root = sectionRef.current;
+      if (!root) return;
+
+      const paragraphs = gsap.utils.toArray('.objective-text', root);
+      if (!paragraphs.length) return;
+
+      const splits = [];
+      paragraphs.forEach((p) => {
+        const split = new SplitText(p, { type: 'words', aria: 'auto' });
+        splits.push(split);
+
+        gsap.set(split.words, { opacity: 0.2 }); // initial (dim) color
+        gsap.to(split.words, {
+          opacity: 1, // final (bright) color
+          ease: 'none',
+          stagger: { each: 0.05 },
+          duration: 0.5,
+          scrollTrigger: {
+            trigger: p,
+            scroller: scrollContainerRef?.current || undefined,
+            start: 'top 85%', // begins as the objective enters from the bottom
+            end: 'top 45%', // fully bright once comfortably in view
+            scrub: true,
+            invalidateOnRefresh: true,
+          },
+        });
+      });
+
+      return () => {
+        splits.forEach((split) => split.revert());
+      };
+    },
+    { dependencies: [scrollContainerRef] },
+  );
 
   const TimelineDot = ({ isCurrent }) => (
     <div
@@ -93,8 +143,8 @@ const WorkExperience = () => {
 
   const Objective = ({ objective }) => (
     <p
-      className="text-sm md:text-base leading-relaxed max-w-3xl"
-      style={{ color: 'var(--text-secondary)' }}
+      className="objective-text text-sm md:text-base leading-relaxed max-w-3xl"
+      style={{ color: 'var(--text-primary)' }}
     >
       {objective}
     </p>
@@ -139,7 +189,10 @@ const WorkExperience = () => {
           <SectionTitle primaryText="WORK" secondaryText="EXPERIENCE" />
         </div>
 
-        <div className="relative max-w-5xl work-experience-section">
+        <div
+          ref={sectionRef}
+          className="relative max-w-5xl work-experience-section"
+        >
           {experiences.map((experience, index) => (
             <ExperienceItem
               key={experience.id}

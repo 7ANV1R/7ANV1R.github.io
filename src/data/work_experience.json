@@ -5,22 +5,22 @@
     "companyLogo": "/experience/weDevs_Logo.svg",
     "designation": "Software Engineer",
     "timeFrame": "September 2024 - Present",
-    "objective": "Working on a SAAS-based ecommerce platform, specifically developing a white label customer mobile app. Successfully converted a React Native app to Flutter with comprehensive feature implementation, ensuring all missing functionalities were properly integrated and optimized for cross-platform performance."
+    "objective": "Built a customer app with a JSON-driven layout that made it endlessly customizable, and a vendor app focused on giving sellers a fast, effortless way to run their store. Extended into mobile HR and project management too, with generative AI features that made daily work quicker."
   },
   {
     "id": 2,
     "company": "RetinaSoft",
     "companyLogo": "/experience/retinaSoft_Logo.svg",
-    "designation": "Mobile Application Developer",
+    "designation": "Mobile Application Developer (Flutter)",
     "timeFrame": "May 2023 - August 2024",
-    "objective": "Developed comprehensive real estate buying and selling applications with advanced features including socket-based messaging, audio and video calling capabilities for seamless communication between users. Built a news portal mobile app supporting both user and reporter functionalities, enabling content creation, publishing, and consumption with real-time updates and interactive features."
+    "objective": "Built real estate and e-commerce apps that took users from browsing to checkout without friction, with in-app video calling that let buyers and sellers connect face to face. Added an offline mode that kept everything working on weak internet and synced the moment users reconnected, making the apps dependable even in low-signal areas."
   },
   {
     "id": 3,
     "company": "NexusLab",
     "companyLogo": "/experience/nexuslab_Logo.svg",
-    "designation": "Junior Flutter Developer",
+    "designation": "Junior Mobile Application Developer (Flutter)",
     "timeFrame": "August 2021 - September 2022",
-    "objective": "Collaborated with design teams to translate mockups into functional and user-friendly app interfaces. Successfully integrated Google Maps and background location tracking features for real-time location awareness, including risk warning functionalities based on user reviews. Implemented chat functionality using sockets to enable real-time communication and enhance user engagement within the platform."
+    "objective": "Turned design ideas into smooth, easy-to-use apps that felt natural across devices, with real-time location tracking that warned users about risky areas from community reviews to help them stay safe. Built instant chat that kept people connected and coming back to the app."
   }
 ]

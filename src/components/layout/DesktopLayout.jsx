@@ -67,7 +67,10 @@ const DesktopLayout = () => {
             </div>
 
             <div ref={sectionRefs.experience}>
-              <WorkExperience className="h-96" />
+              <WorkExperience
+                className="h-96"
+                scrollContainerRef={scrollContainerRef}
+              />
             </div>
 
             <div ref={sectionRefs.skills}>
