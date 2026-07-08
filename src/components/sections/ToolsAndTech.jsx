@@ -124,6 +124,11 @@ const ToolsAndTech = ({ scrollContainerRef }) => {
       const cards = gsap.utils.toArray('.tool-card', tools);
       if (cards.length < 2) return;
 
+      // Hint draggability for mouse/trackpad users (fine pointer), not touch.
+      if (window.matchMedia('(pointer: fine)').matches) {
+        container.style.cursor = 'grab';
+      }
+
       // Seamless infinite loop timeline. Paused — we set its progress by hand.
       const loop = horizontalLoop(cards, { paused: true, repeat: -1 });
 
@@ -229,10 +234,58 @@ const ToolsAndTech = ({ scrollContainerRef }) => {
         axis = null;
       };
 
+      // Mouse click-and-drag: a plain mouse has no horizontal scroll, so let
+      // mouse users grab the track and drag left/right. Touch (mobile) and
+      // trackpad horizontal-wheel paths are untouched — only pointerType
+      // 'mouse' enters here.
+      let dragging = false;
+      let dragLastX = 0;
+      let dragVel = 0; // px/ms
+      let dragT = 0;
+      const onPointerDown = (e) => {
+        if (e.pointerType !== 'mouse' || e.button !== 0) return;
+        e.preventDefault(); // no text/image selection while dragging
+        dragging = true;
+        stopFling();
+        dragLastX = e.clientX;
+        dragVel = 0;
+        dragT = now();
+        container.setPointerCapture?.(e.pointerId);
+        container.style.cursor = 'grabbing';
+      };
+      const onPointerMove = (e) => {
+        if (!dragging) return;
+        const move = e.clientX - dragLastX; // cursor right = +
+        const dt = now() - dragT || 16;
+        dragVel = -move / dt;
+        slideBy(-move); // drag left advances the loop (matches touch swipe)
+        dragLastX = e.clientX;
+        dragT = now();
+      };
+      const endDrag = (e) => {
+        if (!dragging) return;
+        dragging = false;
+        container.releasePointerCapture?.(e.pointerId);
+        container.style.cursor = 'grab';
+        if (Math.abs(dragVel) > 0.02) {
+          // Momentum fling on release, same as touch.
+          gsap.to(manual, {
+            inertia: {
+              cycles: { velocity: pxToCycles(dragVel * 1000) },
+            },
+            onUpdate: render,
+          });
+        }
+      };
+
       container.addEventListener('wheel', onWheel, { passive: false });
       container.addEventListener('touchstart', onTouchStart, { passive: true });
       container.addEventListener('touchmove', onTouchMove, { passive: false });
       container.addEventListener('touchend', onTouchEnd, { passive: true });
+      container.addEventListener('pointerdown', onPointerDown);
+      container.addEventListener('pointermove', onPointerMove);
+      container.addEventListener('pointerup', endDrag);
+      container.addEventListener('pointercancel', endDrag);
 
       return () => {
         clearTimeout(idleTimer);
@@ -241,6 +294,10 @@ const ToolsAndTech = ({ scrollContainerRef }) => {
         container.removeEventListener('touchstart', onTouchStart);
         container.removeEventListener('touchmove', onTouchMove);
         container.removeEventListener('touchend', onTouchEnd);
+        container.removeEventListener('pointerdown', onPointerDown);
+        container.removeEventListener('pointermove', onPointerMove);
+        container.removeEventListener('pointerup', endDrag);
+        container.removeEventListener('pointercancel', endDrag);
       };
     },
     { scope: sectionRef, dependencies: [] },
