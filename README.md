@@ -1,6 +1,6 @@
 # Rivnat's Portfolio
 
-🌐 **Live Site**: [rivnat.me](https://rivnat.me)
+🌐 **Live Site**: [tanvir.wiki](https://tanvir.wiki)
 
 A modern, responsive portfolio built with React and Vite, automatically deployed to GitHub Pages.
 
@@ -15,7 +15,7 @@ npm run preview     # Preview production build
 
 ## Deployment
 
-Push to `main` branch → Auto-deploys to `rivnat.me` via GitHub Actions
+Push to `main` branch → Auto-deploys to `tanvir.wiki` via GitHub Actions
 
 ## Documentation
 

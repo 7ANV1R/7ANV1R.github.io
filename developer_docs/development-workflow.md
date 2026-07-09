@@ -3,7 +3,7 @@
 ## 🚀 How to Make Changes and Dep## 📚 Additional Documentation
 
 - `developer_docs/custom-cursor-implementation.md` - Custom cursor features  
-- `developer_docs/scroll-aware-hover.md` - Scroll-aware hover effectsYour portfolio automatically deploys to `rivnat.me` when you push to the main branch.
+- `developer_docs/scroll-aware-hover.md` - Scroll-aware hover effectsYour portfolio automatically deploys to `tanvir.wiki` when you push to the main branch.
 
 ### Quick Development Cycle
 
@@ -18,7 +18,7 @@ npm run preview      # Preview at localhost:4173
 # Deploy your changes
 git add .
 git commit -m "Update portfolio"
-git push origin main  # Auto-deploys to rivnat.me
+git push origin main  # Auto-deploys to tanvir.wiki
 ```
 
 ### Development Workflow Options
@@ -59,7 +59,7 @@ git push origin main       # Triggers deployment
 1. **You push to main** → GitHub Actions triggered
 2. **Build process** → `npm ci` + `npm run build` 
 3. **Deploy** → Built files uploaded to GitHub Pages
-4. **Live** → Site updated at `https://rivnat.me`
+4. **Live** → Site updated at `https://tanvir.wiki`
 
 **Deployment time**: Usually 1-3 minutes
 
@@ -76,4 +76,4 @@ git push origin main       # Triggers deployment
 - `developer_docs/scroll-aware-hover.md` - Scroll-aware hover effects
 
 ---
-**Live Site**: 🌐 https://rivnat.me
+**Live Site**: 🌐 https://tanvir.wiki
