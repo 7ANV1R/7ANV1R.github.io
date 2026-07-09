@@ -4,9 +4,11 @@ import DesktopLayout from './components/layout/DesktopLayout';
 import useScrollAwareHover from './hooks/useScrollAwareHover';
 import CompanyLogoCursor from './components/ui/CompanyLogoCursor';
 import useMediaQuery from './hooks/useMediaQuery';
+import useDynamicTitle from './hooks/useDynamicTitle';
 
 const App = () => {
   useScrollAwareHover();
+  useDynamicTitle();
   // Render only the active layout. Mounting both duplicates every ScrollTrigger
   // (the hidden copy sits on a display:none scroller and corrupts refresh).
   const isDesktop = useMediaQuery('(min-width: 1024px)');
