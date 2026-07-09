@@ -51,9 +51,18 @@ export default function useLenis({
     // Recalculate trigger positions now that Lenis owns the scroller.
     ScrollTrigger.refresh();
 
+    // Content shifts as web fonts and images finish loading. In dev,
+    // StrictMode's double render re-measures late enough to mask this; the
+    // production build renders once (early), so trigger start/end positions go
+    // stale and scrub animations never fire. Re-measure once those settle.
+    const refresh = () => ScrollTrigger.refresh();
+    window.addEventListener('load', refresh);
+    if (document.fonts?.ready) document.fonts.ready.then(refresh);
+
     return () => {
       gsap.ticker.remove(onTick);
       lenis.off('scroll', ScrollTrigger.update);
+      window.removeEventListener('load', refresh);
       lenis.destroy();
       lenisRef.current = null;
     };
