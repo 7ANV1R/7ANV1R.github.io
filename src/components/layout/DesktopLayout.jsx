@@ -11,11 +11,10 @@ import useLenis from '../../hooks/useLenis';
 import useMediaQuery from '../../hooks/useMediaQuery';
 
 const DesktopLayout = () => {
-  const scrollContainerRef = useRef(null);
   const isDesktop = useMediaQuery('(min-width: 1024px)');
   // The page scrolls the window (the .overflow-y-auto container is not height-
   // capped, so it grows to full content and never scrolls internally). Bind
-  // Lenis to the window, not the container.
+  // Lenis to the window, and let ScrollTriggers use the window scroller too.
   const lenisRef = useLenis({ enabled: isDesktop });
   const sectionRefs = {
     profile: useRef(null),
@@ -60,7 +59,7 @@ const DesktopLayout = () => {
         </div>
 
         {/* Right Side - Scrollable Content */}
-        <div className="w-2/3 overflow-y-auto" ref={scrollContainerRef}>
+        <div className="w-2/3 overflow-y-auto">
           <div className="p-6 space-y-6">
             <div ref={sectionRefs.about}>
               <About className="h-80" />
@@ -71,17 +70,11 @@ const DesktopLayout = () => {
             </div>
 
             <div ref={sectionRefs.experience}>
-              <WorkExperience
-                className="h-96"
-                scrollContainerRef={scrollContainerRef}
-              />
+              <WorkExperience className="h-96" />
             </div>
 
             <div ref={sectionRefs.skills}>
-              <ToolsAndTech
-                className="h-96"
-                scrollContainerRef={scrollContainerRef}
-              />
+              <ToolsAndTech className="h-96" />
             </div>
 
             <div>
