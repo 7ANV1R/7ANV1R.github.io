@@ -10,9 +10,9 @@
     <title>Tanvir Ibn Mizan // Developer Portfolio</title>
     <meta
       name="description"
-      content="AI-powered software engineer turning prompts into Flutter apps that (mostly) work."
+      content="Tanvir Ibn Mizan is a software engineer at weDevs building cross-platform mobile apps with Flutter. Portfolio, projects, work experience and contact."
     />
-    <meta name="author" content="Tanvir" />
+    <meta name="author" content="Tanvir Ibn Mizan" />
     <meta
       name="keywords"
       content="Tanvir, Tanvir Ibn Mizan, 7ANV1R, Rivnat, Flutter Developer, Designer, Portfolio, Mobile Development, Web Development"
@@ -23,15 +23,15 @@
     <meta property="og:title" content="Tanvir Ibn Mizan // Developer Portfolio" />
     <meta
       property="og:description"
-      content="AI-powered software engineer turning prompts into Flutter apps that (mostly) work."
+      content="Tanvir Ibn Mizan is a software engineer at weDevs building cross-platform mobile apps with Flutter. Portfolio, projects, work experience and contact."
     />
     <meta property="og:image" content="https://tanvir.wiki/og-image.png" />
-    <meta property="og:image:alt" content="Tanvir's Logo" />
+    <meta property="og:image:alt" content="Tanvir Ibn Mizan" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Tanvir's Portfolio" />
+    <meta property="og:site_name" content="Tanvir Ibn Mizan" />
     <meta property="og:locale" content="en_US" />
 
     <!-- Twitter Card Meta Tags -->
@@ -39,40 +39,101 @@
     <meta name="twitter:title" content="Tanvir Ibn Mizan // Developer Portfolio" />
     <meta
       name="twitter:description"
-      content="AI-powered software engineer turning prompts into Flutter apps that (mostly) work."
+      content="Tanvir Ibn Mizan is a software engineer at weDevs building cross-platform mobile apps with Flutter. Portfolio, projects, work experience and contact."
     />
     <meta name="twitter:image" content="https://tanvir.wiki/og-image.png" />
-    <meta name="twitter:image:alt" content="Tanvir's Logo" />
+    <meta name="twitter:image:alt" content="Tanvir Ibn Mizan" />
 
     <!-- Additional Meta Tags for better SEO -->
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
     <meta name="theme-color" content="#7cc248" />
 
-    <!-- Structured data: tells Google this site IS the person "Tanvir Ibn Mizan" -->
+    <!-- Structured data: WebSite (site name in results) + ProfilePage about the Person -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "Person",
-        "name": "Tanvir Ibn Mizan",
-        "alternateName": ["Tanvir", "7ANV1R", "Rivnat"],
-        "url": "https://tanvir.wiki/",
-        "image": "https://tanvir.wiki/og-image.png",
-        "jobTitle": "Software Engineer & Flutter Developer",
-        "email": "mailto:tanvir.inquiries@gmail.com",
-        "sameAs": [
-          "https://github.com/7ANV1R",
-          "https://linkedin.com/in/7anv1r",
-          "https://twitter.com/tanvir_ibn_mizan",
-          "https://instagram.com/tanvir_ibn_mizan",
-          "https://facebook.com/tanvir.ibn.mizan",
-          "https://www.behance.net/Tanvir_ibn_mizan",
-          "https://about.me/rivnat"
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://tanvir.wiki/#website",
+            "url": "https://tanvir.wiki/",
+            "name": "Tanvir Ibn Mizan",
+            "alternateName": ["tanvir.wiki", "7ANV1R"],
+            "publisher": { "@id": "https://tanvir.wiki/#person" }
+          },
+          {
+            "@type": "ProfilePage",
+            "@id": "https://tanvir.wiki/#profilepage",
+            "url": "https://tanvir.wiki/",
+            "name": "Tanvir Ibn Mizan // Developer Portfolio",
+            "isPartOf": { "@id": "https://tanvir.wiki/#website" },
+            "mainEntity": { "@id": "https://tanvir.wiki/#person" }
+          },
+          {
+            "@type": "Person",
+            "@id": "https://tanvir.wiki/#person",
+            "name": "Tanvir Ibn Mizan",
+            "alternateName": ["Tanvir", "7ANV1R", "Rivnat"],
+            "url": "https://tanvir.wiki/",
+            "image": "https://tanvir.wiki/og-image.png",
+            "jobTitle": "Software Engineer",
+            "description": "Software engineer building cross-platform mobile apps with Flutter.",
+            "worksFor": { "@type": "Organization", "name": "weDevs" },
+            "knowsAbout": ["Flutter", "Dart", "Mobile App Development", "React", "Node.js", "Firebase", "Supabase", "Figma", "Rive", "UI Design"],
+            "email": "mailto:tanvir.inquiries@gmail.com",
+            "sameAs": [
+              "https://github.com/7ANV1R",
+              "https://linkedin.com/in/7anv1r",
+              "https://twitter.com/tanvir_ibn_mizan",
+              "https://instagram.com/tanvir_ibn_mizan",
+              "https://facebook.com/tanvir.ibn.mizan",
+              "https://www.behance.net/Tanvir_ibn_mizan",
+              "https://www.youtube.com/@tanvir_ibn_mizan",
+              "https://www.youtube.com/@7anv1r71",
+              "https://about.me/rivnat"
+            ]
+          }
         ]
       }
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Static copy of the page for crawlers / AI bots that don't run JS.
+           React replaces this on mount. Keep it in sync with the real content. -->
+      <main style="max-width: 48rem; margin: 0 auto; padding: 4rem 1rem; line-height: 1.6">
+        <h1>Tanvir Ibn Mizan</h1>
+        <p><strong>Software Engineer</strong> at weDevs &middot; Flutter developer</p>
+        <p>
+          I am a software engineer currently focused on building cross-platform
+          mobile apps with Flutter. I enjoy exploring mobile app UI designs and
+          bringing them to life in Flutter, always aiming to write clean,
+          collaborative, and maintainable code.
+        </p>
+        <h2>Work experience</h2>
+        <ul>
+          <li><strong>Software Engineer, weDevs</strong> (September 2024 &ndash; Present): customer app with a JSON-driven layout, vendor app for sellers, mobile HR and project management apps with generative AI features.</li>
+          <li><strong>Mobile Application Developer (Flutter), RetinaSoft</strong> (May 2023 &ndash; August 2024): real estate and e-commerce apps with in-app video calling and offline mode with sync.</li>
+          <li><strong>Junior Mobile Application Developer (Flutter), NexusLab</strong> (August 2021 &ndash; September 2022): real-time location tracking with community safety reviews and instant chat.</li>
+        </ul>
+        <h2>Projects</h2>
+        <ul>
+          <li><a href="https://github.com/7ANV1R/flutter-mcp-chatbot">Weather Assistant &ndash; Flutter MCP</a>: conversational weather chatbot built with Flutter, mcp_dart, OpenAI and the OpenWeather API.</li>
+          <li><a href="https://github.com/7ANV1R/shoe_app">Tyke &ndash; Shoe App</a>: Flutter UI demo with a carousel slider animation for browsing shoes.</li>
+        </ul>
+        <h2>Tools &amp; tech</h2>
+        <p>Flutter, React, Node.js, Firebase, Supabase, Figma, Rive</p>
+        <h2>Contact</h2>
+        <p>
+          <a href="mailto:tanvir.inquiries@gmail.com">tanvir.inquiries@gmail.com</a> &middot;
+          <a href="https://github.com/7ANV1R">GitHub</a> &middot;
+          <a href="https://linkedin.com/in/7anv1r">LinkedIn</a> &middot;
+          <a href="https://www.behance.net/Tanvir_ibn_mizan">Behance</a> &middot;
+          <a href="https://www.youtube.com/@tanvir_ibn_mizan">YouTube</a> &middot;
+          <a href="https://www.youtube.com/@7anv1r71">YouTube (gaming)</a>
+        </p>
+      </main>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

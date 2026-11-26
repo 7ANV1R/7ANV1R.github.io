@@ -1,0 +1,24 @@
+# Tanvir Ibn Mizan
+
+> Tanvir Ibn Mizan (also known as 7ANV1R) is a software engineer at weDevs who builds cross-platform mobile apps with Flutter. This is his official website: https://tanvir.wiki
+
+## About
+- Software engineer focused on cross-platform mobile apps with Flutter, mobile UI design, and clean, maintainable code.
+- Tools: Flutter, Dart, React, Node.js, Firebase, Supabase, Figma, Rive.
+
+## Experience
+- Software Engineer, weDevs (Sep 2024 – Present)
+- Mobile Application Developer (Flutter), RetinaSoft (May 2023 – Aug 2024)
+- Junior Mobile Application Developer (Flutter), NexusLab (Aug 2021 – Sep 2022)
+
+## Projects
+- [Weather Assistant – Flutter MCP](https://github.com/7ANV1R/flutter-mcp-chatbot): conversational weather chatbot (Flutter, mcp_dart, OpenAI, OpenWeather API)
+- [Tyke – Shoe App](https://github.com/7ANV1R/shoe_app): Flutter carousel animation UI demo
+
+## Links
+- Website: https://tanvir.wiki
+- GitHub: https://github.com/7ANV1R
+- LinkedIn: https://linkedin.com/in/7anv1r
+- YouTube: https://www.youtube.com/@tanvir_ibn_mizan
+- YouTube (gaming): https://www.youtube.com/@7anv1r71
+- Email: tanvir.inquiries@gmail.com

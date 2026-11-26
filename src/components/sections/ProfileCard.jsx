@@ -70,12 +70,12 @@ const ProfileCard = () => {
         </div>
 
         {/* name */}
-        <h2
+        <h1
           className="text-lg sm:text-xl lg:text-2xl font-semibold mb-1 sm:mb-2 text-center transition-colors duration-300"
           style={{ color: cardColors.textColor }}
         >
           Tanvir Ibn Mizan
-        </h2>
+        </h1>
 
         {/* social link icon */}
         <div className="flex space-x-3 sm:space-x-4 mt-1 sm:mt-4">

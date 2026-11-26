@@ -5,6 +5,7 @@ import {
   HiOutlineWrenchScrewdriver,
 } from 'react-icons/hi2';
 import ThemeToggle from './ThemeToggle';
+import DestroyModeToggle from './DestroyModeToggle';
 
 const FloatingNav = ({ onNavigate }) => {
   const navItems = [
@@ -16,7 +17,7 @@ const FloatingNav = ({ onNavigate }) => {
 
   return (
     <nav
-      className="fixed top-4 lg:top-6 left-1/2 transform -translate-x-1/2 z-50 backdrop-blur-xl rounded-2xl px-6 lg:px-8 py-2"
+      className="fixed top-4 lg:top-6 left-1/2 transform -translate-x-1/2 z-50 backdrop-blur-xl rounded-2xl px-3 lg:px-8 py-2"
       style={{
         backdropFilter: 'blur(20px) saturate(180%)',
         backgroundColor: 'var(--nav-bg)',
@@ -25,7 +26,7 @@ const FloatingNav = ({ onNavigate }) => {
         WebkitBackdropFilter: 'blur(20px) saturate(180%)', // Safari support
       }}
     >
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-1 lg:space-x-2">
         {navItems.map((item) => {
           const IconComponent = item.icon;
           return (
@@ -55,12 +56,13 @@ const FloatingNav = ({ onNavigate }) => {
         })}
 
         <div
-          className="w-px h-6 mx-3"
+          className="w-px h-6 mx-1 lg:mx-3"
           style={{
             backgroundColor: 'var(--border-color, rgba(156, 163, 175, 0.8))',
           }}
         />
 
+        <DestroyModeToggle />
         <ThemeToggle />
       </div>
     </nav>

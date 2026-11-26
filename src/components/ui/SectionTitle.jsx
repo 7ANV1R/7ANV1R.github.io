@@ -8,7 +8,7 @@ const SectionTitle = ({
 }) => {
   return (
     <div className={`text-left leading-none ${className}`}>
-      <h1
+      <h2
         className="font-semibold"
         style={{
           color: 'var(--text-primary)',
@@ -18,8 +18,8 @@ const SectionTitle = ({
         }}
       >
         {primaryText}
-      </h1>
-      <h1
+      </h2>
+      <h2
         className="font-semibold"
         style={{
           color: 'var(--text-secondary)',
@@ -30,7 +30,7 @@ const SectionTitle = ({
         }}
       >
         {secondaryText}
-      </h1>
+      </h2>
     </div>
   );
 };
