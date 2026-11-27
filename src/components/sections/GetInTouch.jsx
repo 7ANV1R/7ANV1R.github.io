@@ -16,7 +16,7 @@ const FORMSUBMIT_EMAIL = 'tanvir.inquiries@gmail.com';
  */
 const GetInTouch = () => {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState(null); // message to show, or null
   const [submitting, setSubmitting] = useState(false);
 
   // Memoized form change handler to prevent unnecessary re-renders
@@ -62,7 +62,7 @@ const GetInTouch = () => {
 
   // Memoized snackbar close handler
   const handleSnackbarClose = useCallback(() => {
-    setSnackbarOpen(false);
+    setSnackbar(null);
   }, []);
 
   const handleSubmit = async (e) => {
@@ -99,13 +99,14 @@ const GetInTouch = () => {
       if (response.ok) {
         track('contact_submitted'); // no form contents sent
         setForm({ name: '', email: '', message: '' });
-        setSnackbarOpen(true);
+        setSnackbar("Message sent successfully! I'll get back to you soon.");
       } else {
         throw new Error('Form submission failed');
       }
     } catch (error) {
       console.error('Form submission error:', error);
-      setSnackbarOpen(true);
+      // Form is left filled in, so they can just hit send again.
+      setSnackbar(`Couldn't send your message. Please try again, or email ${FORMSUBMIT_EMAIL}.`);
     } finally {
       setSubmitting(false);
     }
@@ -128,8 +129,8 @@ const GetInTouch = () => {
         aria-labelledby="contact-heading"
       >
         <Snackbar
-          open={snackbarOpen}
-          message="Message sent successfully! I'll get back to you soon."
+          open={snackbar !== null}
+          message={snackbar}
           onClose={handleSnackbarClose}
         />
 

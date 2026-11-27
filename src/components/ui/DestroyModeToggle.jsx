@@ -4,7 +4,11 @@ import { track } from '../../analytics';
 import fx from './DestroyModeToggle.module.css';
 
 // Game code (and its page-capture lib) is only downloaded on first tap.
-const loadGame = () => import('../../game/destroyMode.js');
+let gameRequested = false;
+const loadGame = () => {
+  gameRequested = true;
+  return import('../../game/destroyMode.js');
+};
 
 // Every page load: the icon glitches once, hinting at the chaos behind it.
 const TEASE_MS = 3900; // .tease delay + run in the CSS, plus a little
@@ -46,7 +50,8 @@ const DestroyModeToggle = () => {
   }, [tease]);
 
   // Layouts swap at the 1024px breakpoint; don't leave a game running unowned.
-  useEffect(() => () => void loadGame().then((g) => g.stop()), []);
+  // Never opened: nothing to stop, and no reason to download the game chunk.
+  useEffect(() => () => void (gameRequested && loadGame().then((g) => g.stop())), []);
 
   const toggle = async () => {
     const input = pointer.current || 'keyboard';

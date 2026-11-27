@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import Icon from './Icon';
+import MonoLoader from './MonoLoader';
 import styles from './VideoPreview.module.css';
 
 // Plays whenever it is on screen (desktop and mobile), pauses when scrolled away.
@@ -11,6 +12,7 @@ const VideoPreview = ({ videoSrc, poster, className }) => {
   const [hasError, setHasError] = useState(false);
   const [shouldLoad, setShouldLoad] = useState(false);
   const [isInView, setIsInView] = useState(false);
+  const [posterReady, setPosterReady] = useState(false);
   const videoRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -76,28 +78,25 @@ const VideoPreview = ({ videoSrc, poster, className }) => {
       className={`${className} ${styles.videoContainer} group cursor-pointer relative rounded-xl overflow-hidden`}
       style={{ aspectRatio: '4/3' }}
     >
-      {/* Loading placeholder */}
-      {(!isLoaded || !shouldLoad) && (poster ? (
+      {/* Loading placeholder: the site loader until the poster (or video) is in */}
+      {!isLoaded && (
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--accent)' }}
+        >
+          {!posterReady && <MonoLoader size={56} />}
+        </div>
+      )}
+      {!isLoaded && poster && (
         <img
           src={poster}
           alt=""
           loading="lazy"
           decoding="async"
+          onLoad={() => setPosterReady(true)}
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ backgroundColor: 'var(--bg-secondary)' }}
         />
-      ) : (
-        <div
-          className={`absolute inset-0 flex items-center justify-center rounded-xl ${styles.loadingPulse}`}
-          style={{ backgroundColor: 'var(--bg-secondary)' }}
-        >
-          <Icon
-          name="photo"
-            className="w-12 h-12 opacity-30"
-            style={{ color: 'var(--text-secondary)' }}
-          />
-        </div>
-      ))}
+      )}
 
       {/* Video element - only render when shouldLoad is true */}
       {shouldLoad && (

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { gsap } from 'gsap';
 
 // Constants for better maintainability and performance
@@ -24,7 +24,7 @@ const CompanyLogoCursor = () => {
   const mouseRef = useRef({ x: 0, y: 0 });
   const currentLogoRef = useRef(null);
   const isVisibleRef = useRef(false);
-  const animationFrameRef = useRef(null);
+  const moveToRef = useRef(null); // [xTo, yTo] quickTo setters
   const [currentLogo, setCurrentLogo] = useState(null);
 
   // Dynamic logo sizing based on aspect ratio
@@ -86,24 +86,18 @@ const CompanyLogoCursor = () => {
     }
   }, []);
 
-  // GSAP animation for smooth cursor movement
+  // Smooth follow: one reusable quickTo tween per axis, retargeted on every
+  // move (a fresh gsap.to per frame stacked ~20 live tweens on the same props).
   const animateCursor = useCallback((x, y) => {
-    if (!cursorRef.current) return;
-
-    // Cancel any pending animation frame
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
-
-    // Use requestAnimationFrame for smooth performance
-    animationFrameRef.current = requestAnimationFrame(() => {
-      gsap.to(cursorRef.current, {
-        x: x - CURSOR_CONFIG.OFFSET,
-        y: y - CURSOR_CONFIG.OFFSET,
-        duration: CURSOR_CONFIG.ANIMATION_DURATION,
-        ease: CURSOR_CONFIG.ANIMATION_EASE,
-      });
-    });
+    const el = cursorRef.current;
+    if (!el) return;
+    const opts = {
+      duration: CURSOR_CONFIG.ANIMATION_DURATION,
+      ease: CURSOR_CONFIG.ANIMATION_EASE,
+    };
+    moveToRef.current ??= [gsap.quickTo(el, 'x', opts), gsap.quickTo(el, 'y', opts)];
+    moveToRef.current[0](x - CURSOR_CONFIG.OFFSET);
+    moveToRef.current[1](y - CURSOR_CONFIG.OFFSET);
   }, []);
 
   // Show cursor with logo
@@ -196,8 +190,10 @@ const CompanyLogoCursor = () => {
       // Animate cursor position
       animateCursor(e.clientX, e.clientY);
 
-      // Check if mouse is over a work experience item
-      const elementUnderMouse = document.elementFromPoint(e.clientX, e.clientY);
+      // Check if mouse is over a work experience item. e.target is the element
+      // under the pointer (both cursor overlays are pointer-events: none), so
+      // no forced hit-test per move.
+      const elementUnderMouse = e.target instanceof Element ? e.target : null;
 
       if (elementUnderMouse && isWorkExperienceItem(elementUnderMouse)) {
         const logoPath = getCompanyLogo(elementUnderMouse);
@@ -263,8 +259,9 @@ const CompanyLogoCursor = () => {
             }
           }
 
-          // Check if scroll-hover was removed - but only hide if we're not over a work experience item
-          if (!target.classList.contains('scroll-hover')) {
+          // Check if scroll-hover was removed - but only hide if we're not over a work experience item.
+          // Nothing to hide without a logo: skip the hit-test (this fires on every class change on the page).
+          if (!target.classList.contains('scroll-hover') && currentLogoRef.current) {
             // Check if mouse is still over a work experience item
             const elementUnderMouse = document.elementFromPoint(
               mouseRef.current.x,
@@ -347,10 +344,6 @@ const CompanyLogoCursor = () => {
 
       if (periodicCheck) {
         clearInterval(periodicCheck);
-      }
-
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
       }
     };
   }, [

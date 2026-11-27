@@ -299,8 +299,9 @@ const ToolsAndTech = ({ scrollContainerRef }) => {
         faces.forEach((f, i) => {
           const r = f.getBoundingClientRect();
           const cut = gsap.utils.clamp(0, 1, (beamX - r.left) / r.width);
-          f.style.setProperty('--cut', cut.toFixed(3));
           const t = typers[i];
+          const cutStr = cut.toFixed(3);
+          if (cutStr !== t.cutStr) f.style.setProperty('--cut', (t.cutStr = cutStr)); // off-beam cards stay put
           t.cut = cut;
           if (cut === 0 && t.n && !reduced) {
             t.n = 0;

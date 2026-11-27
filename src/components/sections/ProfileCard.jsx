@@ -1,5 +1,5 @@
 import Icon from '../ui/Icon';
-import tanvirImg from '../../assets/tanvir.png';
+import tanvirImg from '../../assets/tanvir.webp';
 import { useTheme } from '../../hooks/useTheme';
 
 const ProfileCard = () => {

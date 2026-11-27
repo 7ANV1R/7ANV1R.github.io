@@ -38,6 +38,9 @@ export default function BlobCursor() {
     let time = 0;
     const morph = (_t, deltaMs) => {
       time += Math.min(deltaMs, 50) / 1000;
+      // Faded out: keep time, skip the polygon + style write. The initial call
+      // (deltaMs 0) always draws, since reduced motion never ticks after it.
+      if (deltaMs && el.dataset.hidden === 'true') return;
       blob.style.clipPath = blobPath(half, half, half / (1 + MAX_DEPTH), time, still, 48);
     };
     morph(0, 0);

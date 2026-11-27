@@ -50,8 +50,13 @@ const MaskedTitle = ({
       let cx = null; // last pointer position (client coords), null = none
       let cy = null;
       let open = false;
+      // Font size only changes with the viewport (clamp on vw), so read it once
+      // per resize instead of forcing a style recalc every frame.
+      let bigRCache = 0;
       const bigR = () =>
-        parseFloat(getComputedStyle(base.querySelector('h2')).fontSize) * REVEAL_SCALE;
+        (bigRCache ||=
+          parseFloat(getComputedStyle(base.querySelector('h2')).fontSize) * REVEAL_SCALE);
+      const onResize = () => (bigRCache = 0);
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       // Hover zone: old + new title (the new one may be wider), plus a margin
@@ -102,6 +107,8 @@ const MaskedTitle = ({
       };
 
       let time = 0;
+      let lastCopy = '';
+      let lastClip = '';
       const tick = (_time, deltaMs) => {
         if (cx !== null) aim(); // re-aim each frame so page scroll can't detach it
         else if (sweep.on) {
@@ -112,7 +119,8 @@ const MaskedTitle = ({
         }
         // Keep the hidden copy glued over the real title (viewport coords).
         const b = base.getBoundingClientRect();
-        copy.style.transform = `translate(${b.left}px, ${b.top}px)`;
+        const copyT = `translate(${b.left}px, ${b.top}px)`;
+        if (copyT !== lastCopy) copy.style.transform = lastCopy = copyT;
         const dt = Math.min(deltaMs, 50) / 1000;
         time += dt;
         if (drawn.r < 1) {
@@ -125,7 +133,8 @@ const MaskedTitle = ({
         drawn.y += (target.y - drawn.y) * (1 - Math.exp(-dt * 6));
         drawn.r += (target.r - drawn.r) * (1 - Math.exp(-dt * 8));
         if (target.r === 0 && drawn.r < 0.5) drawn.r = 0;
-        mask.style.clipPath = blobPath(drawn.x, drawn.y, drawn.r, time, reduced);
+        const clip = blobPath(drawn.x, drawn.y, drawn.r, time, reduced);
+        if (clip !== lastClip) mask.style.clipPath = lastClip = clip; // idle: no write
       };
 
       // Mouse / pen anywhere on the page; touch is handled on the title only.
@@ -159,7 +168,7 @@ const MaskedTitle = ({
           gsap.ticker.remove(tick);
           release();
           drawn.r = 0;
-          mask.style.clipPath = 'circle(0 at 0 0)';
+          mask.style.clipPath = lastClip = 'circle(0 at 0 0)';
         },
       });
       if (!window.matchMedia('(hover: hover)').matches && !reduced) {
@@ -167,6 +176,7 @@ const MaskedTitle = ({
       }
 
       window.addEventListener('pointermove', onPointerMove, { passive: true });
+      window.addEventListener('resize', onResize);
       document.addEventListener('pointerout', onPointerOut);
       wrap.addEventListener('touchstart', onTouch, { passive: true });
       wrap.addEventListener('touchmove', onTouch, { passive: true });
@@ -178,6 +188,7 @@ const MaskedTitle = ({
         gsap.killTweensOf([target, sweep]);
         setOpen(id, false);
         window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('resize', onResize);
         document.removeEventListener('pointerout', onPointerOut);
         wrap.removeEventListener('touchstart', onTouch);
         wrap.removeEventListener('touchmove', onTouch);

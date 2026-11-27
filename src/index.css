@@ -1,3 +1,6 @@
+/* Also <link>ed in index.html so it downloads early; this copy (served from
+   cache) stays because destroy mode's page capture (modern-screenshot) only
+   embeds fonts from same-origin sheets and their @imports. */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
 @import 'tailwindcss';
 
