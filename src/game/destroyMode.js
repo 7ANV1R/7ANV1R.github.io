@@ -177,9 +177,10 @@ const HUD_CSS = `
 .dm-hud.touch .dm-slot canvas{left:4px;top:1px;width:50px;height:34px}
 .dm-hud:not(.touch) .dm-hint{display:none}
 .dm-hud.touch .dm-hint{left:12px;right:12px;bottom:196px;transform:none;padding:0;background:none;border:0;box-shadow:none;display:flex;justify-content:space-between;align-items:flex-end;gap:10px;white-space:normal;overflow:visible;max-width:none}
-.dm-tip{position:relative;max-width:48%;padding:5px 10px 6px;font-size:17px;line-height:1.05;background-color:#ffd23f;animation:dm-float 1.6s ease-in-out infinite}
+.dm-tip{position:relative;max-width:48%;transition:opacity .4s;padding:5px 10px 6px;font-size:17px;line-height:1.05;background-color:#ffd23f;animation:dm-float 1.6s ease-in-out infinite}
 .dm-tip small{display:block;margin-top:2px;font-size:11px;letter-spacing:.04em;color:#d7263d}
 .dm-tip+.dm-tip{text-align:right;animation-delay:.8s}
+.dm-tip.gone{opacity:0}
 .dm-tip svg{position:absolute;top:100%;left:56px;width:34px;height:44px;margin-top:2px;fill:none;stroke:#ffd23f;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(2px 2px 0 #111);animation:dm-nudge .7s ease-in-out infinite alternate}
 .dm-tip+.dm-tip svg{left:auto;right:60px}
 .dm-hud.touch .dm-stick.demo .dm-knob{animation:dm-demo 3.2s ease-in-out infinite}
@@ -263,8 +264,8 @@ function createGame(shot, { W, H, Hw, PS, input, at }, onStop) {
   // stick (left) and the gun grid (right); arrow offsets match those sizes.
   const ARROW = '<svg viewBox="0 0 34 44" aria-hidden="true"><path d="M17 4V38M6 28l11 11 11-11"/></svg>';
   const TOUCH_HINT =
-    `<div class="dm-panel dm-tip">DRAG TO MOVE<small>up fly · down sink · push to the rim to sprint</small>${ARROW}</div>` +
-    `<div class="dm-panel dm-tip">PICK A GUN<small>tap anywhere to blast · hold blaster to charge</small>${ARROW}</div>`;
+    `<div class="dm-panel dm-tip" data-tip="stick">DRAG TO MOVE<small>up fly · down sink · push to the rim to sprint</small>${ARROW}</div>` +
+    `<div class="dm-panel dm-tip" data-tip="gun">PICK A GUN<small>tap anywhere to blast · hold blaster to charge</small>${ARROW}</div>`;
   // Keyboard: keycaps drawn around the crosshair instead (drawKeyHint).
 
   // ---------- world: page texture + solidity mask (CSS px) ----------
@@ -413,6 +414,8 @@ function createGame(shot, { W, H, Hw, PS, input, at }, onStop) {
   const $ = (sel) => hud.querySelector(sel);
   const pctEl = $('[data-pct]'), fillEl = $('[data-fill]'), knob = $('[data-knob]');
   const hintEl = $('[data-hint]');
+  // Each mobile tip goes once its control is used (stick touched; shot or gun picked).
+  const tipDone = (k) => $(`[data-tip=${k}]`).classList.add('gone');
   // The stick wiggles by itself (.demo) while the hint is up, until it's touched.
   const hideHint = () => {
     hintEl.style.opacity = '0';
@@ -453,7 +456,7 @@ function createGame(shot, { W, H, Hw, PS, input, at }, onStop) {
     // pointerdown, not just click: browsers don't turn a tap into a click while
     // another finger is down, so with a thumb on the stick click never came.
     // click stays for Enter/Space.
-    b.onpointerdown = b.onclick = () => setWeapon(i);
+    b.onpointerdown = b.onclick = () => (setWeapon(i), tipDone('gun'));
     $('[data-guns]').append(b);
     return b;
   });
@@ -611,6 +614,7 @@ function createGame(shot, { W, H, Hw, PS, input, at }, onStop) {
     audio?.resume();
     fireId = e.pointerId;
     fired = true;
+    tipDone('gun');
     onMove(e);
     firing = tapped = true; // tapped: a click shorter than a frame still fires once
     canvas.setPointerCapture?.(e.pointerId);
@@ -630,6 +634,7 @@ function createGame(shot, { W, H, Hw, PS, input, at }, onStop) {
     if (e.type === 'pointerdown') {
       audio?.resume();
       stickEl.classList.remove('demo'); // CSS animation would override the knob's inline transform
+      tipDone('stick');
       stick.id = e.pointerId;
       stickEl.setPointerCapture?.(e.pointerId);
     }
