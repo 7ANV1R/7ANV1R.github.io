@@ -278,6 +278,114 @@ export function drawCrosshair(g, x, y) {
   g.fill();
 }
 
+// Little yellow tag beside the crosshair ("TAP TO SHOOT"); flips to stay on screen.
+export function drawAimTag(g, x, y, text, alpha, W, H) {
+  g.save();
+  g.globalAlpha = alpha;
+  g.font = `16px ${FONT}`;
+  const w = Math.ceil(g.measureText(text).width) + 16, h = 24;
+  const bx = Math.round(x + 22 + w > W - 8 ? x - 22 - w : x + 22), by = Math.round(y + 14 + h > H - 8 ? y - 14 - h : y + 14);
+  g.fillStyle = INK;
+  g.fillRect(bx + 3, by + 3, w, h); // offset comic shadow
+  g.fillStyle = YELLOW;
+  g.fillRect(bx, by, w, h);
+  g.lineWidth = 2.5;
+  g.strokeStyle = INK;
+  g.strokeRect(bx, by, w, h);
+  g.fillStyle = INK;
+  g.textBaseline = 'middle';
+  g.fillText(text, bx + 8, by + h / 2 + 1);
+  g.restore();
+}
+
+// Keyboard controls drawn around the crosshair: a WASD cluster + Shift on the
+// left; mouse + 1–4 gun keys on the right. Keys light up while held.
+// o: { down: Set of held keys ('w','a','s','d','shift'), gun: 0-3, mouse: show the
+// click row, touch: show the "no keyboard?" note }
+const KEY = 40, KGAP = 5, SIDE = 34;
+function keycap(g, x, y, w, h, label, cap, lit) {
+  const d = lit ? 3 : 0; // pressed in
+  roundRect(g, x, y + 4, w, h - 4, 7);
+  g.fillStyle = lit ? '#b5891c' : '#1c1c21';
+  g.fill();
+  g.lineWidth = 2;
+  g.strokeStyle = INK;
+  g.stroke();
+  roundRect(g, x, y + d, w, h - 5, 7);
+  g.fillStyle = lit ? YELLOW : '#4b4b53';
+  g.fill();
+  g.stroke();
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillStyle = lit ? INK : '#f4efe4';
+  g.font = `${cap ? 17 : 18}px ${FONT}`;
+  g.fillText(label, x + w / 2, y + d + (cap ? 13 : (h - 5) / 2 + 1));
+  if (cap) {
+    g.font = `9px ${FONT}`;
+    g.fillStyle = lit ? INK : YELLOW;
+    g.fillText(cap, x + w / 2, y + d + h - 14);
+  }
+}
+// comic text: ink outline, light fill, readable on any page
+function inkText(g, text, x, y, size, color = '#fff') {
+  g.font = `${size}px ${FONT}`;
+  g.textAlign = 'left';
+  g.textBaseline = 'middle';
+  g.lineJoin = 'round';
+  g.lineWidth = 4;
+  g.strokeStyle = INK;
+  g.strokeText(text, x, y);
+  g.fillStyle = color;
+  g.fillText(text, x, y);
+  return g.measureText(text).width;
+}
+export function drawKeyHint(g, x, y, o, alpha, W, H) {
+  const lw = KEY * 3 + KGAP * 2, lh = KEY * 2 + KGAP * 2 + 34, rw = 210, rh = 40 + 12 + 34 + (o.touch ? 22 : 0);
+  // keep the whole thing on screen; it slides off-centre near the edges
+  x += Math.max(0, 8 - (x - SIDE - lw)) - Math.max(0, x + SIDE + rw - (W - 8));
+  y = Math.max(8 + lh / 2, Math.min(H - 8 - lh / 2, y));
+  g.save();
+  g.globalAlpha = alpha;
+  // left: W / A S D / SHIFT
+  const lx = x - SIDE - lw, ly = y - lh / 2, on = (k) => o.down.has(k);
+  keycap(g, lx + KEY + KGAP, ly, KEY, KEY, 'W', 'FLY', on('w'));
+  keycap(g, lx, ly + KEY + KGAP, KEY, KEY, 'A', 'LEFT', on('a'));
+  keycap(g, lx + KEY + KGAP, ly + KEY + KGAP, KEY, KEY, 'S', 'SINK', on('s'));
+  keycap(g, lx + (KEY + KGAP) * 2, ly + KEY + KGAP, KEY, KEY, 'D', 'RIGHT', on('d'));
+  keycap(g, lx, ly + (KEY + KGAP) * 2, lw, 34, 'SHIFT  ·  SPRINT', '', on('shift'));
+  // right: mouse, then gun keys
+  const rx = x + SIDE;
+  let ry = y - (o.mouse ? 43 : 17);
+  if (o.mouse) {
+    roundRect(g, rx, ry, 26, 38, 13);
+    g.fillStyle = '#f4efe4';
+    g.fill();
+    g.lineWidth = 2.5;
+    g.strokeStyle = INK;
+    g.stroke();
+    g.beginPath(); // left button lit: that's the one to press
+    g.moveTo(rx + 13, ry + 15);
+    g.lineTo(rx + 13, ry);
+    g.arcTo(rx, ry, rx, ry + 13, 13);
+    g.lineTo(rx, ry + 15);
+    g.closePath();
+    g.fillStyle = YELLOW;
+    g.fill();
+    g.stroke();
+    g.beginPath();
+    g.moveTo(rx + 13, ry + 15);
+    g.lineTo(rx + 26, ry + 15);
+    g.stroke();
+    inkText(g, 'CLICK TO SHOOT', rx + 36, ry + 11, 18, YELLOW);
+    inkText(g, 'HOLD TO CHARGE · SCROLL TO LOOK', rx + 36, ry + 29, 11);
+    ry += 52;
+  }
+  for (let i = 0; i < 4; i++) keycap(g, rx + i * 34, ry, 30, 34, String(i + 1), '', i === o.gun);
+  inkText(g, 'GUNS', rx + 4 * 34 + 6, ry + 15, 16, YELLOW);
+  if (o.touch) inkText(g, 'NO KEYBOARD? TOUCH THE SCREEN', rx, ry + 48, 11);
+  g.restore();
+}
+
 // ---------- guns: drawn along +x from the grip at (0,0) ----------
 // s: live gun state — spin (minigun barrels), heat 0..1, charge 0..1,
 // loaded (rocket in the tube), t (clock, for blinking lights).

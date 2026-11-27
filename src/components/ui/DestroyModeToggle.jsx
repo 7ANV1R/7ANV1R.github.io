@@ -53,8 +53,9 @@ const DestroyModeToggle = () => {
   // Never opened: nothing to stop, and no reason to download the game chunk.
   useEffect(() => () => void (gameRequested && loadGame().then((g) => g.stop())), []);
 
-  const toggle = async () => {
+  const toggle = async (e) => {
     const input = pointer.current || 'keyboard';
+    const at = e.detail ? { x: e.clientX, y: e.clientY } : null; // detail 0 = Enter/Space
     pointer.current = null;
     setTease(false);
     // Show loading before the chunk download, which is the slow part on a real network.
@@ -64,7 +65,7 @@ const DestroyModeToggle = () => {
       game.stop();
       return setState('off');
     }
-    await game.start({ onStop: () => setState('off'), input });
+    await game.start({ onStop: () => setState('off'), input, at });
     if (game.isRunning()) track('destroy_mode_started');
     setState(game.isRunning() ? 'on' : 'off');
   };

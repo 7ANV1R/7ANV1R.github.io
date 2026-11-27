@@ -7,7 +7,7 @@
 import { domToCanvas } from 'modern-screenshot';
 import {
   INK, ORANGE, YELLOW, RED, CYAN, FONT, GUN_SCALE, HERO_SCALE, loadComicFont, starShape, starPath, halftone, halftonePattern, drawBurst,
-  drawSfx, drawCloud, cloudBlobs, drawFocusLines, drawFlame, drawSpeech, drawCrosshair, drawGun, drawHero, drawScarf,
+  drawSfx, drawCloud, cloudBlobs, drawFocusLines, drawFlame, drawSpeech, drawCrosshair, drawAimTag, drawKeyHint, drawGun, drawHero, drawScarf,
   drawDrone, drawBomb, drawTarget, drawBadge,
 } from './comic.js';
 import { track } from '../analytics.js';
@@ -52,19 +52,27 @@ const PW = 9; // hero half width
 const DRONE_SPEED = 720;
 const MAX_CHUNKS = 220;
 const MAX_PIXELS = 16e6; // stay under Safari's canvas area limit
-// ponytail: the last few % are anti-aliased specks nobody can find, so the
-// meter reads 100% once this share of the original content is gone.
-const WIN_AT = 0.95;
+// Progress is per key element (text, images, icons, buttons), never empty
+// space: an element counts as wrecked once KILL_AT of its pixels are gone, and
+// the meter reads 100% at WIN_AT of that total, so one missed footer link
+// doesn't block the win.
+const KILL_AT = 0.5;
+const WIN_AT = 0.9;
+const KEY_MEDIA = 'img,svg,video,canvas,picture,input,textarea,button';
 
 let game = null;
 let pending = null; // capture in flight
 
 export const isRunning = () => Boolean(game || pending);
 
-export async function start({ onStop, input } = {}) {
+// at: where the opening click happened (desktop crosshair starts under the cursor)
+export async function start({ onStop, input, at } = {}) {
   if (game || pending) return;
   const token = {};
   pending = token;
+  // The page capture takes a moment; keep up with the mouse meanwhile.
+  const seen = (e) => (at = { x: e.clientX, y: e.clientY });
+  addEventListener('pointermove', seen);
   try {
     const root = document.getElementById('root');
     const W = innerWidth, H = innerHeight;
@@ -81,11 +89,12 @@ export async function start({ onStop, input } = {}) {
       font,
     ]);
     if (pending !== token) return; // cancelled while capturing
-    game = createGame(shot, { W, H, Hw, PS, input }, onStop);
+    game = createGame(shot, { W, H, Hw, PS, input, at }, onStop);
   } catch (err) {
     console.error('Destroy mode failed to start:', err);
     if (pending === token) onStop?.();
   } finally {
+    removeEventListener('pointermove', seen);
     if (pending === token) pending = null;
   }
 }
@@ -166,9 +175,19 @@ const HUD_CSS = `
 .dm-hud.touch .dm-slot{width:64px;height:54px}
 .dm-hud.touch .dm-slot span{display:none}
 .dm-hud.touch .dm-slot canvas{left:4px;top:1px;width:50px;height:34px}
-.dm-hud.touch .dm-hint{bottom:auto;top:84px;font-size:14px;white-space:normal;text-align:center;width:max-content}
+.dm-hud:not(.touch) .dm-hint{display:none}
+.dm-hud.touch .dm-hint{left:12px;right:12px;bottom:196px;transform:none;padding:0;background:none;border:0;box-shadow:none;display:flex;justify-content:space-between;align-items:flex-end;gap:10px;white-space:normal;overflow:visible;max-width:none}
+.dm-tip{position:relative;max-width:48%;padding:5px 10px 6px;font-size:17px;line-height:1.05;background-color:#ffd23f;animation:dm-float 1.6s ease-in-out infinite}
+.dm-tip small{display:block;margin-top:2px;font-size:11px;letter-spacing:.04em;color:#d7263d}
+.dm-tip+.dm-tip{text-align:right;animation-delay:.8s}
+.dm-tip svg{position:absolute;top:100%;left:56px;width:34px;height:44px;margin-top:2px;fill:none;stroke:#ffd23f;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(2px 2px 0 #111);animation:dm-nudge .7s ease-in-out infinite alternate}
+.dm-tip+.dm-tip svg{left:auto;right:60px}
+.dm-hud.touch .dm-stick.demo .dm-knob{animation:dm-demo 3.2s ease-in-out infinite}
+@keyframes dm-nudge{to{transform:translateY(8px)}}
+@keyframes dm-demo{0%,100%{transform:none}15%{transform:translate(-34px,0)}35%{transform:translate(34px,0)}55%{transform:translate(0,-38px)}75%{transform:translate(0,38px)}}
+@media (prefers-reduced-motion:reduce){.dm-tip,.dm-tip svg,.dm-stick .dm-knob{animation:none!important}}
 html.dm-playing,html.dm-playing *{cursor:none!important}
-html.dm-playing .dm-hud button,html.dm-playing .dm-hud .dm-dev{cursor:pointer!important}
+html.dm-playing .dm-hud button,html.dm-playing .dm-hud .dm-tap{cursor:pointer!important}
 .dm-hud.won>:not(.dm-win){visibility:hidden}
 .dm-win{position:absolute;inset:0;display:grid;place-items:center;padding:16px;pointer-events:auto;overflow:hidden;background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 3px),rgba(6,4,14,.9);animation:dm-fade .4s both}
 .dm-card{--cut:polygon(0 26px,26px 0,37% 0,40% 12px,60% 12px,63% 0,calc(100% - 44px) 0,100% 44px,100% calc(100% - 26px),calc(100% - 26px) 100%,63% 100%,60% calc(100% - 12px),40% calc(100% - 12px),37% 100%,44px 100%,0 calc(100% - 44px));position:relative;width:min(600px,100%);padding:46px 28px 34px;text-align:center;filter:drop-shadow(-4px 0 0 #00e5ff) drop-shadow(4px 0 0 #ff2bd6) drop-shadow(6px 8px 0 #111);animation:dm-card .7s cubic-bezier(.2,1.5,.4,1) .1s both,dm-jolt 4s 1.5s infinite}
@@ -225,7 +244,7 @@ html.dm-playing .dm-hud button,html.dm-playing .dm-hud .dm-dev{cursor:pointer!im
 @media (prefers-reduced-motion:reduce){.dm-win,.dm-win *,.dm-win *::before,.dm-win *::after{animation:none!important}}
 `;
 
-function createGame(shot, { W, H, Hw, PS, input }, onStop) {
+function createGame(shot, { W, H, Hw, PS, input, at }, onStop) {
   const dpr = Math.min(devicePixelRatio || 1, 2);
   const root = document.getElementById('root');
   // Controls follow how the player actually plays, never the device type
@@ -240,10 +259,13 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
   const canTouch = navigator.maxTouchPoints > 0 || matchMedia('(any-pointer: coarse)').matches;
   let isTouch = input ? input === 'touch' || input === 'pen' : matchMedia('(pointer: coarse)').matches;
   const MAX_PARTICLES = matchMedia('(pointer: coarse)').matches ? 700 : 1400; // phones/tablets: lighter
-  const TOUCH_HINT = 'stick: move · up fly · down sink · push to the rim to sprint<br>tap anywhere to blast · hold blaster to charge';
-  const KEY_HINT =
-    'A/D move · Shift sprint · W fly · S sink · click shoot (hold Blaster to charge) · 1–4 guns · scroll to look around' +
-    (canTouch ? '<br>no keyboard? touch the screen for on-screen controls' : '');
+  // Touch: two comic callouts sitting above the controls, arrows down at the
+  // stick (left) and the gun grid (right); arrow offsets match those sizes.
+  const ARROW = '<svg viewBox="0 0 34 44" aria-hidden="true"><path d="M17 4V38M6 28l11 11 11-11"/></svg>';
+  const TOUCH_HINT =
+    `<div class="dm-panel dm-tip">DRAG TO MOVE<small>up fly · down sink · push to the rim to sprint</small>${ARROW}</div>` +
+    `<div class="dm-panel dm-tip">PICK A GUN<small>tap anywhere to blast · hold blaster to charge</small>${ARROW}</div>`;
+  // Keyboard: keycaps drawn around the crosshair instead (drawKeyHint).
 
   // ---------- world: page texture + solidity mask (CSS px) ----------
   const page = document.createElement('canvas');
@@ -265,7 +287,6 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
   const sg = small.getContext('2d', { willReadFrequently: true });
   sg.drawImage(page, 0, 0, W, Hw);
   const mask = new Uint8Array(W * Hw);
-  let initialSolid = 0;
   {
     const px = sg.getImageData(0, 0, W, Hw).data;
     const counts = new Map();
@@ -285,17 +306,44 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
         const j = i * 4;
         // ponytail: fixed threshold; raise it if subtle card fills should be air
         const d = Math.max(Math.abs(px[j] - bg[0]), Math.abs(px[j + 1] - bg[1]), Math.abs(px[j + 2] - bg[2]));
-        if (d > 14) {
-          mask[i] = 1;
-          initialSolid++;
-        }
+        if (d > 14) mask[i] = 1;
       }
     }
   }
-  // Progress counts original content only, each pixel once: rubble that lands
-  // and gets blasted again doesn't count twice.
-  const original = mask.slice();
-  let removed = 0;
+  // Progress counts key content only, each pixel once: rubble that lands and
+  // gets blasted again doesn't count twice. owner[i] is the 1-based key
+  // element an intact original pixel belongs to; 0 = not scored (background,
+  // card fills between elements, nav).
+  const owner = new Uint16Array(W * Hw);
+  const caps = [0];
+  let target = 0, removed = 0;
+  {
+    // Key element = media, or anything holding its own text. Document order
+    // visits parents first, so nested elements claim their own pixels.
+    // ponytail: rects are live layout + scrollY; a sticky element scrolled
+    // away from its captured spot scores the wrong pixels, only matters if it
+    // ever blocks a win.
+    for (const el of root.querySelectorAll('*')) {
+      if (caps.length > 65535) break;
+      if (!el.matches(KEY_MEDIA) && ![...el.childNodes].some((n) => n.nodeType === 3 && n.data.trim())) continue;
+      if (el.closest('nav,[data-dm-fx]')) continue;
+      const r = el.getBoundingClientRect();
+      const x0 = Math.max(0, Math.floor(r.left)), x1 = Math.min(W, Math.ceil(r.right));
+      const y0 = Math.max(0, Math.floor(r.top + scrollY)), y1 = Math.min(Hw, Math.ceil(r.bottom + scrollY));
+      const k = caps.length;
+      let n = 0;
+      for (let y = y0; y < y1; y++) {
+        for (let i = y * W + x0, e = y * W + x1; i < e; i++) {
+          if (!mask[i]) continue;
+          if (owner[i]) caps[owner[i]]--;
+          owner[i] = k;
+          n++;
+        }
+      }
+      caps.push(n);
+    }
+    for (let k = 1; k < caps.length; k++) target += caps[k] = Math.ceil(caps[k] * KILL_AT);
+  }
 
   const colorAt = (x, y) => {
     const d = sg.getImageData(Math.max(0, Math.min(W - 1, x | 0)), Math.max(0, Math.min(Hw - 1, y | 0)), 1, 1).data;
@@ -327,9 +375,9 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
       for (let k = 0; k + 1 < xs.length; k += 2) {
         const xb = Math.min(W - 1, Math.ceil(xs[k + 1] - 0.5) - 1);
         for (let x = Math.max(0, Math.ceil(xs[k] - 0.5)), i = y * W + x; x <= xb; x++, i++) {
-          if (!v && original[i]) {
-            original[i] = 0;
-            removed++;
+          if (!v && owner[i]) {
+            if (caps[owner[i]]-- > 0) removed++;
+            owner[i] = 0;
           }
           mask[i] = v;
         }
@@ -359,22 +407,28 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
   hud.innerHTML = `<style>${HUD_CSS}</style>
     <div class="dm-panel dm-meter" data-meter><small>DESTRUCTION!</small><b data-pct>0.0%</b><div class="dm-track"><div class="dm-fill" data-fill></div></div></div>
     <button class="dm-panel dm-exit" data-exit>✕ Exit<span class="dm-kbd">Esc</span></button>
-    <div class="dm-panel dm-hint" data-hint>${isTouch ? TOUCH_HINT : KEY_HINT}</div>
+    <div class="dm-panel dm-hint" data-hint>${TOUCH_HINT}</div>
     <div class="dm-panel dm-bar" data-guns></div>
-    <div class="dm-stick" data-stick><b style="top:6px">FLY</b><b style="bottom:6px">SINK</b><div class="dm-knob" data-knob></div></div>`;
+    <div class="dm-stick demo" data-stick><b style="top:6px">FLY</b><b style="bottom:6px">SINK</b><div class="dm-knob" data-knob></div></div>`;
   const $ = (sel) => hud.querySelector(sel);
   const pctEl = $('[data-pct]'), fillEl = $('[data-fill]'), knob = $('[data-knob]');
   const hintEl = $('[data-hint]');
-  let hintTimer = setTimeout(() => (hintEl.style.opacity = '0'), isTouch ? 9000 : 7000);
+  // The stick wiggles by itself (.demo) while the hint is up, until it's touched.
+  const hideHint = () => {
+    hintEl.style.opacity = '0';
+    $('[data-stick]').classList.remove('demo');
+  };
+  let hintTimer = setTimeout(hideHint, isTouch ? 9000 : 7000);
   // switch control scheme, and show the new controls' hint for a moment
   function setTouch(on) {
     if (on === isTouch) return;
     isTouch = on;
     hud.classList.toggle('touch', on);
-    hintEl.innerHTML = on ? TOUCH_HINT : KEY_HINT;
     hintEl.style.opacity = '1';
+    tagEnd = t + 10; // and the crosshair card for the new controls
+    $('[data-stick]').classList.toggle('demo', on);
     clearTimeout(hintTimer);
-    hintTimer = setTimeout(() => (hintEl.style.opacity = '0'), 5000);
+    hintTimer = setTimeout(hideHint, on ? 9000 : 5000);
   }
   $('[data-exit]').onclick = () => stop();
 
@@ -444,7 +498,12 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
     vx: 0, vy: 0, ground: false, walk: 0, recoil: 0, ghost: false, thrust: false, sprint: false,
   };
   let camY = 0, follow = true;
-  const mouse = { x: P.x + (wide ? -200 : 200), y: P.y + 120 }; // screen coords
+  // Hints around the crosshair for 10s (restarted on a control switch); the
+  // click/tap line goes at the first shot.
+  let fired = false, tagEnd = 10;
+  // Crosshair, screen coords: under the real cursor on desktop, screen centre on
+  // touch (or when the game was opened from the keyboard).
+  const mouse = !isTouch && at ? { ...at } : { x: W / 2, y: H / 2 };
   // Dark mode: the hero's black ink, dark hair and navy pants vanish into the
   // page. Draw him on a layer and stamp a light silhouette behind it, like a
   // comic sticker. Light mode stays as is.
@@ -461,6 +520,7 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
   const gun = { spin: 0, spinUp: 0, heat: 0, charge: 0, loaded: true, t: 0 }; // live gun state, drawn by drawGun
   const stats = { shots: 0, booms: 0 };
   let won = false, celebrated = false, winEl = null, party = 0;
+  let record = null; // the first real win's stats; the meter reopens it after Keep smashing
   const speech = { text: pick(SPAWN_LINES), life: 2.8, max: 2.8 };
   const say = (text, life = 1.4) => Object.assign(speech, { text, life, max: life });
   // scarf: verlet chain anchored at the neck
@@ -550,6 +610,7 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
     if (won || (e.pointerType === 'mouse' && e.button !== 0)) return;
     audio?.resume();
     fireId = e.pointerId;
+    fired = true;
     onMove(e);
     firing = tapped = true; // tapped: a click shorter than a frame still fires once
     canvas.setPointerCapture?.(e.pointerId);
@@ -568,6 +629,7 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
   function onStick(e) {
     if (e.type === 'pointerdown') {
       audio?.resume();
+      stickEl.classList.remove('demo'); // CSS animation would override the knob's inline transform
       stick.id = e.pointerId;
       stickEl.setPointerCapture?.(e.pointerId);
     }
@@ -951,13 +1013,18 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
     fireId = null;
     gun.charge = 0;
     keys.clear();
-    party = 3;
     document.documentElement.classList.remove('dm-playing'); // real cursor over the reward
-    const time = fmtTime(t), rank = RANKS.find(([max]) => t <= max)[1];
-    for (let i = 0; i < 180; i++)
-      fx({ t: 'confetti', x: rand(0, W), y: camY - rand(10, H * 0.6), vx: rand(-90, 90), vy: rand(0, 160), rot: rand(0, 6), va: rand(-10, 10),
-        w: rand(5, 10), h: rand(3, 6), color: pick([YELLOW, RED, ORANGE, CYAN, '#fff', '#7cc248']), life: rand(3, 5) });
-    [523, 659, 784, 1046].forEach((f, i) => tone(f, f, i === 3 ? 0.7 : 0.18, 0.12, 'square', 0.35 + i * 0.16));
+    const replay = Boolean(record);
+    const rec = record || { time: fmtTime(t), rank: RANKS.find(([max]) => t <= max)[1], shots: stats.shots, booms: stats.booms };
+    if (celebrated) record = rec; // a DEV preview before the real win isn't kept
+    const { time, rank } = rec;
+    if (!replay) {
+      party = 3;
+      for (let i = 0; i < 180; i++)
+        fx({ t: 'confetti', x: rand(0, W), y: camY - rand(10, H * 0.6), vx: rand(-90, 90), vy: rand(0, 160), rot: rand(0, 6), va: rand(-10, 10),
+          w: rand(5, 10), h: rand(3, 6), color: pick([YELLOW, RED, ORANGE, CYAN, '#fff', '#7cc248']), life: rand(3, 5) });
+      [523, 659, 784, 1046].forEach((f, i) => tone(f, f, i === 3 ? 0.7 : 0.18, 0.12, 'square', 0.35 + i * 0.16));
+    }
     winEl = document.createElement('div');
     winEl.className = 'dm-win';
     winEl.innerHTML = `<div class="dm-card" role="dialog" aria-label="Site destroyed">
@@ -966,8 +1033,8 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
         <div class="dm-rank"><canvas class="dm-badge" aria-hidden="true"></canvas><div class="dm-rank-name">${rank}</div></div>
         <div class="dm-stats">
           <div style="--i:0"><b>${time}</b><small>TIME</small></div>
-          <div style="--i:1"><b>${stats.shots}</b><small>SHOTS FIRED</small></div>
-          <div style="--i:2"><b>${stats.booms}</b><small>EXPLOSIONS</small></div>
+          <div style="--i:1"><b>${rec.shots}</b><small>SHOTS FIRED</small></div>
+          <div style="--i:2"><b>${rec.booms}</b><small>EXPLOSIONS</small></div>
         </div>
         <div class="dm-actions">
           <button data-hi>👋 Say hi to Tanvir!</button><i class="dm-break"></i>
@@ -991,7 +1058,7 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
     spin(0);
     hud.append(winEl);
     hud.classList.add('won'); // hide meter, guns, top Exit: the card has its own buttons
-    winEl.querySelector('[data-shot]').onclick = () => screenshot(time, rank);
+    winEl.querySelector('[data-shot]').onclick = () => screenshot(rec);
     winEl.querySelector('[data-hi]').onclick = () => sayHi(time, rank);
     winEl.querySelector('[data-leave]').onclick = () => stop();
     winEl.querySelector('[data-keep]').onclick = () => {
@@ -1051,7 +1118,7 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
   // A shareable poster: the wreck darkened behind a comic KA-BOOM, with the
   // run's title, rank badge and stats on a card in front. Saved (or shared,
   // on phones) as PNG.
-  function screenshot(time, rank) {
+  function screenshot({ time, rank, shots, booms }) {
     const NC = '#00e5ff', NM = '#ff2bd6', GOLD = '#ffd23f';
     const c = document.createElement('canvas');
     c.width = canvas.width;
@@ -1176,7 +1243,7 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
     y += rankH + 20;
 
     // stat chips
-    const chips = [[time, 'TIME'], [stats.shots, 'SHOTS FIRED'], [stats.booms, 'EXPLOSIONS'], ['100%', 'WRECKED']];
+    const chips = [[time, 'TIME'], [shots, 'SHOTS FIRED'], [booms, 'EXPLOSIONS'], ['100%', 'WRECKED']];
     const cw = (pw - 48 - gap * (cols - 1)) / cols;
     chips.forEach(([v, k], i) => {
       const x = px + 24 + (i % cols) * (cw + gap), yy = y + ((i / cols) | 0) * (chipH + gap);
@@ -1246,14 +1313,20 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
     }
   }
 
-  // DEV only: tap the meter to preview the reward screen.
-  if (import.meta.env.DEV) {
-    const meter = $('[data-meter]');
+  // After the first win the meter reopens the reward (DEV: always, as a preview).
+  const meter = $('[data-meter]');
+  const meterTap = (title) => {
     meter.style.pointerEvents = 'auto';
-    meter.classList.add('dm-dev');
-    meter.title = 'DEV: tap to preview the reward screen';
-    meter.onclick = win;
-    window.__dm = { crater, win, P, size: () => ({ W, Hw, initialSolid, removed }) };
+    meter.classList.add('dm-tap');
+    meter.title = title;
+    meter.setAttribute('role', 'button');
+    meter.tabIndex = 0;
+  };
+  meter.onclick = () => (record || import.meta.env.DEV) && win();
+  meter.onkeydown = (e) => e.key === 'Enter' && meter.onclick();
+  if (import.meta.env.DEV) {
+    meterTap('DEV: tap to preview the reward screen');
+    window.__dm = { crater, win, P, size: () => ({ W, Hw, target, removed, elements: caps.length - 1 }) };
   }
 
   // ---------- update ----------
@@ -1494,7 +1567,7 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
       cooldowns[i].style.transform = `scaleY(${left.toFixed(2)})`;
     });
 
-    const progress = Math.min(1, removed / Math.max(1, initialSolid * WIN_AT));
+    const progress = Math.min(1, removed / Math.max(1, target * WIN_AT));
     const pct = (progress * 100).toFixed(1) + '%';
     if (shownPct !== pct) {
       shownPct = pct;
@@ -1507,6 +1580,7 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
     if (progress >= 1 && !celebrated) {
       celebrated = true; // once per game; the DEV preview doesn't use it up
       win();
+      meterTap('Show my reward again');
     }
   }
 
@@ -1709,7 +1783,12 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
       ctx.fillStyle = `rgba(255,250,230,${k(p) * 0.4})`;
       ctx.fillRect(0, 0, W, H);
     }
-    if (!won) drawCrosshair(ctx, mouse.x, mouse.y);
+    if (!won) {
+      drawCrosshair(ctx, mouse.x, mouse.y);
+      const fade = Math.min(1, (tagEnd - t) * 2);
+      if (fade > 0 && !isTouch) drawKeyHint(ctx, mouse.x, mouse.y, { down: keys, gun: weapon, mouse: !fired, touch: canTouch }, fade, W, H);
+      else if (fade > 0 && !fired) drawAimTag(ctx, mouse.x, mouse.y, 'TAP TO SHOOT', fade, W, H);
+    }
   }
 
   function frame(now) {
