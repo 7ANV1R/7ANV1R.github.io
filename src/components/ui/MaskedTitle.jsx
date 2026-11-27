@@ -92,18 +92,19 @@ const MaskedTitle = ({
         setOpenState(false);
       };
 
-      // No hover on touch screens: sweep the blob across once as a hint.
-      // `sweep.u` is progress along the title, re-aimed in tick() so it stays
-      // on the title even while the page keeps scrolling.
-      const sweep = { on: false, u: 0 };
+      // No hover on touch screens: sweep the blob across as a hint (on scroll-in
+      // and on tap). `sweep.u` is progress along the title, re-aimed in tick()
+      // so it stays on the title even while the page keeps scrolling.
+      const sweep = { on: false, u: 0, r: 0 };
       const peek = () => {
-        if (cx !== null) return;
+        if (cx !== null || sweep.on) return;
         gsap
           .timeline()
-          .set(sweep, { on: true, u: 0 })
+          .set(sweep, { on: true, u: 0, r: 1 })
           .to(sweep, { u: 1, duration: 2.2, ease: 'sine.inOut' })
-          .set(sweep, { on: false })
-          .set(target, { r: 0 });
+          .set(sweep, { r: 0 })
+          // Keep tracking the title while the blob shrinks away.
+          .set(sweep, { on: false }, '+=0.8');
       };
 
       let time = 0;
@@ -115,7 +116,7 @@ const MaskedTitle = ({
           const z = zone();
           target.x = z.left + (z.right - z.left) * (0.12 + 0.76 * sweep.u);
           target.y = (z.top + z.bottom) / 2;
-          target.r = bigR();
+          target.r = sweep.r ? bigR() : 0;
         }
         // Keep the hidden copy glued over the real title (viewport coords).
         const b = base.getBoundingClientRect();
@@ -123,21 +124,24 @@ const MaskedTitle = ({
         if (copyT !== lastCopy) copy.style.transform = lastCopy = copyT;
         const dt = Math.min(deltaMs, 50) / 1000;
         time += dt;
-        if (drawn.r < 1) {
+        if (drawn.r < 1 || sweep.on) {
           // Invisible: jump straight to the target instead of sliding in.
+          // Sweeping: the tween is the motion; easing on top would lag behind
+          // a fast scroll and slide the blob off the title.
           drawn.x = target.x;
           drawn.y = target.y;
+        } else {
+          // Same lazy pace as the cursor dot, so the blob grows out of it.
+          drawn.x += (target.x - drawn.x) * (1 - Math.exp(-dt * 6));
+          drawn.y += (target.y - drawn.y) * (1 - Math.exp(-dt * 6));
         }
-        // Same lazy pace as the cursor dot, so the blob grows out of it.
-        drawn.x += (target.x - drawn.x) * (1 - Math.exp(-dt * 6));
-        drawn.y += (target.y - drawn.y) * (1 - Math.exp(-dt * 6));
         drawn.r += (target.r - drawn.r) * (1 - Math.exp(-dt * 8));
         if (target.r === 0 && drawn.r < 0.5) drawn.r = 0;
         const clip = blobPath(drawn.x, drawn.y, drawn.r, time, reduced);
         if (clip !== lastClip) mask.style.clipPath = lastClip = clip; // idle: no write
       };
 
-      // Mouse / pen anywhere on the page; touch is handled on the title only.
+      // Mouse / pen anywhere on the page; touch gets the sweep instead.
       const onPointerMove = (e) => {
         if (e.pointerType === 'touch') return;
         cx = e.clientX;
@@ -145,10 +149,6 @@ const MaskedTitle = ({
       };
       const onPointerOut = (e) => {
         if (!e.relatedTarget) release(); // pointer left the window
-      };
-      const onTouch = (e) => {
-        cx = e.touches[0].clientX;
-        cy = e.touches[0].clientY;
       };
 
       const scroller = scrollContainerRef?.current || undefined;
@@ -171,36 +171,31 @@ const MaskedTitle = ({
           mask.style.clipPath = lastClip = 'circle(0 at 0 0)';
         },
       });
-      if (!window.matchMedia('(hover: hover)').matches && !reduced) {
+      const touchOnly = !window.matchMedia('(hover: hover)').matches;
+      if (touchOnly && !reduced) {
         ScrollTrigger.create({ trigger: wrap, scroller, start: 'top 65%', onEnter: peek });
       }
+      if (touchOnly) wrap.addEventListener('click', peek); // tap replays the sweep
 
       window.addEventListener('pointermove', onPointerMove, { passive: true });
       window.addEventListener('resize', onResize);
       document.addEventListener('pointerout', onPointerOut);
-      wrap.addEventListener('touchstart', onTouch, { passive: true });
-      wrap.addEventListener('touchmove', onTouch, { passive: true });
-      wrap.addEventListener('touchend', release);
-      wrap.addEventListener('touchcancel', release);
 
       return () => {
         gsap.ticker.remove(tick);
-        gsap.killTweensOf([target, sweep]);
+        gsap.killTweensOf(sweep);
         setOpen(id, false);
         window.removeEventListener('pointermove', onPointerMove);
         window.removeEventListener('resize', onResize);
         document.removeEventListener('pointerout', onPointerOut);
-        wrap.removeEventListener('touchstart', onTouch);
-        wrap.removeEventListener('touchmove', onTouch);
-        wrap.removeEventListener('touchend', release);
-        wrap.removeEventListener('touchcancel', release);
+        wrap.removeEventListener('click', peek);
       };
     },
     { scope: titleRef, dependencies: [] },
   );
 
   return (
-    <div ref={titleRef} className="relative">
+    <div ref={titleRef} className={`relative ${styles.title}`}>
       <div ref={baseRef} className="inline-block">
         <SectionTitle primaryText={primaryText} secondaryText={secondaryText} />
       </div>
