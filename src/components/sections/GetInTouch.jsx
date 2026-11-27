@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import SectionTitle from '../ui/SectionTitle';
+import { track } from '../../analytics';
 import AnimatedLabelIcon from '../ui/AnimatedLabelIcon';
 import Snackbar from '../ui/Snackbar';
 
@@ -96,6 +97,7 @@ const GetInTouch = () => {
       );
 
       if (response.ok) {
+        track('contact_submitted'); // no form contents sent
         setForm({ name: '', email: '', message: '' });
         setSnackbarOpen(true);
       } else {

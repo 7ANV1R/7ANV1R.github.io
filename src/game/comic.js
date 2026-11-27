@@ -227,12 +227,12 @@ export function drawFlame(g, x, y, len, w = 4) {
   }
 }
 
-export function drawSpeech(g, x, y, text, k, minY = -Infinity) {
+export function drawSpeech(g, x, y, text, k, minY = -Infinity, maxX = Infinity) {
   g.save();
   g.globalAlpha = Math.min(1, k * 5);
   g.font = `17px ${FONT}`;
   const w = g.measureText(text).width + 20, h = 28;
-  const bx = Math.round(x - w * 0.3), by = Math.round(Math.max(minY, y - h - 16));
+  const bx = Math.round(Math.max(8, Math.min(maxX - w - 8, x - w * 0.3))), by = Math.round(Math.max(minY, y - h - 16));
   roundRect(g, bx, by, w, h, 12);
   g.fillStyle = '#fff';
   g.fill();
@@ -279,48 +279,342 @@ export function drawCrosshair(g, x, y) {
 }
 
 // ---------- guns: drawn along +x from the grip at (0,0) ----------
-export function drawGun(g, w, spin = 0) {
+// s: live gun state — spin (minigun barrels), heat 0..1, charge 0..1,
+// loaded (rocket in the tube), t (clock, for blinking lights).
+export function drawGun(g, w, s = {}) {
   g.lineJoin = 'round';
-  if (w.name === 'Pistol') {
-    box(g, -2, -5, 20, 7, '#e9ecf5');
-    box(g, 0, -5, 15, 2, '#fff');
-    box(g, 0, 1, 6, 8, ORANGE);
-    box(g, 17, -4, 3, 5, YELLOW);
-    box(g, 8, -2, 4, 2, CYAN, 1);
-  } else if (w.name === 'Minigun') {
-    box(g, -8, -8, 14, 15, ORANGE);
-    box(g, 6, -6, 26, 11, '#cfd3dc');
+  const t = s.t || 0;
+  if (w.id === 'blaster') {
+    // retro ray pistol: finned body, ringed barrel, glowing energy cell
+    g.beginPath();
+    g.moveTo(-1, 0);
+    g.lineTo(5, 0);
+    g.lineTo(3, 10);
+    g.lineTo(-4, 9);
+    g.closePath();
+    g.fillStyle = ORANGE;
+    g.fill();
+    g.lineWidth = 1.4;
+    g.strokeStyle = INK;
+    g.stroke();
+    g.beginPath(); // fin
+    g.moveTo(-3, -6);
+    g.lineTo(2, -11);
+    g.lineTo(9, -6);
+    g.closePath();
+    g.fillStyle = RED;
+    g.fill();
+    g.stroke();
+    roundRect(g, -5, -7, 19, 8, 3.5);
+    g.fillStyle = '#e9ecf5';
+    g.fill();
+    g.stroke();
+    box(g, 13, -5.5, 9, 5, '#cfd3dc');
+    box(g, 15, -6.8, 2, 7.6, YELLOW, 1);
+    box(g, 19, -6.8, 2, 7.6, YELLOW, 1);
+    box(g, 22, -4.5, 2.5, 3, RED, 1);
+    const c = s.charge || 0;
+    box(g, 1, -5, 9, 3.6, c ? `rgb(${91 + 164 * c},${216 + 39 * c},255)` : CYAN, 1);
+    g.strokeStyle = INK; // trigger
+    g.lineWidth = 1.3;
+    g.beginPath();
+    g.arc(6, 2.5, 2.6, 0, Math.PI);
+    g.stroke();
+  } else if (w.id === 'minigun') {
+    // ammo belt sagging under the gun
+    g.save();
+    for (let i = 0; i < 7; i++) {
+      const bx = -6 + i * 3.2, by = 8 + Math.sin(i / 2.2) * 6 + Math.sin(t * 25 + i) * (s.spinUp || 0) * 0.8;
+      box(g, bx, by, 2.6, 5, '#e0b04a', 1);
+    }
+    g.restore();
+    box(g, -11, -9, 15, 17, ORANGE); // motor housing
+    g.strokeStyle = INK;
+    g.lineWidth = 1.2;
+    g.beginPath();
+    for (let i = 0; i < 3; i++) g.moveTo(-8 + i * 3.5, -5), g.lineTo(-8 + i * 3.5, 4);
+    g.stroke();
+    g.beginPath(); // carry handle
+    g.moveTo(-6, -9);
+    g.quadraticCurveTo(2, -18, 10, -7);
+    g.lineWidth = 4;
+    g.stroke();
+    g.strokeStyle = '#4a4e69';
+    g.lineWidth = 2;
+    g.stroke();
+    box(g, 4, -7, 31, 13, '#cfd3dc'); // barrel cluster
     g.fillStyle = INK;
-    for (let k = 0; k < 4; k++) g.fillRect(7 + ((k * 6 + spin) % 24), -6, 1.6, 11);
-    box(g, 30, -7, 4, 13, '#4a4e69');
-    box(g, -4, 7, 6, 6, '#333');
-    box(g, -5, -5, 4, 4, CYAN, 1);
-  } else if (w.name === 'Shotgun') {
-    box(g, -15, -3, 13, 7, '#8a4b2a');
-    box(g, -2, -5, 34, 4, '#cfd3dc');
-    box(g, -2, -1, 34, 3, '#9aa0ad');
-    box(g, 8, 2, 12, 4, '#5a3420');
-    box(g, -3, 2, 5, 7, '#8a4b2a');
-  } else {
-    box(g, -16, -7, 42, 12, '#3d8b6d');
-    box(g, -4, -7, 4, 12, YELLOW);
-    box(g, 26, -8, 5, 14, RED);
-    box(g, 2, -11, 6, 4, INK);
-    box(g, -2, 5, 5, 8, '#333');
+    for (let k = 0; k < 6; k++) g.fillRect(5 + ((k * 5 + (s.spin || 0)) % 29), -7, 1.4, 13);
+    const heat = s.heat || 0;
+    if (heat > 0.05) {
+      const hg = g.createLinearGradient(14, 0, 35, 0);
+      hg.addColorStop(0, 'rgba(255,90,30,0)');
+      hg.addColorStop(1, `rgba(255,${120 - 80 * heat},30,${0.85 * heat})`);
+      g.fillStyle = hg;
+      g.fillRect(14, -7, 21, 13);
+    }
+    box(g, 4, -8.5, 3, 16, '#4a4e69');
+    box(g, 19, -8.5, 2.5, 16, '#4a4e69');
+    box(g, 34, -8, 5, 15, '#4a4e69');
+    box(g, -4, 7, 6, 7, '#333');
+  } else if (w.id === 'rocket') {
+    box(g, -20, -8, 5, 15, '#2a5e49'); // flared back
+    box(g, -16, -7, 44, 13, '#3d8b6d'); // tube
+    box(g, -6, -7, 4, 13, YELLOW);
+    box(g, 18, -7, 3, 13, YELLOW, 1);
+    box(g, 27, -8.5, 5, 16, '#2a5e49'); // front rim
+    if (s.loaded !== false) {
+      g.beginPath(); // warhead peeking out
+      g.moveTo(32, -5.5);
+      g.lineTo(40, 0);
+      g.lineTo(32, 5.5);
+      g.closePath();
+      g.fillStyle = RED;
+      g.fill();
+      g.lineWidth = 1.4;
+      g.strokeStyle = INK;
+      g.stroke();
+    }
+    box(g, 2, -14, 11, 6, INK); // scope
+    box(g, 12, -13.5, 2.5, 5, CYAN, 1);
+    box(g, -2, 6, 5, 8, '#333'); // grips
+    box(g, 11, 6, 4, 6, '#333');
     g.strokeStyle = 'rgba(255,255,255,.55)';
     g.lineWidth = 1.5;
     g.beginPath();
-    g.moveTo(-13, -4.5);
-    g.lineTo(23, -4.5);
+    g.moveTo(-13, -4);
+    g.lineTo(25, -4);
+    g.stroke();
+  } else {
+    // drone remote seen side-on, as held: body in the hands, phone clamped on
+    // top and tilted back toward the pilot's face, antenna pointing forward.
+    // Origin: bottom-centre of the body, +x forward.
+    g.lineCap = 'round';
+    for (const [c, w] of [[INK, 3], ['#9aa0ad', 1.3]]) {
+      g.strokeStyle = c; // antenna
+      g.lineWidth = w;
+      g.beginPath();
+      g.moveTo(6, -3);
+      g.lineTo(12, -12);
+      g.stroke();
+    }
+    g.strokeStyle = INK; // phone clamp arm
+    g.lineWidth = 2.4;
+    g.beginPath();
+    g.moveTo(0, -6);
+    g.lineTo(0, -9);
+    g.stroke();
+    g.save(); // phone: dark slab, screen facing the pilot
+    g.translate(0, -11.5);
+    g.rotate(-2.35);
+    roundRect(g, -6.5, -2.2, 13, 4.4, 1);
+    g.fillStyle = '#2b2d42';
+    g.fill();
+    g.lineWidth = 1.4;
+    g.strokeStyle = INK;
+    g.stroke();
+    g.fillStyle = Math.sin(t * 6) > -0.6 ? '#7fd6ff' : '#bfeaff';
+    g.fillRect(-5.5, 0.4, 11, 1.6);
+    g.restore();
+    g.beginPath(); // grip under the hands
+    g.ellipse(-2, 0.5, 4, 2.6, 0, 0, Math.PI * 2);
+    g.fillStyle = '#7d828e';
+    g.fill();
+    g.lineWidth = 1.4;
+    g.strokeStyle = INK;
+    g.stroke();
+    roundRect(g, -7, -6, 15, 6, 2.5); // body
+    g.fillStyle = '#d9dce3';
+    g.fill();
+    g.stroke();
+    g.fillStyle = '#7cff6b';
+    g.fillRect(-2, -2, 1.2, 1.2);
+    g.fillRect(0, -2, 1.2, 1.2);
+    const wig = Math.sin(t * 7) * 1; // thumb stick
+    g.lineWidth = 1.8;
+    g.beginPath();
+    g.moveTo(2, -6);
+    g.lineTo(2.5 + wig, -9);
+    g.stroke();
+    g.beginPath();
+    g.arc(2.5 + wig, -9.5, 1.5, 0, Math.PI * 2);
+    g.fillStyle = INK;
+    g.fill();
+  }
+}
+
+// ---------- drone strike ----------
+// Camera quadcopter (white shell, red arm stripes, landing skids, gimbal
+// camera underneath), seen from the front. dir: +1 flying right / -1 left.
+export function drawDrone(g, d, t) {
+  g.save();
+  g.translate(d.x, d.y + Math.sin(t * 2.6 + (d.phase || 0)) * 1.5); // gentle hover bob
+  g.rotate(d.dir * (d.tilt || 0)); // nose down when moving fast, level when hovering
+  g.lineCap = 'round';
+  g.lineJoin = 'round';
+  const prop = (x, y, rx) => {
+    g.beginPath();
+    g.ellipse(x, y, rx, rx * 0.18, 0, 0, Math.PI * 2);
+    g.fillStyle = 'rgba(235,240,250,.55)';
+    g.fill();
+    g.lineWidth = 1.2;
+    g.strokeStyle = 'rgba(17,17,17,.6)';
+    g.stroke();
+    const b = Math.sin(t * 70 + x) * rx;
+    g.beginPath();
+    g.moveTo(x - b, y);
+    g.lineTo(x + b, y);
+    g.lineWidth = 1.8;
+    g.strokeStyle = INK;
+    g.stroke();
+  };
+  const motor = (x, y, s) => {
+    box(g, x - 2.5 * s, y - 4 * s, 5 * s, 5 * s, '#e9ecf5', 1.4);
+    box(g, x - 1, y - 6 * s, 2, 2 * s, '#9aa0ad', 1);
+  };
+  // back pair: higher and smaller (depth)
+  for (const sx of [-1, 1]) {
+    g.lineWidth = 5;
+    g.strokeStyle = INK;
+    g.beginPath();
+    g.moveTo(sx * 6, -6);
+    g.lineTo(sx * 18, -10);
+    g.stroke();
+    g.lineWidth = 3;
+    g.strokeStyle = '#e9ecf5';
+    g.stroke();
+    motor(sx * 18, -10, 0.8);
+    prop(sx * 18, -15.5, 12);
+  }
+  // skids
+  for (const sx of [-1, 1]) {
+    for (const [c, w] of [[INK, 4.5], ['#fff', 2.2]]) {
+      g.strokeStyle = c;
+      g.lineWidth = w;
+      g.beginPath();
+      g.moveTo(sx * 6, 2);
+      g.lineTo(sx * 9, 8);
+      g.lineTo(sx * 10, 18);
+      g.stroke();
+    }
+    box(g, sx * 10 - 2, 17.5, 4, 2, INK, 1);
+  }
+  // front arms with red stripes, LEDs under the motors
+  for (const sx of [-1, 1]) {
+    g.lineWidth = 7;
+    g.strokeStyle = INK;
+    g.beginPath();
+    g.moveTo(sx * 8, -2);
+    g.lineTo(sx * 26, -1);
+    g.stroke();
+    g.lineWidth = 4.5;
+    g.strokeStyle = '#fff';
+    g.stroke();
+    g.fillStyle = RED;
+    g.fillRect(sx > 0 ? 17 : -21, -3.2, 1.8, 4.4);
+    g.fillRect(sx > 0 ? 20 : -18, -3.2, 1.8, 4.4);
+    g.beginPath();
+    g.arc(sx * 26, 3, 1.6, 0, Math.PI * 2);
+    g.fillStyle = Math.sin(t * 12 + sx) > 0 ? (sx * d.dir > 0 ? '#ff4d5e' : '#59ff7a') : 'rgba(255,255,255,.4)';
+    g.fill();
+    motor(sx * 26, -1, 1);
+    prop(sx * 26, -8, 16);
+  }
+  // shell
+  g.beginPath();
+  g.moveTo(-10, 2);
+  g.quadraticCurveTo(-12, -9, 0, -10);
+  g.quadraticCurveTo(12, -9, 10, 2);
+  g.quadraticCurveTo(0, 5, -10, 2);
+  g.closePath();
+  g.fillStyle = '#fff';
+  g.fill();
+  g.lineWidth = 2.2;
+  g.strokeStyle = INK;
+  g.stroke();
+  g.fillStyle = '#c9cdd6'; // cel shade
+  g.beginPath();
+  g.moveTo(-10, 2);
+  g.quadraticCurveTo(0, 5, 10, 2);
+  g.quadraticCurveTo(0, 0, -10, 2);
+  g.fill();
+  g.fillStyle = 'rgba(255,255,255,.9)';
+  g.fillRect(-5, -7, 6, 1.6);
+  // gimbal camera
+  box(g, -1.5, 3, 3, 3, '#9aa0ad', 1);
+  roundRect(g, -4.5, 5.5, 9, 6.5, 1.5);
+  g.fillStyle = '#cfd3dc';
+  g.fill();
+  g.lineWidth = 1.4;
+  g.stroke();
+  g.beginPath();
+  g.arc(0, 8.8, 2.3, 0, Math.PI * 2);
+  g.fillStyle = INK;
+  g.fill();
+  g.fillStyle = CYAN;
+  g.fillRect(-0.8, 7.6, 1.2, 1.2);
+  if (!d.dropped) drawBomb(g, 0, 21, 0.62);
+  g.restore();
+}
+
+// Classic finned bomb, nose pointing down, centred at (x, y).
+export function drawBomb(g, x, y, s = 1) {
+  g.save();
+  g.translate(x, y);
+  g.scale(s, s);
+  g.lineJoin = 'round';
+  g.beginPath(); // fins
+  g.moveTo(-6, -12);
+  g.lineTo(6, -12);
+  g.lineTo(3, -5);
+  g.lineTo(-3, -5);
+  g.closePath();
+  g.fillStyle = '#4a4e69';
+  g.fill();
+  g.lineWidth = 2;
+  g.strokeStyle = INK;
+  g.stroke();
+  g.beginPath();
+  g.ellipse(0, 3, 6, 10, 0, 0, Math.PI * 2);
+  g.fillStyle = '#2b2d42';
+  g.fill();
+  g.stroke();
+  box(g, -6, -2, 12, 3, YELLOW, 1.4);
+  g.fillStyle = 'rgba(255,255,255,.5)';
+  g.fillRect(-3.5, 2, 1.6, 6);
+  g.restore();
+}
+
+// Pulsing "target marked" reticle on the ground.
+export function drawTarget(g, x, y, t) {
+  const r = 24 + Math.sin(t * 9) * 3;
+  g.save();
+  g.translate(x, y);
+  g.lineCap = 'round';
+  for (const [c, w] of [[INK, 6], [RED, 3]]) {
+    g.strokeStyle = c;
+    g.lineWidth = w;
+    g.setLineDash([9, 7]);
+    g.lineDashOffset = -t * 40;
+    g.beginPath();
+    g.arc(0, 0, r, 0, Math.PI * 2);
+    g.stroke();
+    g.setLineDash([]);
+    g.beginPath();
+    g.moveTo(-9, -9);
+    g.lineTo(9, 9);
+    g.moveTo(9, -9);
+    g.lineTo(-9, 9);
     g.stroke();
   }
+  g.restore();
 }
 
 // ---------- the hero ----------
 // Original masked hero (brand orange + navy), facing +x with feet at (0,0).
 // p: player state (walk phase, ground/thrust, recoil, squash); aim: world angle;
-// flip: aiming left. Swap this function for a sprite sheet later.
-export function drawHero(g, p, aim, flip, weapon, t, spin) {
+// flip: aiming left; gun: live gun state for drawGun. Swap this function for a sprite sheet later.
+export function drawHero(g, p, aim, flip, weapon, t, gun) {
   g.save();
   g.translate(Math.round(p.x), Math.round(p.y));
   g.scale(HERO_SCALE, HERO_SCALE);
@@ -466,6 +760,33 @@ export function drawHero(g, p, aim, flip, weapon, t, spin) {
   g.lineWidth = 1.3;
   g.stroke();
 
+  if (weapon.id === 'drones') {
+    // pilot pose: elbows tucked at the sides, forearms out front at belly
+    // height, remote in both hands with the phone tilted up to the face
+    const sy = hipY - 18, hy2 = hipY - 5 + Math.sin(t * 2.2) * 0.4;
+    const back = [11, hy2 + 0.5], front = [19, hy2 + 1.5]; // near hand grips from underneath
+    const glove = ([x, y]) => {
+      g.beginPath();
+      g.arc(x, y, 2.7, 0, Math.PI * 2);
+      g.fillStyle = NAVY;
+      g.fill();
+      g.lineWidth = 2;
+      g.strokeStyle = INK;
+      g.stroke();
+    };
+    limb([[-1, sy], [-1, sy + 11], back], 4, SUIT_DARK);
+    glove(back);
+    g.save();
+    g.translate(16, hy2 + 1.5);
+    g.scale(1.15, 1.15);
+    drawGun(g, weapon, gun);
+    g.restore();
+    limb([[1, sy], [3, sy + 12], front], 4.5, SUIT);
+    glove(front);
+    g.restore();
+    return;
+  }
+
   // arms + gun, rotated toward the crosshair
   g.save();
   g.translate(0, hipY - 18);
@@ -475,7 +796,7 @@ export function drawHero(g, p, aim, flip, weapon, t, spin) {
   g.save();
   g.translate(12 + kick, 0);
   g.scale(GUN_SCALE, GUN_SCALE);
-  drawGun(g, weapon, spin);
+  drawGun(g, weapon, gun);
   g.restore();
   limb([[0, 0], [9 + kick, 6], [13 + kick, 2]], 4.5, SUIT);
   for (const [gx, gy] of [[13 + kick, 2]]) {

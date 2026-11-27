@@ -1,29 +1,37 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { IoGameControllerOutline } from 'react-icons/io5';
+import { track } from '../../analytics';
 
 // Game code (and its page-capture lib) is only downloaded on first tap.
 const loadGame = () => import('../../game/destroyMode.js');
 
 const DestroyModeToggle = () => {
   const [state, setState] = useState('off'); // off | loading | on
+  // How the button was pressed (touch / pen / mouse); none means Enter/Space.
+  // The game opens with the controls that match.
+  const pointer = useRef(null);
 
   // Layouts swap at the 1024px breakpoint; don't leave a game running unowned.
   useEffect(() => () => void loadGame().then((g) => g.stop()), []);
 
   const toggle = async () => {
+    const input = pointer.current || 'keyboard';
+    pointer.current = null;
     const game = await loadGame();
     if (game.isRunning()) {
       game.stop();
       return setState('off');
     }
     setState('loading');
-    await game.start({ onStop: () => setState('off') });
+    await game.start({ onStop: () => setState('off'), input });
+    if (game.isRunning()) track('destroy_mode_started');
     setState(game.isRunning() ? 'on' : 'off');
   };
 
   const on = state !== 'off';
   return (
     <button
+      onPointerDown={(e) => (pointer.current = e.pointerType)}
       onClick={toggle}
       className={`p-3 rounded-xl transition-all duration-200 hover:bg-white/30 dark:hover:bg-gray-700/30 group ${state === 'loading' ? 'animate-pulse' : ''}`}
       style={{

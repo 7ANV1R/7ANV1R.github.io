@@ -6,44 +6,60 @@
 // overlay. All drawing style lives in ./comic.js.
 import { domToCanvas } from 'modern-screenshot';
 import {
-  INK, ORANGE, YELLOW, RED, CYAN, GUN_SCALE, HERO_SCALE, loadComicFont, starShape, halftone, halftonePattern, drawBurst, drawSfx,
-  drawCloud, cloudBlobs, drawFocusLines, drawFlame, drawSpeech, drawCrosshair, drawGun, drawHero, drawScarf,
+  INK, ORANGE, YELLOW, RED, CYAN, FONT, GUN_SCALE, HERO_SCALE, loadComicFont, starShape, halftone, halftonePattern, drawBurst,
+  drawSfx, drawCloud, cloudBlobs, drawFocusLines, drawFlame, drawSpeech, drawCrosshair, drawGun, drawHero, drawScarf,
+  drawDrone, drawBomb, drawTarget,
 } from './comic.js';
 
+// Each gun plays differently:
+// Blaster: tap for quick shots, hold to charge a plasma ball (bigger = bigger blast).
+// Minigun: barrels spin up first, then fire faster and wilder as they heat up.
+// Rocket: slow, one huge explosion.
+// Drone strike: marks the crosshair; drones fly in and carpet-bomb a line
+//   with the first bomb exactly on the mark.
 const WEAPONS = [
-  { name: 'Pistol', rate: 240, speed: 2000, spread: 0.012, pellets: 1, crater: 22, chunks: 4, power: 300, recoil: 0, kick: 4, len: 20, casing: '#e0b04a',
-    sfx: ['PEW!', 'BANG!', 'PAP!'], sfxSize: 24, colors: ['#bff6ff', CYAN, '#1b2f8f'], sfxEvery: 0 },
-  { name: 'Minigun', rate: 60, speed: 2200, spread: 0.07, pellets: 1, crater: 14, chunks: 2, power: 260, recoil: 16, kick: 3, len: 34, casing: '#e0b04a',
-    sfx: ['BRAKKA', 'RATATAT', 'BRRRT!'], sfxSize: 26, colors: ['#ffc2d6', '#ff3d7f', '#5a0a2a'], sfxEvery: 380 },
-  { name: 'Shotgun', rate: 720, speed: 1800, spread: 0.15, pellets: 7, crater: 16, chunks: 2, power: 320, recoil: 260, kick: 10, len: 32, casing: RED,
-    sfx: ['BLAM!', 'KA-BLAM!', 'BOOM!'], sfxSize: 34, colors: ['#fff27a', '#ff8c1a', RED], sfxEvery: 0 },
-  { name: 'Rocket', rate: 850, speed: 820, spread: 0, pellets: 1, crater: 95, chunks: 16, power: 700, recoil: 300, kick: 22, len: 31, rocket: true,
-    sfx: ['FWOOSH!', 'SHOOM!'], sfxSize: 22, colors: ['#ffffff', '#c9d6ff', '#24306b'], sfxEvery: 0 },
+  { id: 'blaster', name: 'Blaster', rate: 170, speed: 2100, len: 24, bore: -3, art: [-5, -11, 25, 10], recoil: 40, kick: 4,
+    sfx: ['PEW!', 'ZAP!', 'PAP!'], bigSfx: ['KA-CHOOM!', 'VWOOOM!', 'ZZZAKK!'], colors: ['#bff6ff', CYAN, '#1b2f8f'] },
+  { id: 'minigun', name: 'Minigun', rate: 110, minRate: 38, speed: 2300, spread: 0.03, maxSpread: 0.13, crater: 13, chunks: 2,
+    power: 260, recoil: 16, kick: 3, len: 39, bore: -0.5, art: [-11, -18, 39, 19], casing: '#e0b04a', sfx: ['BRAKKA', 'RATATAT', 'BRRRT!'], sfxEvery: 380,
+    colors: ['#ffc2d6', '#ff3d7f', '#5a0a2a'] },
+  { id: 'rocket', name: 'Rocket', rate: 850, speed: 820, crater: 95, chunks: 16, power: 700, recoil: 300, kick: 22, len: 40, bore: -0.5, art: [-20, -14, 40, 14],
+    sfx: ['FWOOSH!', 'SHOOM!'], colors: ['#ffffff', '#c9d6ff', '#24306b'] },
+  { id: 'drones', name: 'Drone Strike', rate: 1800, crater: 72, chunks: 10, power: 620, kick: 14, len: 26, art: [-43, -18, 43, 21] },
 ];
 const BOOM_WORDS = ['KA-BOOM!', 'KRAKOOM!', 'BLAMMO!', 'KABLAM!', 'WHAM!', 'KRA-KOOM!'];
 const HIT_WORDS = ['KRAK!', 'TOK!', 'SPANG!', 'THWAK!', 'CRUNCH!'];
 const SPAWN_LINES = ['TIME TO REFACTOR!', 'SHIP IT... TO PIECES!', "LET'S BREAK PROD!", 'CODE REVIEW TIME!'];
+const STRIKE_LINES = ['DRONES, SIC EM!', 'AIR SUPPORT INBOUND!', 'TARGET MARKED!', 'DEPLOYING THE SWARM!'];
+const WIN_LETTERS = 'SITE DESTROYED!';
+// fastest first: [seconds, title]
+const RANKS = [[180, 'ONE-HERO APOCALYPSE'], [420, 'DEMOLITION EXPERT'], [900, 'WRECKING CREW'], [Infinity, 'PERSISTENT MENACE']];
 const pick = (a) => a[(Math.random() * a.length) | 0];
+const rand = (a, b) => a + Math.random() * (b - a);
 
 const G = 1800; // debris
 const G_PLAYER = 1050; // floaty, space-ish
 const SPEED = 260;
+const SPRINT = 1.75; // Shift / joystick pushed to the rim
 const JUMP = 560;
 const JETPACK = 2300;
 const JETPACK_MAX = 380;
 const MAX_FALL = 900;
 const PH = 88; // hero height (drawn at HERO_SCALE)
 const PW = 9; // hero half width
+const DRONE_SPEED = 720;
 const MAX_CHUNKS = 220;
-const MAX_PARTICLES = 1400;
 const MAX_PIXELS = 16e6; // stay under Safari's canvas area limit
+// ponytail: the last few % are anti-aliased specks nobody can find, so the
+// meter reads 100% once this share of the original content is gone.
+const WIN_AT = 0.95;
 
 let game = null;
 let pending = null; // capture in flight
 
 export const isRunning = () => Boolean(game || pending);
 
-export async function start({ onStop } = {}) {
+export async function start({ onStop, input } = {}) {
   if (game || pending) return;
   const token = {};
   pending = token;
@@ -61,7 +77,7 @@ export async function start({ onStop } = {}) {
       font,
     ]);
     if (pending !== token) return; // cancelled while capturing
-    game = createGame(shot, { W, H, Hw, PS }, onStop);
+    game = createGame(shot, { W, H, Hw, PS, input }, onStop);
   } catch (err) {
     console.error('Destroy mode failed to start:', err);
     if (pending === token) onStop?.();
@@ -97,7 +113,7 @@ function captureFullPage(root, W, Hw, PS) {
 }
 
 const HUD_CSS = `
-.dm-hud{position:fixed;inset:0;z-index:2147483001;pointer-events:none;font-family:Bangers,Impact,'Arial Black',sans-serif;letter-spacing:.05em;color:#111;user-select:none;-webkit-user-select:none}
+.dm-hud{position:fixed;inset:0;z-index:2147483001;pointer-events:none;font-family:Bangers,Impact,'Arial Black',sans-serif;letter-spacing:.05em;color:#111;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .dm-panel{background-color:#fff8e1;background-image:radial-gradient(rgba(0,0,0,.13) 1px,transparent 1.6px);background-size:6px 6px;border:3px solid #111;box-shadow:5px 5px 0 #111;border-radius:3px}
 .dm-meter{position:absolute;left:16px;top:16px;padding:6px 12px 10px;min-width:170px;background-color:#ffd23f;transform:rotate(-2deg)}
 .dm-meter small{display:block;font-size:15px}
@@ -106,26 +122,90 @@ const HUD_CSS = `
 .dm-fill{height:100%;width:0;background:repeating-linear-gradient(-45deg,#f36c38 0 6px,#d7263d 6px 12px);transition:width .25s}
 .dm-pop{animation:dm-pop .25s}
 @keyframes dm-pop{40%{transform:scale(1.15) rotate(-3deg)}}
-.dm-exit{position:absolute;right:16px;top:16px;padding:8px 14px;font:inherit;font-size:20px;letter-spacing:.05em;color:#fff;background-color:#d7263d;cursor:pointer;pointer-events:auto;transform:rotate(2deg);transition:transform .12s}
+.dm-exit{position:absolute;right:16px;top:16px;padding:8px 14px;font:inherit;font-size:20px;letter-spacing:.05em;color:#fff;background-color:#d7263d;pointer-events:auto;transform:rotate(2deg);transition:transform .12s;touch-action:manipulation}
 .dm-exit:hover{transform:rotate(-1deg) scale(1.06)}
 .dm-kbd{font-size:12px;padding:1px 6px;border:2px solid #111;background:#fff;color:#111;margin-left:8px;border-radius:3px}
 .dm-bar{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);display:flex;gap:10px;padding:8px 10px}
-.dm-slot{pointer-events:auto;position:relative;width:66px;height:48px;border:3px solid #111;background:#fff;box-shadow:3px 3px 0 #111;cursor:pointer;padding:0;border-radius:3px;transition:transform .12s}
+.dm-slot{pointer-events:auto;position:relative;width:78px;height:62px;border:3px solid #111;background:#fff;box-shadow:3px 3px 0 #111;padding:0;border-radius:3px;transition:transform .12s;overflow:hidden;touch-action:manipulation;font:inherit;color:#111}
 .dm-slot.on{background:#ffd23f;transform:translateY(-5px) rotate(-3deg)}
-.dm-slot span{position:absolute;left:4px;top:0;font-size:14px;color:#d7263d}
-.dm-slot canvas{display:block;width:56px;height:38px;margin:3px auto 0}
-.dm-hint{position:absolute;left:50%;bottom:92px;transform:translateX(-50%) rotate(-1deg);padding:6px 14px;font-size:16px;white-space:nowrap;background-color:#ffd23f;transition:opacity .8s;max-width:calc(100vw - 32px);overflow:hidden;text-overflow:ellipsis}
-.dm-touch{display:none;position:absolute;left:16px;right:16px;bottom:92px;justify-content:space-between}
-.dm-touch div{display:flex;gap:10px}
-.dm-touch button{pointer-events:auto;width:54px;height:54px;font:inherit;font-size:22px;color:#111;touch-action:none}
-.dm-hud.touch .dm-hint{bottom:158px}
+.dm-slot span{position:absolute;left:0;top:0;z-index:2;min-width:19px;height:19px;line-height:17px;text-align:center;font-size:14px;color:#fff;background:#d7263d;border:solid #111;border-width:0 2px 2px 0;border-radius:0 0 6px 0}
+.dm-slot em{position:absolute;left:0;right:0;bottom:0;z-index:2;height:15px;line-height:16px;font-size:11px;white-space:nowrap;font-style:normal;letter-spacing:.06em;text-align:center;color:#fff;background:#111}
+.dm-slot.on em{background:#d7263d}
+.dm-slot canvas{position:absolute;left:15px;top:2px;width:56px;height:38px}
+.dm-slot i{position:absolute;inset:0;z-index:1;background:rgba(17,17,17,.35);transform-origin:bottom;transform:scaleY(0);pointer-events:none}
+.dm-hint{position:absolute;left:50%;bottom:112px;transform:translateX(-50%) rotate(-1deg);padding:6px 14px;font-size:16px;white-space:nowrap;text-align:center;background-color:#ffd23f;transition:opacity .8s;max-width:calc(100vw - 32px);overflow:hidden;text-overflow:ellipsis}
+.dm-stick{display:none;position:absolute;left:30px;bottom:34px;width:96px;height:96px;border-radius:50%;pointer-events:auto;touch-action:none;background:rgba(17,17,17,.28);border:2px solid rgba(255,255,255,.3)}
+.dm-stick b{position:absolute;left:0;right:0;text-align:center;font-weight:400;font-size:10px;color:rgba(255,255,255,.55)}
+.dm-knob{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px;border-radius:50%;background:rgba(255,210,63,.85);border:3px solid rgba(17,17,17,.85);box-shadow:0 3px 8px rgba(0,0,0,.35);transition:background .15s}
+.dm-knob.fast{background:rgba(243,108,56,.9)}
+.dm-hud.touch .dm-stick{display:block}
+.dm-hud.touch .dm-kbd{display:none}
+.dm-hud.touch .dm-meter{min-width:0;width:92px;padding:3px 7px 6px;left:10px;top:10px;border-width:2px;box-shadow:3px 3px 0 #111}
+.dm-hud.touch .dm-meter small{font-size:9px}
+.dm-hud.touch .dm-meter b{font-size:18px;-webkit-text-stroke:1px #111;text-shadow:2px 2px 0 #d7263d}
+.dm-hud.touch .dm-track{height:7px;margin-top:3px;border-width:1.5px}
+.dm-hud.touch .dm-exit{right:12px;top:12px;font-size:17px;padding:6px 12px}
+.dm-hud.touch .dm-bar{left:auto;right:12px;bottom:18px;transform:none;display:grid;grid-template-columns:repeat(2,auto);gap:8px;padding:6px}
+.dm-hud.touch .dm-slot{width:64px;height:54px}
+.dm-hud.touch .dm-slot span{display:none}
+.dm-hud.touch .dm-slot canvas{left:4px;top:1px;width:50px;height:34px}
+.dm-hud.touch .dm-hint{bottom:auto;top:84px;font-size:14px;white-space:normal;text-align:center;width:max-content}
 html.dm-playing,html.dm-playing *{cursor:none!important}
-html.dm-playing .dm-hud button{cursor:pointer!important}
+html.dm-playing .dm-hud button,html.dm-playing .dm-hud .dm-dev{cursor:pointer!important}
+.dm-win{position:absolute;inset:0;display:grid;place-items:center;padding:16px;pointer-events:auto;overflow:hidden;background:rgba(23,17,47,.5);animation:dm-fade .4s both}
+.dm-rays{position:absolute;left:50%;top:50%;width:250vmax;height:250vmax;margin:-125vmax;background:repeating-conic-gradient(rgba(255,210,63,.32) 0 7deg,transparent 7deg 18deg);animation:dm-spin 40s linear infinite;pointer-events:none}
+.dm-card{position:relative;width:min(560px,100%);padding:30px 20px 20px;text-align:center;animation:dm-card .7s cubic-bezier(.2,1.5,.4,1) .1s both}
+.dm-issue{position:absolute;left:-8px;top:-16px;padding:3px 10px;background:#d7263d;color:#fff;border:3px solid #111;transform:rotate(-4deg);font-size:14px}
+.dm-burst{position:absolute;left:50%;top:76px;width:min(460px,96%);height:150px;transform:translate(-50%,-50%);animation:dm-throb 1.1s ease-in-out infinite alternate}
+.dm-burst div{position:absolute;inset:0}
+.dm-title{position:relative;margin:4px 0 0;font-weight:400;font-size:clamp(40px,11vw,74px);line-height:.95;color:#ffd23f;-webkit-text-stroke:2px #111;text-shadow:4px 4px 0 #d7263d,7px 7px 0 #111}
+.dm-title span{display:inline-block;white-space:pre;animation:dm-drop .5s cubic-bezier(.3,1.8,.5,1) both;animation-delay:calc(.35s + var(--i) * .05s)}
+.dm-stamp{display:inline-block;margin:16px 0 14px;padding:4px 14px;border:4px solid #d7263d;color:#d7263d;background:rgba(255,255,255,.7);font-size:clamp(18px,5vw,26px);transform:rotate(-6deg);animation:dm-stamp .35s cubic-bezier(.5,0,.6,1.4) 1.25s both}
+.dm-stats{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.dm-stats div{min-width:84px;padding:4px 12px;border:3px solid #111;background:#fff;box-shadow:3px 3px 0 #111;animation:dm-up .4s both;animation-delay:calc(1.5s + var(--i) * .12s)}
+.dm-stats b{display:block;font-size:28px;font-weight:400;line-height:1.1}
+.dm-stats small{font-size:12px;color:#d7263d}
+.dm-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;animation:dm-up .4s 2s both;pointer-events:none}
+.dm-actions button{font:inherit;font-size:18px;letter-spacing:.05em;padding:8px 14px;border:3px solid #111;box-shadow:4px 4px 0 #111;background:#ffd23f;color:#111;cursor:pointer;touch-action:manipulation;transition:transform .12s}
+.dm-actions button:hover{transform:translateY(-2px) rotate(-1deg)}
+.dm-actions [data-keep]{background:#fff}
+.dm-actions [data-leave]{background:#d7263d;color:#fff}
+@keyframes dm-fade{from{opacity:0}}
+@keyframes dm-spin{to{transform:rotate(360deg)}}
+@keyframes dm-card{from{transform:scale(.2) rotate(-14deg);opacity:0}}
+@keyframes dm-throb{to{transform:translate(-50%,-50%) scale(1.06) rotate(2deg)}}
+@keyframes dm-drop{from{transform:translateY(-90px) rotate(-25deg) scale(1.6);opacity:0}}
+@keyframes dm-stamp{from{transform:rotate(-6deg) scale(3);opacity:0}}
+@keyframes dm-up{from{transform:translateY(16px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.dm-win,.dm-win *{animation:none!important}}
 `;
 
-function createGame(shot, { W, H, Hw, PS }, onStop) {
+// CSS clip-path for a comic starburst (an ellipse with spikes).
+const burstClip = (spikes, inner) =>
+  `polygon(${Array.from({ length: spikes * 2 }, (_, i) => {
+    const a = (i / (spikes * 2)) * Math.PI * 2, r = i % 2 ? inner : 1;
+    return `${(50 + Math.cos(a) * 50 * r).toFixed(1)}% ${(50 + Math.sin(a) * 50 * r).toFixed(1)}%`;
+  }).join(',')})`;
+
+function createGame(shot, { W, H, Hw, PS, input }, onStop) {
   const dpr = Math.min(devicePixelRatio || 1, 2);
   const root = document.getElementById('root');
+  // Controls follow how the player actually plays, never the device type
+  // (there's no way to ask a browser whether a keyboard is attached, and
+  // touch laptops / iPads with keyboards / some Windows drivers make every
+  // hardware guess wrong somewhere):
+  // - open with whatever pressed the game button: a finger or pen means the
+  //   on-screen stick; a mouse/trackpad click or Enter means keyboard
+  // - any game key switches to keyboard mode, any touch on the screen
+  //   switches to touch mode, so a wrong start corrects itself at once
+  // - only if the button press is unknown, fall back to the primary pointer
+  const canTouch = navigator.maxTouchPoints > 0 || matchMedia('(any-pointer: coarse)').matches;
+  let isTouch = input ? input === 'touch' || input === 'pen' : matchMedia('(pointer: coarse)').matches;
+  const MAX_PARTICLES = matchMedia('(pointer: coarse)').matches ? 700 : 1400; // phones/tablets: lighter
+  const TOUCH_HINT = 'stick: move · up fly · down sink · push to the rim to sprint<br>tap anywhere to blast · hold blaster to charge';
+  const KEY_HINT =
+    'A/D move · Shift sprint · W fly · S sink · click shoot (hold Blaster to charge) · 1–4 guns · scroll to look around' +
+    (canTouch ? '<br>no keyboard? touch the screen for on-screen controls' : '');
 
   // ---------- world: page texture + solidity mask (CSS px) ----------
   const page = document.createElement('canvas');
@@ -174,6 +254,9 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
       }
     }
   }
+  // Progress counts original content only, each pixel once: rubble that lands
+  // and gets blasted again doesn't count twice.
+  const original = mask.slice();
   let removed = 0;
 
   const colorAt = (x, y) => {
@@ -205,10 +288,12 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
     for (let y = y0; y <= y1; y++)
       for (let x = x0; x <= x1; x++) {
         const i = y * W + x;
-        if (mask[i] !== v && inPoly(x + 0.5, y + 0.5, poly)) {
-          if (!v) removed++;
-          mask[i] = v;
+        if (!inPoly(x + 0.5, y + 0.5, poly)) continue;
+        if (!v && original[i]) {
+          original[i] = 0;
+          removed++;
         }
+        mask[i] = v;
       }
   }
 
@@ -224,53 +309,58 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
   canvas.height = H * dpr;
   Object.assign(canvas.style, {
     position: 'fixed', inset: '0', width: W + 'px', height: H + 'px',
-    zIndex: '2147483000', cursor: 'none', touchAction: 'none',
+    zIndex: '2147483000', cursor: 'none', touchAction: 'none', webkitTouchCallout: 'none',
   });
   const ctx = canvas.getContext('2d');
   const voidFill = halftonePattern(ctx, '#17112f', '#2c2360'); // revealed behind destroyed page
 
-  const isTouch = matchMedia('(pointer: coarse)').matches;
   const hud = document.createElement('div');
   hud.className = 'dm-hud' + (isTouch ? ' touch' : '');
   hud.innerHTML = `<style>${HUD_CSS}</style>
-    <div class="dm-panel dm-meter"><small>DESTRUCTION!</small><b data-pct>0.0%</b><div class="dm-track"><div class="dm-fill" data-fill></div></div></div>
+    <div class="dm-panel dm-meter" data-meter><small>DESTRUCTION!</small><b data-pct>0.0%</b><div class="dm-track"><div class="dm-fill" data-fill></div></div></div>
     <button class="dm-panel dm-exit" data-exit>✕ Exit<span class="dm-kbd">Esc</span></button>
-    <div class="dm-panel dm-hint" data-hint>${
-      isTouch ? 'tap to shoot · ▲ fly · ▼ sink' : 'A/D move · hold W fly · hold S sink · click shoot · 1–4 guns · scroll to look around'
-    }</div>
+    <div class="dm-panel dm-hint" data-hint>${isTouch ? TOUCH_HINT : KEY_HINT}</div>
     <div class="dm-panel dm-bar" data-guns></div>
-    <div class="dm-touch" style="${isTouch ? 'display:flex' : ''}">
-      <div><button class="dm-panel" data-k="a">◀</button><button class="dm-panel" data-k="d">▶</button></div>
-      <div><button class="dm-panel" data-k="s">▼</button><button class="dm-panel" data-k="w">▲</button></div>
-    </div>`;
+    <div class="dm-stick" data-stick><b style="top:6px">FLY</b><b style="bottom:6px">SINK</b><div class="dm-knob" data-knob></div></div>`;
   const $ = (sel) => hud.querySelector(sel);
-  const pctEl = $('[data-pct]'), fillEl = $('[data-fill]');
-  const hintTimer = setTimeout(() => ($('[data-hint]').style.opacity = '0'), 7000);
+  const pctEl = $('[data-pct]'), fillEl = $('[data-fill]'), knob = $('[data-knob]');
+  const hintEl = $('[data-hint]');
+  let hintTimer = setTimeout(() => (hintEl.style.opacity = '0'), isTouch ? 9000 : 7000);
+  // switch control scheme, and show the new controls' hint for a moment
+  function setTouch(on) {
+    if (on === isTouch) return;
+    isTouch = on;
+    hud.classList.toggle('touch', on);
+    hintEl.innerHTML = on ? TOUCH_HINT : KEY_HINT;
+    hintEl.style.opacity = '1';
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(() => (hintEl.style.opacity = '0'), 5000);
+  }
   $('[data-exit]').onclick = () => stop();
 
   const slots = WEAPONS.map((w, i) => {
     const b = document.createElement('button');
     b.className = 'dm-slot';
     b.title = w.name;
-    b.innerHTML = `<span>${i + 1}</span>`;
+    b.innerHTML = `<span>${i + 1}</span><em>${w.name.split(' ')[0]}</em><i></i>`;
     const ic = document.createElement('canvas');
     ic.width = 56 * dpr;
     ic.height = 38 * dpr;
     const ig = ic.getContext('2d');
     ig.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ig.translate(28 - w.len / 2, 21);
-    drawGun(ig, w);
-    b.append(ic);
+    // fit the gun's drawn box (art: [left, top, right, bottom] around the
+    // grip) into the top of the slot, clear of the name label
+    const [x0, y0, x1, y1] = w.art, k = Math.min(1, 52 / (x1 - x0), 30 / (y1 - y0));
+    ig.translate(28 - ((x0 + x1) / 2) * k, 16 - ((y0 + y1) / 2) * k);
+    ig.scale(k, k);
+    if (w.id === 'drones') drawDrone(ig, { x: 0, y: 0, dir: 0, dropped: true }, 0);
+    else drawGun(ig, w);
+    b.prepend(ic);
     b.onclick = () => setWeapon(i);
     $('[data-guns]').append(b);
     return b;
   });
-
-  const keys = new Set();
-  hud.querySelectorAll('[data-k]').forEach((b) => {
-    b.onpointerdown = () => keys.add(b.dataset.k);
-    b.onpointerup = b.onpointerleave = b.onpointercancel = () => keys.delete(b.dataset.k);
-  });
+  const cooldowns = slots.map((b) => b.querySelector('i'));
 
   document.body.append(canvas, hud);
   const prevOverflow = document.documentElement.style.overflow;
@@ -290,25 +380,33 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
   const P = {
     x: heading ? heading.left + 30 : W / 2,
     y: heading ? Math.max(PH + 10, heading.top) : PH + 10,
-    vx: 0, vy: 0, ground: false, walk: 0, recoil: 0, ghost: false, thrust: false,
+    vx: 0, vy: 0, ground: false, walk: 0, recoil: 0, ghost: false, thrust: false, sprint: false,
   };
   let camY = 0, follow = true;
   const mouse = { x: P.x + 200, y: P.y + 120 }; // screen coords
   const aimW = () => ({ x: mouse.x, y: mouse.y + camY }); // world coords
-  let weapon = 0, firing = false, lastShot = -1e9, shake = 0, raf = 0, last = performance.now();
-  let chunks = [], bullets = [], particles = [];
-  let t = 0, spin = 0, lastSfx = -1e9;
-  const speech = { text: pick(SPAWN_LINES), life: 2.8 };
+  let weapon = 0, firing = false, tapped = false, fireId = null, shake = 0, raf = 0, last = performance.now();
+  const lastShot = WEAPONS.map(() => -1e9);
+  let chunks = [], bullets = [], particles = [], drones = [], bombs = [], marks = [];
+  let t = 0, lastSfx = -1e9;
+  const gun = { spin: 0, spinUp: 0, heat: 0, charge: 0, loaded: true, t: 0 }; // live gun state, drawn by drawGun
+  const stats = { shots: 0, booms: 0 };
+  let won = false, celebrated = false, winEl = null, party = 0;
+  const speech = { text: pick(SPAWN_LINES), life: 2.8, max: 2.8 };
+  const say = (text, life = 1.4) => Object.assign(speech, { text, life, max: life });
   // scarf: verlet chain anchored at the neck
   const scarf = Array.from({ length: 7 }, () => ({ x: P.x, y: P.y - 47, px: P.x, py: P.y - 47 }));
 
   function setWeapon(i) {
+    if (i === weapon && slots[i].classList.contains('on')) return;
     weapon = i;
+    gun.charge = 0;
     slots.forEach((b, j) => b.classList.toggle('on', j === i));
+    if (t > 0.5) say(WEAPONS[i].name.toUpperCase() + '!', 0.9);
   }
   setWeapon(0);
 
-  // ---------- sound: synthesized noise bursts, no assets ----------
+  // ---------- sound: synthesized, no assets ----------
   const audio = window.AudioContext ? new AudioContext() : null;
   function boom(dur, freq, vol) {
     if (!audio) return;
@@ -325,21 +423,40 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
     src.connect(f).connect(g).connect(audio.destination);
     src.start();
   }
+  // a sliding tone: bomb whistle, spin-up whine, fanfare notes
+  function tone(f0, f1, dur, vol, type = 'sine', delay = 0) {
+    if (!audio) return;
+    const o = audio.createOscillator(), g = audio.createGain(), at = audio.currentTime + delay;
+    o.type = type;
+    o.frequency.setValueAtTime(f0, at);
+    o.frequency.exponentialRampToValueAtTime(f1, at + dur);
+    g.gain.setValueAtTime(vol, at);
+    g.gain.exponentialRampToValueAtTime(0.001, at + dur);
+    o.connect(g).connect(audio.destination);
+    o.start(at);
+    o.stop(at + dur);
+  }
 
   // ---------- input ----------
+  const keys = new Set();
   const onKey = (e) => {
     const key = e.key.toLowerCase();
     const map = { arrowleft: 'a', arrowright: 'd', arrowup: 'w', ' ': 'w', arrowdown: 's' };
     const kk = map[key] || key;
     if (e.type === 'keydown') {
       if (key === 'escape') return stop();
-      if (key >= '1' && key <= '4') setWeapon(+key - 1);
+      if (won) return;
+      if ('adws'.includes(kk) || kk === 'shift' || /^Digit[1-4]$/.test(e.code)) setTouch(false);
+      // e.code, not e.key: with Shift held the digits arrive as !@#$
+      const digit = /^Digit([1-4])$/.exec(e.code);
+      if (digit) setWeapon(+digit[1] - 1);
       if ('adws'.includes(kk)) follow = true;
       keys.add(kk);
     } else keys.delete(kk);
     if (key in map) e.preventDefault();
   };
   const clearKeys = () => keys.clear();
+  const onAnyPointer = (e) => e.pointerType !== 'mouse' && setTouch(true);
   const onWheel = (e) => {
     e.preventDefault();
     e.stopPropagation(); // keep Lenis (window listener) from scrolling underneath
@@ -347,24 +464,86 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
     follow = false;
   };
   const blockTouch = (e) => {
+    if (won) return; // the reward screen's buttons need normal touches
     e.preventDefault();
     e.stopPropagation();
   };
+  // Only the pointer that's aiming moves the crosshair: on touch the other
+  // thumb is on the joystick.
   const onMove = (e) => {
+    if (e.pointerType !== 'mouse' && e.pointerId !== fireId) return;
     mouse.x = e.clientX;
     mouse.y = e.clientY;
   };
   const onDown = (e) => {
-    onMove(e);
+    if (won || (e.pointerType === 'mouse' && e.button !== 0)) return;
     audio?.resume();
-    firing = true;
+    fireId = e.pointerId;
+    onMove(e);
+    firing = tapped = true; // tapped: a click shorter than a frame still fires once
     canvas.setPointerCapture?.(e.pointerId);
   };
-  const onUp = () => (firing = false);
+  const onUp = (e) => {
+    audio?.resume(); // iOS sometimes only unlocks audio on pointerup
+    if (e.pointerId !== fireId) return;
+    fireId = null;
+    firing = false;
+    if (WEAPONS[weapon].id === 'blaster') releaseBlaster(performance.now());
+  };
+
+  // Touch joystick: left/right walk (analog), up flies, down sinks, the rim sprints.
+  const stick = { x: 0, id: null };
+  const stickEl = $('[data-stick]');
+  function onStick(e) {
+    if (e.type === 'pointerdown') {
+      audio?.resume();
+      stick.id = e.pointerId;
+      stickEl.setPointerCapture?.(e.pointerId);
+    }
+    if (e.pointerId !== stick.id) return;
+    const r = stickEl.getBoundingClientRect(), R = r.width / 2; // knob centre can reach the rim
+    let dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+    const d = Math.hypot(dx, dy);
+    if (d > R) (dx *= R / d), (dy *= R / d);
+    const nx = dx / R, ny = dy / R, mag = Math.min(1, d / R);
+    stick.x = Math.abs(nx) > 0.2 ? nx : 0;
+    const set = (k, on) => (on ? keys.add(k) : keys.delete(k));
+    set('w', ny < -0.5);
+    set('s', ny > 0.6);
+    set('shift', mag > 0.92);
+    follow = true;
+    knob.style.transform = `translate(${dx}px,${dy}px)`;
+    knob.classList.toggle('fast', mag > 0.92);
+  }
+  function endStick(e) {
+    if (e.pointerId !== stick.id) return;
+    stick.id = null;
+    stick.x = 0;
+    ['w', 's', 'shift'].forEach((k) => keys.delete(k));
+    knob.style.transform = '';
+    knob.classList.remove('fast');
+  }
+  stickEl.addEventListener('pointerdown', onStick);
+  stickEl.addEventListener('pointermove', onStick);
+  stickEl.addEventListener('pointerup', endStick);
+  stickEl.addEventListener('pointercancel', endStick);
+
+  // The snapshot, mask and layout are fixed at start: a new width (rotation,
+  // desktop resize) means a different page, so leave. A height-only change is
+  // the mobile URL bar; just resize the view.
+  const onResize = () => {
+    if (innerWidth !== W) return stop();
+    H = innerHeight;
+    canvas.height = H * dpr;
+    canvas.style.height = H + 'px';
+    camY = Math.max(0, Math.min(Hw - H, camY));
+  };
 
   addEventListener('keydown', onKey);
   addEventListener('keyup', onKey);
   addEventListener('blur', clearKeys);
+  addEventListener('resize', onResize);
+  addEventListener('pointerdown', onAnyPointer, true);
   addEventListener('wheel', onWheel, { passive: false, capture: true });
   addEventListener('touchmove', blockTouch, { passive: false, capture: true });
   canvas.addEventListener('pointermove', onMove);
@@ -374,14 +553,11 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
 
   // ---------- effects ----------
   // One particle list; `t` picks behaviour and look.
-  // bit: debris/dust square · spark: streak · fire: additive glow · smoke: soft
-  // puff · ring: shockwave · flash: additive disc · text: comic pop · casing
   function fx(p) {
     p.max = p.life;
     particles.push(p);
     if (particles.length > MAX_PARTICLES) particles.splice(0, particles.length - MAX_PARTICLES);
   }
-  const rand = (a, b) => a + Math.random() * (b - a);
   function burst(x, y, n, t, power, extra = {}) {
     for (let i = 0; i < n; i++) {
       const a = Math.random() * Math.PI * 2, v = rand(0.25, 1) * power;
@@ -496,23 +672,26 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
     if (Math.random() < 0.22) sfx(x + rand(-20, 20), y - w.crater - 10, pick(HIT_WORDS), 22, ['#fff27a', '#ff8c1a', RED]);
   }
 
-  function explode(x, y, w) {
+  // quiet: one of several bombs landing together; skip the word, flash and
+  // full-volume bang so a strike doesn't triple everything.
+  function explode(x, y, w, { quiet = false, word } = {}) {
+    stats.booms++;
     crater(x, y, w.crater, w.chunks, w.power);
     fx({ t: 'burst', x, y, r: w.crater * 1.7, shape: starShape(14), rot: rand(0, 6), layers: [RED, '#ff8c1a', YELLOW, '#fffbe6'], life: 0.38 });
     fx({ t: 'lines', x, y, r: w.crater * 1.5, lines: Array.from({ length: 34 }, () => [rand(0, Math.PI * 2), rand(1.5, 4), rand(80, 260)]), life: 0.2 });
     fx({ t: 'ring', x, y, r: w.crater * 2.6, life: 0.35 });
-    fx({ t: 'screen', x, y, life: 0.09 });
-    burst(x, y, 26, 'spark', 950, { life: 0.4 });
-    burst(x, y, 26, 'bit', 620, { color: colorAt(x, y) });
-    burst(x, y, 16, 'ink', 520, { size: rand(3, 7) });
-    for (let i = 0; i < 9; i++) {
+    if (!quiet) fx({ t: 'screen', x, y, life: 0.09 });
+    burst(x, y, quiet ? 14 : 26, 'spark', 950, { life: 0.4 });
+    burst(x, y, quiet ? 14 : 26, 'bit', 620, { color: colorAt(x, y) });
+    burst(x, y, quiet ? 8 : 16, 'ink', 520, { size: rand(3, 7) });
+    for (let i = 0; i < (quiet ? 5 : 9); i++) {
       const a = rand(0, Math.PI * 2), d = rand(10, w.crater * 0.9);
       const dark = i % 3 === 0;
       cloud(x + Math.cos(a) * d, y + Math.sin(a) * d, rand(16, 28), rand(0.9, 1.6), dark ? '#5b5470' : '#fbf7ee', dark ? '#3a3450' : '#c9c3d6', Math.cos(a) * 60, Math.sin(a) * 60 - 50);
     }
-    sfx(x, y - w.crater * 0.4, pick(BOOM_WORDS), 58, ['#fff27a', '#ffb31a', RED], { bubble: '#fff', shape: starShape(13), life: 1 });
-    boom(0.9, 450, 1);
-    shake = Math.max(shake, w.kick);
+    if (!quiet) sfx(x, y - w.crater * 0.4, word || pick(BOOM_WORDS), 58, ['#fff27a', '#ffb31a', RED], { bubble: '#fff', shape: starShape(13), life: 1 });
+    boom(0.9, 450, quiet ? 0.45 : 1);
+    shake = Math.max(shake, quiet ? w.kick * 0.5 : w.kick);
     const R = w.crater * 2.4;
     for (const s of chunks) {
       const d = Math.hypot(s.x - x, s.y - y);
@@ -538,36 +717,275 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
     const s = shoulder(), a = aimW();
     return Math.atan2(a.y - s.y, a.x - s.x);
   };
+  // Barrel tip in world space. bore: the barrel's height above the arm line
+  // in gun units; the hero is mirrored when aiming left, so it flips sides.
+  const muzzle = (w) => {
+    const a = aimAngle(), s = shoulder(), reach = (12 + w.len * GUN_SCALE) * HERO_SCALE;
+    const off = (w.bore || 0) * GUN_SCALE * HERO_SCALE * (aimW().x < P.x ? -1 : 1);
+    return { a, x: s.x + Math.cos(a) * reach - Math.sin(a) * off, y: s.y + Math.sin(a) * reach + Math.cos(a) * off };
+  };
 
-  function shoot(now) {
-    const w = WEAPONS[weapon];
-    if (now - lastShot < w.rate) return;
-    lastShot = now;
-    const a0 = aimAngle(), s = shoulder(), target = aimW();
-    const reach = (12 + w.len * GUN_SCALE) * HERO_SCALE;
-    const mx = s.x + Math.cos(a0) * reach, my = s.y + Math.sin(a0) * reach;
-    const dist = Math.hypot(target.x - mx, target.y - my);
-    for (let i = 0; i < w.pellets; i++) {
-      const a = a0 + (Math.random() - 0.5) * 2 * w.spread;
-      bullets.push({ x: mx, y: my, vx: Math.cos(a) * w.speed, vy: Math.sin(a) * w.speed, a, dist: dist * rand(0.97, 1.03), trav: 0, w });
-    }
-    P.vx -= Math.cos(a0) * w.recoil;
-    P.vy -= Math.sin(a0) * w.recoil * 0.5;
+  // Fire a projectile from the muzzle that lands exactly on the crosshair
+  // (± spread), then calls onHit there.
+  function launch(w, { kind, speed, spread = 0, r = 0, onHit }) {
+    const m = muzzle(w), target = aimW();
+    const dist = Math.hypot(target.x - m.x, target.y - m.y);
+    // from the barrel tip straight to the crosshair (the barrel sits a little off the arm line)
+    const a = Math.atan2(target.y - m.y, target.x - m.x) + (Math.random() - 0.5) * 2 * spread;
+    bullets.push({ x: m.x, y: m.y, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed, a, speed, dist: spread ? dist * rand(0.97, 1.03) : dist, trav: 0, kind, r, onHit });
+    stats.shots++;
+    return m;
+  }
+
+  function muzzleFx(w, m, { size = 10, words = w.sfx, wordSize = 24, recoil = w.recoil, kick = w.kick, every = w.sfxEvery || 0 }) {
+    P.vx -= Math.cos(m.a) * recoil;
+    P.vy -= Math.sin(m.a) * recoil * 0.5;
     P.recoil = 1;
-    fx({ t: 'burst', x: mx, y: my, r: w.rocket ? 22 : 10 + w.pellets * 1.5, shape: starShape(7), rot: a0, layers: [YELLOW, '#fffbe6'], life: 0.06 });
-    if (w.rocket) cloud(mx - Math.cos(a0) * 50, my - Math.sin(a0) * 50, 14, 0.6, '#fbf7ee', '#c9c3d6', -Math.cos(a0) * 120, -Math.sin(a0) * 120);
-    if (now - lastSfx > w.sfxEvery && (w.sfxEvery || Math.random() < 0.6)) {
+    fx({ t: 'burst', x: m.x, y: m.y, r: size, shape: starShape(7), rot: m.a, layers: [YELLOW, '#fffbe6'], life: 0.06 });
+    const now = performance.now();
+    if (words && now - lastSfx > every && (every || Math.random() < 0.6)) {
       lastSfx = now;
-      sfx(mx + Math.cos(a0) * 30, my + Math.sin(a0) * 30 - 18, pick(w.sfx), w.sfxSize, w.colors);
+      sfx(m.x + Math.cos(m.a) * 30, m.y + Math.sin(m.a) * 30 - 18, pick(words), wordSize, w.colors);
     }
-    spin += 9;
     if (w.casing) {
-      const back = Math.cos(a0) > 0 ? -1 : 1;
-      fx({ t: 'casing', x: s.x + Math.cos(a0) * 18, y: s.y + Math.sin(a0) * 18, vx: back * rand(60, 160), vy: rand(-260, -160), rot: 0, va: rand(-20, 20), life: 2.5, color: w.casing });
+      const s = shoulder(), back = Math.cos(m.a) > 0 ? -1 : 1;
+      fx({ t: 'casing', x: s.x + Math.cos(m.a) * 18, y: s.y + Math.sin(m.a) * 18, vx: back * rand(60, 160), vy: rand(-260, -160), rot: 0, va: rand(-20, 20), life: 2.5, color: w.casing });
     }
-    shake = Math.max(shake, w.kick * 0.35);
-    if (w.rocket) boom(0.35, 300, 0.5);
-    else boom(w.pellets > 1 ? 0.3 : 0.07, w.pellets > 1 ? 1200 : 2600, 0.35);
+    shake = Math.max(shake, kick * 0.35);
+  }
+
+  function releaseBlaster(now) {
+    const w = WEAPONS[0], c = gun.charge;
+    gun.charge = 0;
+    if (won || now - lastShot[0] < w.rate) return;
+    lastShot[0] = now;
+    const big = c > 0.35;
+    const spec = { crater: 20 + 52 * c, chunks: 3 + ((12 * c) | 0), power: 300 + 450 * c, kick: 4 + 16 * c };
+    const m = launch(w, {
+      kind: big ? 'plasma' : 'bolt', speed: big ? 1500 : w.speed, r: 4 + 9 * c,
+      onHit: (x, y) => (big ? explode(x, y, spec, { word: pick(w.bigSfx) }) : hit(x, y, spec)),
+    });
+    muzzleFx(w, m, { size: 10 + 18 * c, words: big ? w.bigSfx : w.sfx, wordSize: big ? 30 : 22, recoil: w.recoil + 220 * c, kick: spec.kick });
+    if (big) burst(m.x, m.y, 10, 'spark', 500, { life: 0.25 });
+    tone(big ? 900 : 1800, big ? 120 : 500, big ? 0.4 : 0.12, big ? 0.18 : 0.08, 'square');
+  }
+
+  function callStrike() {
+    const mark = aimW();
+    stats.shots++;
+    const dir = mark.x < W / 2 ? -1 : 1; // fly in from the far side, toward the mark
+    const fromX = dir > 0 ? -60 : W + 60;
+    // hover just above the mark (lower if the mark is near the top of the view)
+    const y0 = mark.y - Math.min(110, Math.max(70, mark.y - camY - 40));
+    const m = { x: mark.x, y: mark.y };
+    marks.push(m);
+    // lead drone takes the far spot, so nobody flies through a hovering one
+    [1, 0, -1].forEach((k, i) =>
+      drones.push({
+        x: fromX - dir * i * 80, y: y0 - i * 10, dir, speed: DRONE_SPEED, tilt: 0.16, hover: 0, phase: rand(0, 6),
+        dropX: mark.x + k * dir * 85, ty: mark.y + (k ? rand(-18, 18) : 0), main: k === 0, mark: m, dropped: false,
+      }),
+    );
+    say(pick(STRIKE_LINES), 1.6);
+    tone(1200, 1500, 0.08, 0.06, 'square');
+    tone(1500, 1200, 0.08, 0.06, 'square', 0.1);
+  }
+
+  function updateWeapon(dt, now) {
+    const w = WEAPONS[weapon];
+    // minigun: barrels spin up before firing, then fire faster and spray wider as they heat
+    const mini = w.id === 'minigun' && firing;
+    if (mini && gun.spinUp === 0) {
+      sfx(P.x + 30, P.y - PH - 10, 'WHIRRR...', 20, w.colors);
+      tone(150, 600, 0.35, 0.07, 'sawtooth');
+    }
+    gun.spinUp = mini ? Math.min(1, gun.spinUp + dt / 0.35) : Math.max(0, gun.spinUp - dt / 0.8);
+    gun.heat = mini && gun.spinUp >= 1 ? Math.min(1, gun.heat + dt / 2) : Math.max(0, gun.heat - dt / 1.2);
+    gun.spin += gun.spinUp * dt * 60;
+    gun.loaded = now - lastShot[2] > WEAPONS[2].rate * 0.8;
+    gun.t = t;
+    const pull = firing || tapped;
+    tapped = false;
+    if (!pull || won) return;
+    if (w.id === 'blaster') {
+      // charging: fires on release (a sub-frame tap already fired in onUp)
+      if (!firing) return;
+      const before = gun.charge;
+      gun.charge = Math.min(1, gun.charge + dt / 0.8);
+      if (gun.charge === 1 && before < 1) say('FULLY CHARGED!', 0.8);
+      return;
+    }
+    const rate = w.id === 'minigun' ? w.rate - (w.rate - w.minRate) * gun.heat : w.rate;
+    if (w.id === 'minigun' && gun.spinUp < 1) return;
+    if (now - lastShot[weapon] < rate) return;
+    lastShot[weapon] = now;
+    if (w.id === 'minigun') {
+      const m = launch(w, { kind: 'tracer', speed: w.speed, spread: w.spread + (w.maxSpread - w.spread) * gun.heat, onHit: (x, y) => hit(x, y, w) });
+      muzzleFx(w, m, { size: 11, wordSize: 26 });
+      boom(0.07, 2600, 0.3);
+    } else if (w.id === 'rocket') {
+      const m = launch(w, { kind: 'rocket', speed: w.speed, onHit: (x, y) => explode(x, y, w) });
+      muzzleFx(w, m, { size: 22, wordSize: 22 });
+      cloud(m.x - Math.cos(m.a) * 50, m.y - Math.sin(m.a) * 50, 14, 0.6, '#fbf7ee', '#c9c3d6', -Math.cos(m.a) * 120, -Math.sin(m.a) * 120);
+      boom(0.35, 300, 0.5);
+    } else {
+      callStrike();
+    }
+  }
+
+  function updateStrikes(dt) {
+    const w = WEAPONS[3];
+    // Fly in at speed, brake onto the drop point, hover a beat, release,
+    // then speed off. Tilt follows speed, like a real quadcopter.
+    for (const d of drones) {
+      if (!d.dropped) {
+        const dist = (d.dropX - d.x) * d.dir;
+        d.speed += (Math.min(DRONE_SPEED, Math.max(0, dist) * 5 + 25) - d.speed) * Math.min(1, dt * 6);
+        if (dist <= 2) {
+          d.x = d.dropX;
+          d.speed = 0;
+          d.hover += dt;
+        }
+      } else d.speed = Math.min(DRONE_SPEED, d.speed + 1100 * dt);
+      d.x += d.dir * d.speed * dt;
+      d.tilt += ((d.speed / DRONE_SPEED) * 0.18 - d.tilt) * Math.min(1, dt * 5);
+      if (!d.dropped && d.hover > 0.18) {
+        d.dropped = true;
+        bombs.push({ x: d.dropX, y: d.y + 21, vy: 0, ty: d.ty, main: d.main, mark: d.mark });
+        tone(1500, 380, Math.sqrt((2 * Math.max(10, d.ty - d.y)) / G), 0.05);
+      }
+      if (d.dropped && (d.x < -120 || d.x > W + 120)) d.done = true;
+    }
+    drones = drones.filter((d) => !d.done);
+    for (const b of bombs) {
+      b.vy += G * dt;
+      b.y += b.vy * dt;
+      if (b.y >= b.ty) {
+        b.done = true;
+        explode(b.x, b.ty, w, { quiet: !b.main });
+        if (b.main) b.mark.done = true;
+      }
+    }
+    bombs = bombs.filter((b) => !b.done);
+    marks = marks.filter((m) => !m.done);
+  }
+
+  // ---------- reward ----------
+  const fmtTime = (s) => `${(s / 60) | 0}:${String(s % 60 | 0).padStart(2, '0')}`;
+  const rankFor = (s) => RANKS.find(([max]) => s <= max)[1];
+
+  function win() {
+    if (won) return;
+    won = true;
+    firing = false;
+    fireId = null;
+    gun.charge = 0;
+    keys.clear();
+    party = 3;
+    document.documentElement.classList.remove('dm-playing'); // real cursor over the reward
+    const time = fmtTime(t), rank = rankFor(t);
+    for (let i = 0; i < 180; i++)
+      fx({ t: 'confetti', x: rand(0, W), y: camY - rand(10, H * 0.6), vx: rand(-90, 90), vy: rand(0, 160), rot: rand(0, 6), va: rand(-10, 10),
+        w: rand(5, 10), h: rand(3, 6), color: pick([YELLOW, RED, ORANGE, CYAN, '#fff', '#7cc248']), life: rand(3, 5) });
+    [523, 659, 784, 1046].forEach((f, i) => tone(f, f, i === 3 ? 0.7 : 0.18, 0.12, 'square', 0.35 + i * 0.16));
+    winEl = document.createElement('div');
+    winEl.className = 'dm-win';
+    winEl.innerHTML = `<div class="dm-rays"></div>
+      <div class="dm-panel dm-card" role="dialog" aria-label="Site destroyed">
+        <div class="dm-issue">FINAL ISSUE · #100%</div>
+        <div class="dm-burst"><div style="background:#111;clip-path:${burstClip(18, 0.72)}"></div><div style="inset:5px;background:#fff;clip-path:${burstClip(18, 0.72)}"></div></div>
+        <h2 class="dm-title">${[...WIN_LETTERS].map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}</h2>
+        <div class="dm-stamp">RANK: ${rank}</div>
+        <div class="dm-stats">
+          <div style="--i:0"><b>${time}</b><small>TIME</small></div>
+          <div style="--i:1"><b>${stats.shots}</b><small>SHOTS FIRED</small></div>
+          <div style="--i:2"><b>${stats.booms}</b><small>EXPLOSIONS</small></div>
+        </div>
+        <div class="dm-actions">
+          <button data-shot>📸 Screenshot</button>
+          <button data-keep>Keep smashing</button>
+          <button data-leave>Exit</button>
+        </div>
+      </div>`;
+    hud.append(winEl);
+    winEl.querySelector('[data-shot]').onclick = () => screenshot(time, rank);
+    winEl.querySelector('[data-leave]').onclick = () => stop();
+    winEl.querySelector('[data-keep]').onclick = () => {
+      winEl.remove();
+      won = false;
+      document.documentElement.classList.add('dm-playing');
+    };
+    // Buttons stay inert while they're still invisible, so a click meant for
+    // the last bomb can't hit an unseen Exit.
+    const actions = winEl.querySelector('.dm-actions');
+    setTimeout(() => {
+      actions.style.pointerEvents = 'auto';
+      actions.querySelector('[data-keep]').focus({ preventScroll: true });
+    }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 2300);
+  }
+
+  // The wrecked view plus a comic caption, saved (or shared, on phones) as PNG.
+  function screenshot(time, rank) {
+    const c = document.createElement('canvas');
+    c.width = canvas.width;
+    c.height = canvas.height;
+    const g = c.getContext('2d');
+    g.drawImage(canvas, 0, 0);
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const bw = Math.min(W - 24, 520), bh = 92, bx = (W - bw) / 2, by = H - bh - 22;
+    g.fillStyle = INK;
+    g.fillRect(bx + 6, by + 6, bw, bh);
+    g.fillStyle = YELLOW;
+    g.fillRect(bx, by, bw, bh);
+    g.lineWidth = 3;
+    g.strokeStyle = INK;
+    g.strokeRect(bx, by, bw, bh);
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.lineJoin = 'round';
+    g.font = `${Math.min(44, bw / 9)}px ${FONT}`;
+    g.lineWidth = 7;
+    g.strokeText(WIN_LETTERS, W / 2 + 3, by + 36 + 3);
+    g.fillStyle = RED;
+    g.fillText(WIN_LETTERS, W / 2 + 3, by + 36 + 3);
+    g.strokeText(WIN_LETTERS, W / 2, by + 36);
+    g.fillStyle = '#fff';
+    g.fillText(WIN_LETTERS, W / 2, by + 36);
+    g.font = `17px ${FONT}`;
+    g.fillStyle = INK;
+    g.fillText(`${rank} · ${time} · ${location.host}`, W / 2, by + 72);
+    const name = 'site-destroyed.png';
+    try {
+      c.toBlob(async (blob) => {
+        if (!blob) return;
+        const file = new File([blob], name, { type: 'image/png' });
+        if (isTouch && navigator.canShare?.({ files: [file] })) {
+          try {
+            return await navigator.share({ files: [file], title: `I destroyed ${location.host}` });
+          } catch (err) {
+            if (err.name === 'AbortError') return; // share sheet dismissed
+            // anything else: fall back to a download
+          }
+        }
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = name;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+      }, 'image/png');
+    } catch (err) {
+      console.error('Screenshot failed:', err); // a cross-origin image tainted the snapshot
+    }
+  }
+
+  // DEV only: tap the meter to preview the reward screen.
+  if (import.meta.env.DEV) {
+    const meter = $('[data-meter]');
+    meter.style.pointerEvents = 'auto';
+    meter.classList.add('dm-dev');
+    meter.title = 'DEV: tap to preview the reward screen';
+    meter.onclick = win;
+    window.__dm = { crater, win, P, size: () => ({ W, Hw, initialSolid, removed }) };
   }
 
   // ---------- update ----------
@@ -581,17 +999,22 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
   };
 
   function updatePlayer(dt) {
-    const dir = (keys.has('d') ? 1 : 0) - (keys.has('a') ? 1 : 0);
-    P.vx += (dir * SPEED - P.vx) * Math.min(1, dt * (P.ground ? 14 : 5));
+    const kdir = (keys.has('d') ? 1 : 0) - (keys.has('a') ? 1 : 0);
+    const dir = kdir || stick.x;
+    P.sprint = keys.has('shift') && (dir !== 0 || keys.has('w') || keys.has('s'));
+    const sp = P.sprint ? SPRINT : 1;
+    P.vx += (dir * SPEED * sp - P.vx) * Math.min(1, dt * (P.ground ? 14 : 5));
     P.thrust = keys.has('w') && !P.ground;
     if (keys.has('w') && P.ground) {
-      P.vy = -JUMP;
+      P.vy = -JUMP * (P.sprint ? 1.2 : 1);
       P.ground = false;
     } else if (P.thrust) {
       // jetpack: holding up keeps lifting
-      P.vy = Math.max(-JETPACK_MAX, P.vy - JETPACK * dt);
-      if (Math.random() < dt * 12) cloud(P.x - (aimW().x < P.x ? -15 : 15), P.y - 30, 5, 0.45, '#fbf7ee', '#c9c3d6', 0, 120);
+      P.vy = Math.max(-JETPACK_MAX * (P.sprint ? 1.6 : 1), P.vy - JETPACK * (P.sprint ? 1.4 : 1) * dt);
+      if (Math.random() < dt * (P.sprint ? 24 : 12)) cloud(P.x - (aimW().x < P.x ? -15 : 15), P.y - 30, 5, 0.45, '#fbf7ee', '#c9c3d6', 0, 120);
     }
+    if (P.sprint && P.ground && Math.abs(P.vx) > SPEED && Math.random() < dt * 14)
+      cloud(P.x - Math.sign(P.vx) * 12, P.y - 4, 5, 0.35, '#fbf7ee', '#c9c3d6', -P.vx * 0.2, -30);
 
     // Holding down sinks through whatever is underfoot; after release it only
     // finishes passing through the thing its feet are in.
@@ -599,7 +1022,7 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
     P.ghost = keys.has('s') || (P.ghost && feetIn());
     if (P.ghost) {
       P.ground = false;
-      P.vy = Math.min(MAX_FALL, Math.max(P.vy, 140) + G_PLAYER * dt);
+      P.vy = Math.min(MAX_FALL * sp, Math.max(P.vy, 140 * sp) + G_PLAYER * sp * dt);
       P.x = Math.max(PW, Math.min(W - PW, P.x + P.vx * dt));
       P.y = Math.min(Hw, P.y + P.vy * dt);
       if (P.y >= Hw) P.vy = 0;
@@ -669,9 +1092,10 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
     if (top < H * 0.15) target = P.y - PH - H * 0.15;
     else if (bottom > H * 0.8) target = P.y - H * 0.8;
     target = Math.max(0, Math.min(Hw - H, target));
-    camY += (target - camY) * Math.min(1, dt * 7);
+    camY += (target - camY) * Math.min(1, dt * (P.sprint ? 10 : 7));
   }
 
+  let shownPct = '';
   function update(dt, now) {
     updatePlayer(dt);
     P.walk += Math.abs(P.vx) * dt * 0.06;
@@ -698,22 +1122,23 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
         b.y -= dy * f;
       }
     updateCamera(dt);
-    if (firing) shoot(now);
+    updateWeapon(dt, now);
+    updateStrikes(dt);
 
-    // bullets fly to the crosshair and destroy exactly there
+    // projectiles fly to the crosshair and destroy exactly there
     for (const b of bullets) {
-      const step = b.w.speed * dt;
+      const step = b.speed * dt;
       b.x += b.vx * dt;
       b.y += b.vy * dt;
       b.trav += step;
       if (b.trav >= b.dist) {
         b.done = true;
         const back = b.trav - b.dist; // land on the exact point
-        const ix = b.x - Math.cos(b.a) * back, iy = b.y - Math.sin(b.a) * back;
-        if (b.w.rocket) explode(ix, iy, b.w);
-        else hit(ix, iy, b.w);
-      } else if (b.w.rocket) {
+        b.onHit(b.x - Math.cos(b.a) * back, b.y - Math.sin(b.a) * back);
+      } else if (b.kind === 'rocket') {
         if (Math.random() < 0.45) cloud(b.x - Math.cos(b.a) * 16, b.y - Math.sin(b.a) * 16, rand(5, 8), 0.55, '#fbf7ee', '#c9c3d6', rand(-15, 15), rand(-25, 0));
+      } else if (b.kind === 'plasma' && Math.random() < 0.5) {
+        fx({ t: 'spark', x: b.x, y: b.y, vx: rand(-80, 80), vy: rand(-80, 80), life: 0.2, size: 2 });
       }
     }
     bullets = bullets.filter((b) => !b.done);
@@ -746,6 +1171,18 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
     }
     chunks = chunks.filter((s) => !s.done);
 
+    // celebration fireworks behind the reward screen
+    if (party > 0) {
+      party -= dt;
+      if (Math.random() < dt * 5) {
+        const x = rand(W * 0.1, W * 0.9), y = camY + rand(H * 0.1, H * 0.8);
+        fx({ t: 'burst', x, y, r: rand(40, 80), shape: starShape(12), rot: rand(0, 6), layers: [pick([RED, CYAN, ORANGE]), YELLOW, '#fffbe6'], life: 0.4 });
+        burst(x, y, 14, 'spark', 700, { life: 0.5 });
+        sfx(x, y, pick(BOOM_WORDS), 44, ['#fff27a', '#ffb31a', RED]);
+        boom(0.5, 600, 0.35);
+      }
+    }
+
     for (const p of particles) {
       p.life -= dt;
       if (p.t === 'sfx') {
@@ -753,6 +1190,13 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
         continue;
       }
       if (p.t === 'burst' || p.t === 'ring' || p.t === 'lines' || p.t === 'screen') continue;
+      if (p.t === 'confetti') {
+        p.vy = Math.min(p.vy + 240 * dt, 140);
+        p.x += (p.vx + Math.sin(t * 4 + p.va) * 50) * dt;
+        p.y += p.vy * dt;
+        p.rot += p.va * dt;
+        continue;
+      }
       const g = p.t === 'cloud' ? -0.02 : p.t === 'spark' ? 0.45 : 1;
       p.vy += G * g * dt;
       const drag = p.t === 'cloud' ? 2.5 : 0.5;
@@ -775,18 +1219,30 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
 
     shake = Math.max(0, shake - dt * 45);
 
-    const pct = ((removed / Math.max(1, initialSolid)) * 100).toFixed(1) + '%';
-    if (pctEl.textContent !== pct) {
+    // cooldown shade on slow guns
+    WEAPONS.forEach((w, i) => {
+      if (w.rate < 800) return;
+      const left = Math.max(0, 1 - (now - lastShot[i]) / w.rate);
+      cooldowns[i].style.transform = `scaleY(${left.toFixed(2)})`;
+    });
+
+    const progress = Math.min(1, removed / Math.max(1, initialSolid * WIN_AT));
+    const pct = (progress * 100).toFixed(1) + '%';
+    if (shownPct !== pct) {
+      shownPct = pct;
       pctEl.textContent = pct;
-      fillEl.style.width = Math.min(100, parseFloat(pct)) + '%';
+      fillEl.style.width = pct;
       pctEl.classList.remove('dm-pop');
       void pctEl.offsetWidth;
       pctEl.classList.add('dm-pop');
     }
+    if (progress >= 1 && !celebrated) {
+      celebrated = true; // once per game; the DEV preview doesn't use it up
+      win();
+    }
   }
 
   // ---------- draw ----------
-
   function draw() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.save();
@@ -799,6 +1255,7 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
     const view = (p, pad = 200) => p.y > camY - pad && p.y < camY + H + pad;
     const k = (p) => Math.max(0, p.life / p.max);
 
+    for (const m of marks) drawTarget(ctx, m.x, m.y, t);
     for (const p of particles) if (p.t === 'lines' && view(p, 400)) drawFocusLines(ctx, p, k(p));
     for (const p of particles) {
       if (p.t !== 'cloud' || !view(p)) continue;
@@ -828,16 +1285,17 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size * (0.5 + kk * 0.5), 0, Math.PI * 2);
         ctx.fill();
-      } else if (p.t === 'casing') {
+      } else if (p.t === 'casing' || p.t === 'confetti') {
         ctx.globalAlpha = Math.min(1, kk * 3);
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rot);
+        const w = p.w || 7, h = p.h || 3.6;
         ctx.fillStyle = p.color;
-        ctx.fillRect(-3.5, -1.8, 7, 3.6);
+        ctx.fillRect(-w / 2, -h / 2, w, h);
         ctx.lineWidth = 1.2;
         ctx.strokeStyle = INK;
-        ctx.strokeRect(-3.5, -1.8, 7, 3.6);
+        ctx.strokeRect(-w / 2, -h / 2, w, h);
         ctx.restore();
       } else if (p.t === 'spark') {
         ctx.globalAlpha = Math.min(1, kk * 1.5);
@@ -868,7 +1326,7 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
     ctx.globalAlpha = 1;
 
     for (const b of bullets) {
-      if (b.w.rocket) {
+      if (b.kind === 'rocket') {
         ctx.save();
         ctx.translate(b.x, b.y);
         ctx.rotate(b.a);
@@ -891,23 +1349,71 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
         ctx.fill();
         ctx.stroke();
         ctx.restore();
+      } else if (b.kind === 'plasma') {
+        const r = b.r * (0.9 + Math.random() * 0.2);
+        for (const [c, f] of [[INK, 1.25], [CYAN, 1], ['#fff', 0.5]]) {
+          ctx.fillStyle = c;
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, r * f, 0, Math.PI * 2);
+          ctx.fill();
+        }
       } else {
+        // tracer (minigun, orange) / bolt (blaster, cyan)
+        const bolt = b.kind === 'bolt';
         ctx.lineCap = 'round';
-        for (const [c, w] of [[INK, 6], [ORANGE, 3.5], ['#fff6c8', 1.5]]) {
+        for (const [c, w] of [[INK, 6], [bolt ? CYAN : ORANGE, 3.5], [bolt ? '#fff' : '#fff6c8', 1.5]]) {
           ctx.strokeStyle = c;
           ctx.lineWidth = w;
           ctx.beginPath();
-          ctx.moveTo(b.x - b.vx * 0.016, b.y - b.vy * 0.016);
+          ctx.moveTo(b.x - b.vx * (bolt ? 0.024 : 0.016), b.y - b.vy * (bolt ? 0.024 : 0.016));
           ctx.lineTo(b.x, b.y);
           ctx.stroke();
         }
       }
     }
+    for (const b of bombs) drawBomb(ctx, b.x, b.y);
+    for (const d of drones) drawDrone(ctx, d, t);
+
+    // speed lines while sprinting
+    if (P.sprint && Math.abs(P.vx) > SPEED * 1.1) {
+      const back = -Math.sign(P.vx);
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const y = P.y - 12 - i * 16 - Math.random() * 6, x0 = P.x + back * (16 + Math.random() * 8);
+        ctx.moveTo(x0, y);
+        ctx.lineTo(x0 + back * (22 + Math.random() * 26), y);
+      }
+      ctx.stroke();
+    }
 
     const flip = aimW().x < P.x;
     drawScarf(ctx, scarf);
-    drawHero(ctx, P, aimAngle(), flip, WEAPONS[weapon], t, spin);
-    if (speech.life > 0) drawSpeech(ctx, P.x + 18, P.y - PH * 1.1, speech.text, speech.life / 2.8, camY + 110);
+    drawHero(ctx, P, aimAngle(), flip, WEAPONS[weapon], t, gun);
+    if (gun.charge > 0) {
+      // plasma ball gathering at the muzzle, sparks pulled in
+      // sits at the barrel mouth, growing outward along the barrel
+      const c = gun.charge, r = 3 + 9 * c + (c === 1 ? Math.sin(t * 30) * 1.5 : 0), tip = muzzle(WEAPONS[0]);
+      const m = { x: tip.x + Math.cos(tip.a) * r * 0.8, y: tip.y + Math.sin(tip.a) * r * 0.8 };
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = CYAN;
+      ctx.beginPath();
+      for (let i = 0; i < 4; i++) {
+        const a = t * 9 + i * 1.57, d = r + 8 + ((t * 40 + i * 7) % 12);
+        ctx.moveTo(m.x + Math.cos(a) * d, m.y + Math.sin(a) * d);
+        ctx.lineTo(m.x + Math.cos(a) * (d - 6), m.y + Math.sin(a) * (d - 6));
+      }
+      ctx.stroke();
+      for (const [col, f] of [[INK, 1.3], [CYAN, 1], ['#fff', 0.5]]) {
+        ctx.fillStyle = col;
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, r * f, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    if (speech.life > 0) drawSpeech(ctx, P.x + 18, P.y - PH * 1.1, speech.text, speech.life / speech.max, camY + 110, W);
 
     for (const p of particles) if (p.t === 'sfx' && view(p)) drawSfx(ctx, p);
     ctx.restore();
@@ -917,7 +1423,7 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
       ctx.fillStyle = `rgba(255,250,230,${k(p) * 0.4})`;
       ctx.fillRect(0, 0, W, H);
     }
-    drawCrosshair(ctx, mouse.x, mouse.y);
+    if (!won) drawCrosshair(ctx, mouse.x, mouse.y);
   }
 
   function frame(now) {
@@ -936,6 +1442,8 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
       removeEventListener('keydown', onKey);
       removeEventListener('keyup', onKey);
       removeEventListener('blur', clearKeys);
+      removeEventListener('resize', onResize);
+      removeEventListener('pointerdown', onAnyPointer, true);
       removeEventListener('wheel', onWheel, { capture: true });
       removeEventListener('touchmove', blockTouch, { capture: true });
       document.documentElement.style.overflow = prevOverflow;
@@ -943,6 +1451,7 @@ function createGame(shot, { W, H, Hw, PS }, onStop) {
       canvas.remove();
       hud.remove();
       audio?.close();
+      if (import.meta.env.DEV) delete window.__dm;
       onStop?.();
     },
   };

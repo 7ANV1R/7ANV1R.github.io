@@ -5,6 +5,7 @@ import VideoPreview from '../ui/VideoPreview';
 import projectsData from '../../data/recent_projects.json';
 import { HiOutlinePhotograph } from 'react-icons/hi';
 import { FiArrowUpRight } from 'react-icons/fi';
+import { track } from '../../analytics';
 
 const RecentProjects = () => {
   const [projects, setProjects] = useState([]);
@@ -17,6 +18,7 @@ const RecentProjects = () => {
     const handleProjectClick = () => {
       const url = project.demoUrl || project.githubUrl;
       if (url) {
+        track('project_clicked', { project: project.title, url });
         window.open(url, '_blank');
       }
     };

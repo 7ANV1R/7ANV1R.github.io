@@ -1,5 +1,6 @@
 import React from 'react';
 import SectionTitle from '../ui/SectionTitle';
+import { track } from '../../analytics';
 import {
   HiOutlineCode,
   HiOutlineTemplate,
@@ -71,7 +72,10 @@ const About = () => {
             } group cursor-pointer w-full lg:max-w-sm about-card-${
               card.id === 'code' ? 'orange' : 'green'
             }`}
-            onClick={() => window.open(card.url, '_blank')}
+            onClick={() => {
+              track('link_clicked', { url: card.url });
+              window.open(card.url, '_blank');
+            }}
           >
             {/* Background pattern */}
             <div className="absolute inset-0 opacity-100">

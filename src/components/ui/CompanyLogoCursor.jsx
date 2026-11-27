@@ -146,6 +146,9 @@ const CompanyLogoCursor = () => {
   const isWorkExperienceItem = useCallback((element) => {
     if (!element) return false;
 
+    // Hide the big logo over app links so it doesn't cover the store popup
+    if (element.closest('[data-app-link]')) return false;
+
     // Must be within the work experience section
     const workSection = element.closest(SELECTORS.WORK_SECTION);
     if (!workSection) return false;

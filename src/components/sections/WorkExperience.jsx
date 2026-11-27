@@ -4,7 +4,9 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/all';
 import { SplitText } from 'gsap/SplitText';
 import SectionTitle from '../ui/SectionTitle';
+import AppLink from '../ui/AppLink';
 import workExperienceData from '../../data/work_experience.json';
+import apps from '../../data/apps.json';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -141,13 +143,24 @@ const WorkExperience = ({ scrollContainerRef }) => {
     </div>
   );
 
+  // Blank lines in the copy split it into paragraphs; "{key}" tokens become
+  // store-link popups from apps.json.
   const Objective = ({ objective }) => (
-    <p
-      className="objective-text text-sm md:text-base leading-relaxed max-w-3xl"
-      style={{ color: 'var(--text-primary)' }}
-    >
-      {objective}
-    </p>
+    <div className="space-y-3 md:space-y-4 max-w-3xl">
+      {objective.split('\n\n').map((para, p) => (
+        <p
+          key={p}
+          className="objective-text text-sm md:text-base leading-relaxed"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          {para
+            .split(/\{(\w+)\}/)
+            .map((part, i) =>
+              i % 2 ? <AppLink key={i} app={apps[part]} /> : part,
+            )}
+        </p>
+      ))}
+    </div>
   );
 
   const ExperienceItem = ({ experience, index, totalItems }) => {
