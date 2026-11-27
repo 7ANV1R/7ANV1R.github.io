@@ -3,8 +3,7 @@ import SectionTitle from '../ui/SectionTitle';
 import { track } from '../../analytics';
 import AnimatedLabelIcon from '../ui/AnimatedLabelIcon';
 import Snackbar from '../ui/Snackbar';
-
-const FORMSUBMIT_EMAIL = 'tanvir.inquiries@gmail.com';
+import { CONTACT_EMAIL, sendContact } from '../../contact';
 
 /**
  * GetInTouch Component
@@ -76,37 +75,15 @@ const GetInTouch = () => {
 
     setSubmitting(true);
 
-    // Prepare form data
-    const data = new FormData();
-    data.append('name', form.name.trim());
-    data.append('email', form.email.trim());
-    data.append('message', form.message.trim());
-    data.append('_honey', '');
-    data.append('_captcha', 'false');
-
     try {
-      const response = await fetch(
-        `https://formsubmit.co/${FORMSUBMIT_EMAIL}`,
-        {
-          method: 'POST',
-          body: data,
-          headers: {
-            Accept: 'application/json',
-          },
-        },
-      );
-
-      if (response.ok) {
-        track('contact_submitted'); // no form contents sent
-        setForm({ name: '', email: '', message: '' });
-        setSnackbar("Message sent successfully! I'll get back to you soon.");
-      } else {
-        throw new Error('Form submission failed');
-      }
+      await sendContact(form);
+      track('contact_submitted'); // no form contents sent
+      setForm({ name: '', email: '', message: '' });
+      setSnackbar("Message sent successfully! I'll get back to you soon.");
     } catch (error) {
       console.error('Form submission error:', error);
       // Form is left filled in, so they can just hit send again.
-      setSnackbar(`Couldn't send your message. Please try again, or email ${FORMSUBMIT_EMAIL}.`);
+      setSnackbar(`Couldn't send your message. Please try again, or email ${CONTACT_EMAIL}.`);
     } finally {
       setSubmitting(false);
     }

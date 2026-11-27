@@ -1,6 +1,7 @@
 import Icon from './Icon';
 import ThemeToggle from './ThemeToggle';
 import DestroyModeToggle from './DestroyModeToggle';
+import fx from './DestroyModeToggle.module.css';
 
 const FloatingNav = ({ onNavigate }) => {
   const navItems = [
@@ -12,7 +13,7 @@ const FloatingNav = ({ onNavigate }) => {
 
   return (
     <nav
-      className="fixed top-4 lg:top-6 left-1/2 transform -translate-x-1/2 z-50 backdrop-blur-xl rounded-2xl px-2 py-2"
+      className={`${fx.nav} fixed top-4 lg:top-6 left-1/2 transform -translate-x-1/2 z-50 backdrop-blur-xl rounded-2xl px-2 py-2`}
       style={{
         backdropFilter: 'blur(20px) saturate(180%)',
         backgroundColor: 'var(--nav-bg)',
@@ -21,7 +22,14 @@ const FloatingNav = ({ onNavigate }) => {
         WebkitBackdropFilter: 'blur(20px) saturate(180%)', // Safari support
       }}
     >
-      <div className="flex items-center gap-1 lg:gap-2">
+      {/* Game-mode loading: shown by CSS while the game button is aria-busy.
+          data-dm-fx keeps it out of the game's page snapshot. */}
+      <span className={fx.navFx} data-dm-fx aria-hidden="true">
+        <span className={fx.ring}><i /></span>
+        <span className={`${fx.ring} ${fx.ghost}`}><i /></span>
+        <b className={fx.scan} />
+      </span>
+      <div className={`${fx.navRow} flex items-center gap-1 lg:gap-2`}>
         {navItems.map((item) => {
           return (
             <button

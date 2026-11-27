@@ -614,7 +614,8 @@ export function drawTarget(g, x, y, t) {
 // Original masked hero (brand orange + navy), facing +x with feet at (0,0).
 // p: player state (walk phase, ground/thrust, recoil, squash); aim: world angle;
 // flip: aiming left; gun: live gun state for drawGun. Swap this function for a sprite sheet later.
-export function drawHero(g, p, aim, flip, weapon, t, gun) {
+// dark: lighter pants so they read on a dark page
+export function drawHero(g, p, aim, flip, weapon, t, gun, dark = false) {
   g.save();
   g.translate(Math.round(p.x), Math.round(p.y));
   g.scale(HERO_SCALE, HERO_SCALE);
@@ -653,7 +654,7 @@ export function drawHero(g, p, aim, flip, weapon, t, gun) {
     else if (p.thrust) (fx = back ? -6 : 1), (fy = back ? -1 : -4);
     else (fx = back ? -6 : 9), (fy = back ? -6 : -12);
     const [kx, ky] = knee(0, hipY, fx, fy - 2);
-    limb([[0, hipY], [kx, ky], [fx, fy - 2]], 5.5, back ? NAVY_DARK : NAVY);
+    limb([[0, hipY], [kx, ky], [fx, fy - 2]], 5.5, back ? (dark ? '#2b4a9e' : NAVY_DARK) : dark ? '#3d64c9' : NAVY);
     box(g, fx - 3, fy - 5, 10, 5, back ? '#a8a8b8' : '#e9ecf5', 2); // boot
   };
 
@@ -726,7 +727,7 @@ export function drawHero(g, p, aim, flip, weapon, t, gun) {
     i ? g.lineTo(x, hy + y) : g.moveTo(x, hy + y),
   );
   g.closePath();
-  g.fillStyle = '#1b1b2f';
+  g.fillStyle = '#f2d42c'; // spiky golden hair
   g.fill();
   g.lineWidth = 2;
   g.stroke();
@@ -823,4 +824,102 @@ export function drawScarf(g, pts) {
     pts.forEach((p, i) => (i ? g.lineTo(p.x, p.y) : g.moveTo(p.x, p.y)));
     g.stroke();
   }
+}
+
+// ---------- rank badge ----------
+// Winged hexagon emblem: yellow wings, red hex, a star in the middle.
+// Centre (x, y) is the hex centre, r its radius; it spans ±1.95r across and
+// -1r..1.32r down. t (seconds) drives the star pulse, shine and sparkle.
+export function drawBadge(g, x, y, r, t = 0) {
+  g.save();
+  g.translate(x, y);
+  g.lineJoin = 'round';
+  const path = (pts) => {
+    g.beginPath();
+    pts.forEach(([px, py], i) => (i ? g.lineTo(px * r, py * r) : g.moveTo(px * r, py * r)));
+    g.closePath();
+  };
+  const poly = (pts, fill, lw = 3) => {
+    path(pts);
+    g.fillStyle = fill;
+    g.fill();
+    if (lw) {
+      g.lineWidth = lw;
+      g.strokeStyle = INK;
+      g.stroke();
+    }
+  };
+  const star = (k, rot) => Array.from({ length: 10 }, (_, i) => {
+    const a = rot - Math.PI / 2 + (i * Math.PI) / 5, kk = i % 2 ? k * 0.45 : k;
+    return [Math.cos(a) * kk, Math.sin(a) * kk];
+  });
+  // wings: three feathers a side, drawn bottom-up so the top one overlaps
+  for (const sx of [-1, 1])
+    for (let i = 2; i >= 0; i--) {
+      const f = [[0.6, -0.45 + i * 0.32], [1.95 - i * 0.28, -1 + i * 0.42], [1.8 - i * 0.28, -0.72 + i * 0.42], [0.6, -0.18 + i * 0.32]];
+      poly(f.map(([a, b]) => [a * sx, b]), ['#fff0a0', YELLOW, '#e09a00'][i]);
+    }
+  poly([[-0.55, 0.62], [0, 1], [0.55, 0.62], [0.55, 0.9], [0, 1.32], [-0.55, 0.9]], '#e09a00'); // tail chevron
+  const hex = (k) => Array.from({ length: 6 }, (_, i) => {
+    const a = -Math.PI / 2 + (i * Math.PI) / 3;
+    return [Math.cos(a) * k, Math.sin(a) * k];
+  });
+  const O = hex(1), I = hex(0.72);
+  poly(O, RED, 0);
+  // bevel faces lit from the top-left
+  for (let i = 0; i < 6; i++) {
+    const lit = Math.cos(-Math.PI / 2 + ((i + 0.5) * Math.PI) / 3 + Math.PI * 0.75);
+    poly([O[i], O[(i + 1) % 6], I[(i + 1) % 6], I[i]], lit > 0 ? `rgba(255,255,255,${lit * 0.45})` : `rgba(0,0,0,${-lit * 0.35})`, 0);
+  }
+  // rivets on the rim
+  hex(0.86).forEach(([px, py]) => {
+    g.beginPath();
+    g.arc(px * r, py * r, r * 0.055, 0, Math.PI * 2);
+    g.fillStyle = YELLOW;
+    g.fill();
+    g.lineWidth = 1.5;
+    g.strokeStyle = INK;
+    g.stroke();
+  });
+  const face = g.createLinearGradient(0, -0.72 * r, 0, 0.72 * r);
+  face.addColorStop(0, '#7d1020');
+  face.addColorStop(1, RED);
+  poly(I, face, 2.5);
+  g.save();
+  path(I);
+  g.clip();
+  halftone(g, 0, 0, r * 0.72, 'rgba(0,0,0,.25)', r * 0.05, r * 0.13);
+  path(hex(0.58));
+  g.lineWidth = 1.5;
+  g.strokeStyle = 'rgba(255,210,63,.45)';
+  g.stroke();
+  // star: pulses gently
+  const sp = 1 + Math.sin(t * 4) * 0.06;
+  poly(star(0.44 * sp, 0).map(([a, b]) => [a + 0.04, b + 0.05]), INK, 0);
+  poly(star(0.44 * sp, 0), YELLOW, r * 0.05);
+  poly(star(0.2 * sp, 0), '#fff0a0', 0);
+  // shine sweeping across the face every ~3s
+  const sx = (((t * 0.9) % 2.6) - 1.3) * r;
+  const sh = g.createLinearGradient(sx - r * 0.3, 0, sx + r * 0.3, 0);
+  sh.addColorStop(0, 'rgba(255,255,255,0)');
+  sh.addColorStop(0.5, 'rgba(255,255,255,.45)');
+  sh.addColorStop(1, 'rgba(255,255,255,0)');
+  g.setTransform(g.getTransform().multiply(new DOMMatrix([1, 0, -0.4, 1, 0, 0])));
+  g.fillStyle = sh;
+  g.fillRect(sx - r * 0.3, -r, r * 0.6, r * 2);
+  g.restore();
+  path(O);
+  g.lineWidth = 4;
+  g.strokeStyle = INK;
+  g.stroke();
+  // sparkle: twinkles
+  const tw = 0.55 + 0.45 * Math.abs(Math.sin(t * 2.2));
+  g.fillStyle = '#fff';
+  g.beginPath();
+  for (let i = 0; i < 8; i++) {
+    const a = (i * Math.PI) / 4 + t * 0.6, k = (i % 2 ? 0.06 : 0.26) * tw;
+    g.lineTo(0.84 * r + Math.cos(a) * k * r, -0.88 * r + Math.sin(a) * k * r);
+  }
+  g.fill();
+  g.restore();
 }

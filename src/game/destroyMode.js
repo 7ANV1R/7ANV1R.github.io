@@ -6,10 +6,12 @@
 // overlay. All drawing style lives in ./comic.js.
 import { domToCanvas } from 'modern-screenshot';
 import {
-  INK, ORANGE, YELLOW, RED, CYAN, FONT, GUN_SCALE, HERO_SCALE, loadComicFont, starShape, halftone, halftonePattern, drawBurst,
+  INK, ORANGE, YELLOW, RED, CYAN, FONT, GUN_SCALE, HERO_SCALE, loadComicFont, starShape, starPath, halftone, halftonePattern, drawBurst,
   drawSfx, drawCloud, cloudBlobs, drawFocusLines, drawFlame, drawSpeech, drawCrosshair, drawGun, drawHero, drawScarf,
-  drawDrone, drawBomb, drawTarget,
+  drawDrone, drawBomb, drawTarget, drawBadge,
 } from './comic.js';
+import { track } from '../analytics.js';
+import { CONTACT_EMAIL, sendContact } from '../contact.js';
 
 // Each gun plays differently:
 // Blaster: tap for quick shots, hold to charge a plasma ball (bigger = bigger blast).
@@ -67,7 +69,9 @@ export async function start({ onStop, input } = {}) {
     const root = document.getElementById('root');
     const W = innerWidth, H = innerHeight;
     const Hw = Math.max(H, root.scrollHeight, document.documentElement.scrollHeight);
-    const PS = Math.min(devicePixelRatio || 1, 2, Math.sqrt(MAX_PIXELS / (W * Hw)));
+    // A canvas taller than the GPU's max texture drops to CPU raster, and
+    // every frame then re-uploads the visible slice: the main mobile lag.
+    const PS = Math.min(devicePixelRatio || 1, 2, Math.sqrt(MAX_PIXELS / (W * Hw)), maxTexture() / Hw);
     const font = Promise.race([loadComicFont(), new Promise((r) => setTimeout(r, 3000))]);
     const [shot] = await Promise.all([
       Promise.race([
@@ -83,6 +87,17 @@ export async function start({ onStop, input } = {}) {
     if (pending === token) onStop?.();
   } finally {
     if (pending === token) pending = null;
+  }
+}
+
+function maxTexture() {
+  try {
+    const gl = document.createElement('canvas').getContext('webgl');
+    const n = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+    gl.getExtension('WEBGL_lose_context')?.loseContext();
+    return n;
+  } catch {
+    return 8192;
   }
 }
 
@@ -136,9 +151,9 @@ const HUD_CSS = `
 .dm-slot canvas{position:absolute;left:15px;top:2px;width:56px;height:38px}
 .dm-slot i{position:absolute;inset:0;z-index:1;background:rgba(17,17,17,.35);transform-origin:bottom;transform:scaleY(0);pointer-events:none}
 .dm-hint{position:absolute;left:50%;bottom:112px;transform:translateX(-50%) rotate(-1deg);padding:6px 14px;font-size:16px;white-space:nowrap;text-align:center;background-color:#ffd23f;transition:opacity .8s;max-width:calc(100vw - 32px);overflow:hidden;text-overflow:ellipsis}
-.dm-stick{display:none;position:absolute;left:30px;bottom:34px;width:96px;height:96px;border-radius:50%;pointer-events:auto;touch-action:none;background:rgba(17,17,17,.28);border:2px solid rgba(255,255,255,.3)}
-.dm-stick b{position:absolute;left:0;right:0;text-align:center;font-weight:400;font-size:10px;color:rgba(255,255,255,.55)}
-.dm-knob{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px;border-radius:50%;background:rgba(255,210,63,.85);border:3px solid rgba(17,17,17,.85);box-shadow:0 3px 8px rgba(0,0,0,.35);transition:background .15s}
+.dm-stick{display:none;position:absolute;left:26px;bottom:30px;width:118px;height:118px;border-radius:50%;pointer-events:auto;touch-action:none;background:rgba(17,17,17,.62);border:2px solid rgba(255,255,255,.4)}
+.dm-stick b{position:absolute;left:0;right:0;text-align:center;font-weight:400;font-size:11px;color:rgba(255,255,255,.75)}
+.dm-knob{position:absolute;left:50%;top:50%;width:58px;height:58px;margin:-29px;border-radius:50%;background:rgba(255,210,63,.85);border:3px solid rgba(17,17,17,.85);box-shadow:0 3px 8px rgba(0,0,0,.35);transition:background .15s}
 .dm-knob.fast{background:rgba(243,108,56,.9)}
 .dm-hud.touch .dm-stick{display:block}
 .dm-hud.touch .dm-kbd{display:none}
@@ -154,40 +169,61 @@ const HUD_CSS = `
 .dm-hud.touch .dm-hint{bottom:auto;top:84px;font-size:14px;white-space:normal;text-align:center;width:max-content}
 html.dm-playing,html.dm-playing *{cursor:none!important}
 html.dm-playing .dm-hud button,html.dm-playing .dm-hud .dm-dev{cursor:pointer!important}
-.dm-win{position:absolute;inset:0;display:grid;place-items:center;padding:16px;pointer-events:auto;overflow:hidden;background:rgba(23,17,47,.5);animation:dm-fade .4s both}
-.dm-rays{position:absolute;left:50%;top:50%;width:250vmax;height:250vmax;margin:-125vmax;background:repeating-conic-gradient(rgba(255,210,63,.32) 0 7deg,transparent 7deg 18deg);animation:dm-spin 40s linear infinite;pointer-events:none}
-.dm-card{position:relative;width:min(560px,100%);padding:30px 20px 20px;text-align:center;animation:dm-card .7s cubic-bezier(.2,1.5,.4,1) .1s both}
+.dm-hud.won>:not(.dm-win){visibility:hidden}
+.dm-win{position:absolute;inset:0;display:grid;place-items:center;padding:16px;pointer-events:auto;overflow:hidden;background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 3px),rgba(6,4,14,.9);animation:dm-fade .4s both}
+.dm-card{--cut:polygon(0 26px,26px 0,37% 0,40% 12px,60% 12px,63% 0,calc(100% - 44px) 0,100% 44px,100% calc(100% - 26px),calc(100% - 26px) 100%,63% 100%,60% calc(100% - 12px),40% calc(100% - 12px),37% 100%,44px 100%,0 calc(100% - 44px));position:relative;width:min(600px,100%);padding:46px 28px 34px;text-align:center;filter:drop-shadow(-4px 0 0 #00e5ff) drop-shadow(4px 0 0 #ff2bd6) drop-shadow(6px 8px 0 #111);animation:dm-card .7s cubic-bezier(.2,1.5,.4,1) .1s both,dm-jolt 4s 1.5s infinite}
+.dm-card::before,.dm-card::after{content:'';position:absolute;z-index:-1;clip-path:var(--cut)}
+.dm-card::before{inset:0;background:#111}
+.dm-card::after{inset:4px;background-color:#fff8e1;background-image:radial-gradient(rgba(0,0,0,.13) 1px,transparent 1.6px);background-size:6px 6px}
 .dm-issue{position:absolute;left:-8px;top:-16px;padding:3px 10px;background:#d7263d;color:#fff;border:3px solid #111;transform:rotate(-4deg);font-size:14px}
-.dm-burst{position:absolute;left:50%;top:76px;width:min(460px,96%);height:150px;transform:translate(-50%,-50%);animation:dm-throb 1.1s ease-in-out infinite alternate}
-.dm-burst div{position:absolute;inset:0}
+.dm-glitch{position:relative;margin:0 -24px;padding:14px 12px 16px;background:#111;overflow:hidden}
+.dm-glitch::before{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.07) 0 1px,transparent 1px 3px)}
+.dm-glitch::after{content:'';position:absolute;left:0;right:0;top:-20%;height:14%;z-index:2;pointer-events:none;background:rgba(0,229,255,.16);animation:dm-scan 2.6s linear 1.2s infinite}
+.dm-title::before,.dm-title::after{content:attr(data-text);position:absolute;inset:0;pointer-events:none;opacity:0;-webkit-text-stroke:0;text-shadow:none}
+.dm-title::before{color:#00e5ff;animation:dm-glitch-a 2.4s steps(1) 1.3s infinite}
+.dm-title::after{color:#ff2bd6;animation:dm-glitch-b 3.1s steps(1) 1.6s infinite}
 .dm-title{position:relative;margin:4px 0 0;font-weight:400;font-size:clamp(40px,11vw,74px);line-height:.95;color:#ffd23f;-webkit-text-stroke:2px #111;text-shadow:4px 4px 0 #d7263d,7px 7px 0 #111}
 .dm-title span{display:inline-block;white-space:pre;animation:dm-drop .5s cubic-bezier(.3,1.8,.5,1) both;animation-delay:calc(.35s + var(--i) * .05s)}
-.dm-stamp{display:inline-block;margin:16px 0 14px;padding:4px 14px;border:4px solid #d7263d;color:#d7263d;background:rgba(255,255,255,.7);font-size:clamp(18px,5vw,26px);transform:rotate(-6deg);animation:dm-stamp .35s cubic-bezier(.5,0,.6,1.4) 1.25s both}
+.dm-rank{display:flex;flex-direction:column;align-items:center;margin:14px 0 16px;animation:dm-stamp .45s cubic-bezier(.5,0,.6,1.4) 1.25s both}
+.dm-badge{width:170px;height:104px;animation:dm-glow 1.4s ease-in-out 1.7s infinite alternate,dm-float 2.6s ease-in-out 1.7s infinite}
+.dm-rank-name{margin-top:4px;padding:3px 16px;border:2px solid #ffd23f;background:#111;color:#fff;font-size:clamp(18px,5vw,24px);text-shadow:2px 2px 0 #d7263d;transform:skewX(-8deg);box-shadow:3px 3px 0 #111}
 .dm-stats{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-bottom:18px}
 .dm-stats div{min-width:84px;padding:4px 12px;border:3px solid #111;background:#fff;box-shadow:3px 3px 0 #111;animation:dm-up .4s both;animation-delay:calc(1.5s + var(--i) * .12s)}
 .dm-stats b{display:block;font-size:28px;font-weight:400;line-height:1.1}
 .dm-stats small{font-size:12px;color:#d7263d}
 .dm-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;animation:dm-up .4s 2s both;pointer-events:none}
-.dm-actions button{font:inherit;font-size:18px;letter-spacing:.05em;padding:8px 14px;border:3px solid #111;box-shadow:4px 4px 0 #111;background:#ffd23f;color:#111;cursor:pointer;touch-action:manipulation;transition:transform .12s}
-.dm-actions button:hover{transform:translateY(-2px) rotate(-1deg)}
+.dm-actions button,.dm-hi button{font:inherit;font-size:18px;letter-spacing:.05em;padding:8px 14px;border:3px solid #111;box-shadow:4px 4px 0 #111;background:#ffd23f;color:#111;cursor:pointer;touch-action:manipulation;transition:transform .12s}
+.dm-actions button:hover,.dm-hi button:hover:not(:disabled){transform:translateY(-2px) rotate(-1deg)}
 .dm-actions [data-keep]{background:#fff}
 .dm-actions [data-leave]{background:#d7263d;color:#fff}
+.dm-actions [data-hi],.dm-hi [data-send]{background:#7cc248;color:#111}
+.dm-actions [data-hi]{font-size:20px}
+.dm-break{flex-basis:100%;height:0}
+.dm-hi{margin:auto;width:min(440px,calc(100vw - 32px));padding:22px 20px 18px;color:#111;user-select:text;-webkit-user-select:text}
+.dm-hi[open]{animation:dm-card .4s cubic-bezier(.2,1.5,.4,1) both}
+.dm-hi::backdrop{background:rgba(6,4,14,.65)}
+.dm-hi h3{margin:0;font-weight:400;font-size:34px;line-height:1;color:#ffd23f;-webkit-text-stroke:1.5px #111;text-shadow:3px 3px 0 #d7263d}
+.dm-hi p{margin:6px 0 14px;font-size:15px;color:#d7263d}
+.dm-hi label{display:block;margin-bottom:10px;font-size:15px}
+.dm-hi input,.dm-hi textarea{display:block;width:100%;box-sizing:border-box;margin-top:3px;padding:8px 10px;border:3px solid #111;border-radius:0;background:#fff;color:#111;font:16px/1.4 system-ui,sans-serif;letter-spacing:0;resize:vertical}
+.dm-hi input:focus,.dm-hi textarea:focus{outline:none;box-shadow:4px 4px 0 #ff2bd6}
+.dm-hi [data-status]{min-height:1.3em;margin-bottom:10px;font-size:16px}
+.dm-hi-actions{display:flex;justify-content:flex-end;gap:10px}
+.dm-hi [data-cancel]{background:#fff}
+.dm-hi button:disabled{opacity:.6;cursor:wait}
 @keyframes dm-fade{from{opacity:0}}
-@keyframes dm-spin{to{transform:rotate(360deg)}}
 @keyframes dm-card{from{transform:scale(.2) rotate(-14deg);opacity:0}}
-@keyframes dm-throb{to{transform:translate(-50%,-50%) scale(1.06) rotate(2deg)}}
+@keyframes dm-jolt{0%,90%,96%,100%{transform:none}91%{transform:translate(-5px,2px) skewX(-4deg)}93%{transform:translate(4px,-1px) skewX(3deg)}95%{transform:translate(-2px,0)}}
+@keyframes dm-scan{to{top:120%}}
+@keyframes dm-glitch-a{0%{opacity:.9;transform:translate(-4px,0);clip-path:inset(10% 0 68% 0)}6%{transform:translate(5px,0);clip-path:inset(55% 0 22% 0)}12%{transform:translate(-3px,0);clip-path:inset(32% 0 46% 0)}18%,100%{opacity:0}}
+@keyframes dm-glitch-b{0%{opacity:.9;transform:translate(4px,0);clip-path:inset(62% 0 8% 0)}5%{transform:translate(-5px,0);clip-path:inset(18% 0 60% 0)}10%{transform:translate(3px,0);clip-path:inset(40% 0 38% 0)}15%,100%{opacity:0}}
 @keyframes dm-drop{from{transform:translateY(-90px) rotate(-25deg) scale(1.6);opacity:0}}
-@keyframes dm-stamp{from{transform:rotate(-6deg) scale(3);opacity:0}}
+@keyframes dm-stamp{from{transform:scale(3) rotate(-8deg);opacity:0}}
+@keyframes dm-glow{from{filter:drop-shadow(0 0 2px rgba(255,210,63,.6))}to{filter:drop-shadow(0 0 14px rgba(255,210,63,.9))}}
+@keyframes dm-float{50%{transform:translateY(-4px)}}
 @keyframes dm-up{from{transform:translateY(16px);opacity:0}}
-@media (prefers-reduced-motion:reduce){.dm-win,.dm-win *{animation:none!important}}
+@media (prefers-reduced-motion:reduce){.dm-win,.dm-win *,.dm-win *::before,.dm-win *::after{animation:none!important}}
 `;
-
-// CSS clip-path for a comic starburst (an ellipse with spikes).
-const burstClip = (spikes, inner) =>
-  `polygon(${Array.from({ length: spikes * 2 }, (_, i) => {
-    const a = (i / (spikes * 2)) * Math.PI * 2, r = i % 2 ? inner : 1;
-    return `${(50 + Math.cos(a) * 50 * r).toFixed(1)}% ${(50 + Math.sin(a) * 50 * r).toFixed(1)}%`;
-  }).join(',')})`;
 
 function createGame(shot, { W, H, Hw, PS, input }, onStop) {
   const dpr = Math.min(devicePixelRatio || 1, 2);
@@ -274,29 +310,31 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
     return y >= 0 && mask[y * W + x] === 1;
   };
 
-  function inPoly(px, py, poly) {
-    let inside = false;
-    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-      const [xi, yi] = poly[i], [xj, yj] = poly[j];
-      if (yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) inside = !inside;
-    }
-    return inside;
-  }
-
+  // Scanline fill (even-odd, pixel centres): per row, find where the edges
+  // cross and fill the spans between, instead of a point-in-polygon test
+  // per pixel. Explosions call this a lot, so it matters on phones.
   function fillMask(poly, v) {
-    const xs = poly.map((p) => p[0]), ys = poly.map((p) => p[1]);
-    const x0 = Math.max(0, Math.floor(Math.min(...xs))), x1 = Math.min(W - 1, Math.ceil(Math.max(...xs)));
+    const ys = poly.map((p) => p[1]), xs = [];
     const y0 = Math.max(0, Math.floor(Math.min(...ys))), y1 = Math.min(Hw - 1, Math.ceil(Math.max(...ys)));
-    for (let y = y0; y <= y1; y++)
-      for (let x = x0; x <= x1; x++) {
-        const i = y * W + x;
-        if (!inPoly(x + 0.5, y + 0.5, poly)) continue;
-        if (!v && original[i]) {
-          original[i] = 0;
-          removed++;
-        }
-        mask[i] = v;
+    for (let y = y0; y <= y1; y++) {
+      const py = y + 0.5;
+      xs.length = 0;
+      for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+        const [xi, yi] = poly[i], [xj, yj] = poly[j];
+        if (yi > py !== yj > py) xs.push(((xj - xi) * (py - yi)) / (yj - yi) + xi);
       }
+      xs.sort((a, b) => a - b);
+      for (let k = 0; k + 1 < xs.length; k += 2) {
+        const xb = Math.min(W - 1, Math.ceil(xs[k + 1] - 0.5) - 1);
+        for (let x = Math.max(0, Math.ceil(xs[k] - 0.5)), i = y * W + x; x <= xb; x++, i++) {
+          if (!v && original[i]) {
+            original[i] = 0;
+            removed++;
+          }
+          mask[i] = v;
+        }
+      }
+    }
   }
 
   const tracePath = (g, poly, dx = 0, dy = 0) => {
@@ -358,7 +396,10 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
     if (w.id === 'drones') drawDrone(ig, { x: 0, y: 0, dir: 0, dropped: true }, 0);
     else drawGun(ig, w);
     b.prepend(ic);
-    b.onclick = () => setWeapon(i);
+    // pointerdown, not just click: browsers don't turn a tap into a click while
+    // another finger is down, so with a thumb on the stick click never came.
+    // click stays for Enter/Space.
+    b.onpointerdown = b.onclick = () => setWeapon(i);
     $('[data-guns]').append(b);
     return b;
   });
@@ -370,22 +411,48 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
   document.documentElement.classList.add('dm-playing');
 
   // ---------- state ----------
-  // Drop in just above the biggest heading in the first screen of the page
-  // (page coordinates, since the game opens at the top).
+  // Drop in by the biggest heading near the top of the page (page
+  // coordinates, since the game opens at the top). On short phones the
+  // headline sits below the centred profile card, so look past the first
+  // screen; the camera follows him down.
+  // the text's own box: a block heading spans the whole column
+  const textBox = (el) => {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    return range.getBoundingClientRect();
+  };
   const heading = [...document.querySelectorAll('h1, h2, h3')]
     .map((el) => {
-      const r = el.getBoundingClientRect();
+      const r = textBox(el);
       return { el, left: r.left, right: r.right, top: r.top + scrollY, w: r.width };
     })
-    .filter((h) => h.w && h.left >= 0 && h.right <= W && h.top > 60 && h.top < H * 0.7)
+    .filter((h) => h.w && h.left >= 0 && h.right <= W && h.top > 60 && h.top < H * 1.5)
     .sort((a, b) => parseFloat(getComputedStyle(b.el).fontSize) - parseFloat(getComputedStyle(a.el).fontSize))[0];
+  // Desktop: drop through the empty space right of the headline (and of a
+  // heading right below it, SOFTWARE over ENGINEER), landing on the paragraph
+  // under them, facing the page. Mobile: land on the headline's left end.
+  const wide = W >= 1024;
+  const under = heading?.el.nextElementSibling;
+  const underRight = under?.matches('h1, h2, h3') ? textBox(under).right : 0;
   const P = {
-    x: heading ? heading.left + 30 : W / 2,
+    x: heading
+      ? wide
+        ? Math.min(Math.max(heading.right, underRight) + 60, W - 80)
+        : heading.left + 30
+      : W / 2,
     y: heading ? Math.max(PH + 10, heading.top) : PH + 10,
     vx: 0, vy: 0, ground: false, walk: 0, recoil: 0, ghost: false, thrust: false, sprint: false,
   };
   let camY = 0, follow = true;
-  const mouse = { x: P.x + 200, y: P.y + 120 }; // screen coords
+  const mouse = { x: P.x + (wide ? -200 : 200), y: P.y + 120 }; // screen coords
+  // Dark mode: the hero's black ink, dark hair and navy pants vanish into the
+  // page. Draw him on a layer and stamp a light silhouette behind it, like a
+  // comic sticker. Light mode stays as is.
+  const rim = document.documentElement.getAttribute('data-theme') === 'dark' && (() => {
+    const S = 280, mk = () => Object.assign(document.createElement('canvas'), { width: S * dpr, height: S * dpr });
+    const layer = mk(), tint = mk();
+    return { S, layer, tint, lg: layer.getContext('2d'), tg: tint.getContext('2d') };
+  })();
   const aimW = () => ({ x: mouse.x, y: mouse.y + camY }); // world coords
   let weapon = 0, firing = false, tapped = false, fireId = null, shake = 0, raf = 0, last = performance.now();
   const lastShot = WEAPONS.map(() => -1e9);
@@ -442,6 +509,7 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
   // ---------- input ----------
   const keys = new Set();
   const onKey = (e) => {
+    if (e.target.closest?.('dialog')) return; // typing in the say-hi form
     const key = e.key.toLowerCase();
     const map = { arrowleft: 'a', arrowright: 'd', arrowup: 'w', ' ': 'w', arrowdown: 's' };
     const kk = map[key] || key;
@@ -460,6 +528,7 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
   const clearKeys = () => keys.clear();
   const onAnyPointer = (e) => e.pointerType !== 'mouse' && setTouch(true);
   const onWheel = (e) => {
+    if (e.target.closest?.('dialog')) return;
     e.preventDefault();
     e.stopPropagation(); // keep Lenis (window listener) from scrolling underneath
     camY = Math.max(0, Math.min(Hw - H, camY + e.deltaY));
@@ -874,7 +943,6 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
 
   // ---------- reward ----------
   const fmtTime = (s) => `${(s / 60) | 0}:${String(s % 60 | 0).padStart(2, '0')}`;
-  const rankFor = (s) => RANKS.find(([max]) => s <= max)[1];
 
   function win() {
     if (won) return;
@@ -885,35 +953,50 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
     keys.clear();
     party = 3;
     document.documentElement.classList.remove('dm-playing'); // real cursor over the reward
-    const time = fmtTime(t), rank = rankFor(t);
+    const time = fmtTime(t), rank = RANKS.find(([max]) => t <= max)[1];
     for (let i = 0; i < 180; i++)
       fx({ t: 'confetti', x: rand(0, W), y: camY - rand(10, H * 0.6), vx: rand(-90, 90), vy: rand(0, 160), rot: rand(0, 6), va: rand(-10, 10),
         w: rand(5, 10), h: rand(3, 6), color: pick([YELLOW, RED, ORANGE, CYAN, '#fff', '#7cc248']), life: rand(3, 5) });
     [523, 659, 784, 1046].forEach((f, i) => tone(f, f, i === 3 ? 0.7 : 0.18, 0.12, 'square', 0.35 + i * 0.16));
     winEl = document.createElement('div');
     winEl.className = 'dm-win';
-    winEl.innerHTML = `<div class="dm-rays"></div>
-      <div class="dm-panel dm-card" role="dialog" aria-label="Site destroyed">
+    winEl.innerHTML = `<div class="dm-card" role="dialog" aria-label="Site destroyed">
         <div class="dm-issue">FINAL ISSUE · #100%</div>
-        <div class="dm-burst"><div style="background:#111;clip-path:${burstClip(18, 0.72)}"></div><div style="inset:5px;background:#fff;clip-path:${burstClip(18, 0.72)}"></div></div>
-        <h2 class="dm-title">${[...WIN_LETTERS].map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}</h2>
-        <div class="dm-stamp">RANK: ${rank}</div>
+        <div class="dm-glitch"><h2 class="dm-title" data-text="${WIN_LETTERS}">${[...WIN_LETTERS].map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}</h2></div>
+        <div class="dm-rank"><canvas class="dm-badge" aria-hidden="true"></canvas><div class="dm-rank-name">${rank}</div></div>
         <div class="dm-stats">
           <div style="--i:0"><b>${time}</b><small>TIME</small></div>
           <div style="--i:1"><b>${stats.shots}</b><small>SHOTS FIRED</small></div>
           <div style="--i:2"><b>${stats.booms}</b><small>EXPLOSIONS</small></div>
         </div>
         <div class="dm-actions">
+          <button data-hi>👋 Say hi to Tanvir!</button><i class="dm-break"></i>
           <button data-shot>📸 Screenshot</button>
           <button data-keep>Keep smashing</button>
           <button data-leave>Exit</button>
         </div>
       </div>`;
+    const badge = winEl.querySelector('.dm-badge');
+    badge.width = 170 * dpr;
+    badge.height = 104 * dpr;
+    const bg = badge.getContext('2d');
+    bg.scale(dpr, dpr);
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const spin = (now) => {
+      if (!badge.isConnected && now) return; // reward closed
+      bg.clearRect(0, 0, 170, 104);
+      drawBadge(bg, 85, 46, 41, (now || 0) / 1000);
+      if (!still) requestAnimationFrame(spin);
+    };
+    spin(0);
     hud.append(winEl);
+    hud.classList.add('won'); // hide meter, guns, top Exit: the card has its own buttons
     winEl.querySelector('[data-shot]').onclick = () => screenshot(time, rank);
+    winEl.querySelector('[data-hi]').onclick = () => sayHi(time, rank);
     winEl.querySelector('[data-leave]').onclick = () => stop();
     winEl.querySelector('[data-keep]').onclick = () => {
       winEl.remove();
+      hud.classList.remove('won');
       won = false;
       document.documentElement.classList.add('dm-playing');
     };
@@ -926,36 +1009,219 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
     }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 2300);
   }
 
-  // The wrecked view plus a comic caption, saved (or shared, on phones) as PNG.
+  // The site's contact form, prefilled with a brag the player can edit.
+  function sayHi(time, rank) {
+    const dlg = document.createElement('dialog');
+    dlg.className = 'dm-panel dm-hi';
+    dlg.setAttribute('aria-label', 'Say hi to Tanvir');
+    dlg.innerHTML = `<form>
+        <h3>Say hi to Tanvir!</h3>
+        <p>He built it. You wrecked it. Tell him how it felt.</p>
+        <label>Your name<input name="name" required maxlength="100" autocomplete="name"></label>
+        <label>Email<input name="email" type="email" required autocomplete="email"></label>
+        <label>Message<textarea name="message" rows="4" required maxlength="2000"></textarea></label>
+        <div data-status aria-live="polite"></div>
+        <div class="dm-hi-actions"><button type="button" data-cancel>Cancel</button><button data-send>Send it 🔥</button></div>
+      </form>`;
+    const form = dlg.querySelector('form'), status = dlg.querySelector('[data-status]'), send = dlg.querySelector('[data-send]');
+    form.elements.message.value = `I just smashed your whole site, huh! 🔥\n\n(${rank}, ${time})`;
+    dlg.querySelector('[data-cancel]').onclick = () => dlg.close();
+    dlg.addEventListener('close', () => dlg.remove());
+    form.onsubmit = async (e) => {
+      e.preventDefault(); // the browser already checked required + email format
+      const fields = Object.fromEntries(new FormData(form));
+      if (Object.values(fields).some((v) => !v.trim())) return void (status.textContent = 'Fill in all three, hero.');
+      send.disabled = true;
+      status.textContent = 'Sending…';
+      try {
+        await sendContact(fields);
+        track('contact_submitted', { from: 'destroy_mode' }); // no form contents sent
+        status.textContent = 'Sent! Tanvir will get back to you soon.';
+        setTimeout(() => dlg.close(), 1600);
+      } catch (err) {
+        console.error('Say hi failed:', err);
+        status.textContent = `Couldn't send. Try again, or email ${CONTACT_EMAIL}.`;
+        send.disabled = false;
+      }
+    };
+    winEl.append(dlg);
+    dlg.showModal();
+  }
+
+  // A shareable poster: the wreck darkened behind a comic KA-BOOM, with the
+  // run's title, rank badge and stats on a card in front. Saved (or shared,
+  // on phones) as PNG.
   function screenshot(time, rank) {
+    const NC = '#00e5ff', NM = '#ff2bd6', GOLD = '#ffd23f';
     const c = document.createElement('canvas');
     c.width = canvas.width;
     c.height = canvas.height;
     const g = c.getContext('2d');
     g.drawImage(canvas, 0, 0);
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const bw = Math.min(W - 24, 520), bh = 92, bx = (W - bw) / 2, by = H - bh - 22;
-    g.fillStyle = INK;
-    g.fillRect(bx + 6, by + 6, bw, bh);
-    g.fillStyle = YELLOW;
-    g.fillRect(bx, by, bw, bh);
-    g.lineWidth = 3;
-    g.strokeStyle = INK;
-    g.strokeRect(bx, by, bw, bh);
+    g.fillStyle = 'rgba(6,4,14,.86)';
+    g.fillRect(0, 0, W, H);
+    g.lineJoin = 'round';
     g.textAlign = 'center';
     g.textBaseline = 'middle';
-    g.lineJoin = 'round';
-    g.font = `${Math.min(44, bw / 9)}px ${FONT}`;
-    g.lineWidth = 7;
-    g.strokeText(WIN_LETTERS, W / 2 + 3, by + 36 + 3);
-    g.fillStyle = RED;
-    g.fillText(WIN_LETTERS, W / 2 + 3, by + 36 + 3);
-    g.strokeText(WIN_LETTERS, W / 2, by + 36);
-    g.fillStyle = '#fff';
-    g.fillText(WIN_LETTERS, W / 2, by + 36);
-    g.font = `17px ${FONT}`;
+    const font = (px) => (g.font = `${px}px ${FONT}`);
+    const fit = (text, max, px) => (font(px), Math.min(px, (px * max) / g.measureText(text).width));
+    const inked = (text, x, y, lw, fill) => {
+      g.lineWidth = lw;
+      g.strokeStyle = INK;
+      g.strokeText(text, x, y);
+      g.fillStyle = fill;
+      g.fillText(text, x, y);
+    };
+
+    // layout: a card centred on screen, 4 stat chips per row (2 on phones)
+    const pw = Math.min(W - 32, 620), cols = pw < 480 ? 2 : 4, pad = 24;
+    const fs = fit(WIN_LETTERS, pw - 70, 76), bandH = fs * 1.35, br = 40, rankH = br * 2.32 + 40, chipH = 66, gap = 10;
+    const rows = 4 / cols, chipsH = rows * chipH + (rows - 1) * gap;
+    const ph = pad + 26 + bandH + 20 + rankH + 20 + chipsH + pad + 6;
+    const px = (W - pw) / 2, py = Math.max(30, (H - ph - 50) / 2), cx = W / 2, cy = py + ph / 2;
+
+    // KA-BOOM burst behind the card, the game's impact style: soft drop,
+    // layered star with ink outline, halftone
+    const R = Math.hypot(pw, ph) * 0.6, shape = starShape(14);
+    starPath(g, cx + 10, cy + 12, R, shape, 0.1);
+    g.fillStyle = 'rgba(0,0,0,.45)';
+    g.fill();
+    [[RED, 1], [ORANGE, 0.84], [GOLD, 0.68]].forEach(([col, k], i) => {
+      starPath(g, cx, cy, R * k, shape, 0.1 + i * 0.12);
+      g.fillStyle = col;
+      g.fill();
+      g.lineWidth = i ? 3 : 5;
+      g.strokeStyle = INK;
+      g.stroke();
+    });
+    halftone(g, cx, cy, R, 'rgba(17,17,17,.16)', 4, 10);
+
+    // the card: cut corners, ink drop, RGB split edges, halftone paper
+    const cut = (x, y, w, h, k) => {
+      g.beginPath();
+      g.moveTo(x + k, y);
+      g.lineTo(x + w - k * 1.6, y);
+      g.lineTo(x + w, y + k * 1.6);
+      g.lineTo(x + w, y + h - k);
+      g.lineTo(x + w - k, y + h);
+      g.lineTo(x + k * 1.6, y + h);
+      g.lineTo(x, y + h - k * 1.6);
+      g.lineTo(x, y + k);
+      g.closePath();
+    };
+    for (const [dx, dy, col] of [[8, 10, INK], [-5, 0, NC], [5, 0, NM]]) {
+      cut(px + dx, py + dy, pw, ph, 22);
+      g.fillStyle = col;
+      g.fill();
+    }
+    cut(px, py, pw, ph, 22);
+    g.fillStyle = halftonePattern(g, '#fff8e1', 'rgba(0,0,0,.13)', 6, 1);
+    g.fill();
+    g.lineWidth = 4;
+    g.strokeStyle = INK;
+    g.stroke();
+
+    // glitch title band
+    font(17);
     g.fillStyle = INK;
-    g.fillText(`${rank} · ${time} · ${location.host}`, W / 2, by + 72);
+    g.fillText(location.host.toUpperCase().split('').join(' '), cx, py + pad + 4);
+    let y = py + pad + 26;
+    const ty = y + bandH / 2, o = fs / 20;
+    const band = () => {
+      g.fillStyle = INK;
+      g.fillRect(px + 4, y, pw - 8, bandH);
+    };
+    const title = (dx) => {
+      font(fs);
+      g.fillStyle = NC;
+      g.fillText(WIN_LETTERS, cx + dx - o, ty);
+      g.fillStyle = NM;
+      g.fillText(WIN_LETTERS, cx + dx + o, ty);
+      inked(WIN_LETTERS, cx + dx + o, ty + o, fs / 16, RED);
+      inked(WIN_LETTERS, cx + dx, ty, fs / 16, GOLD);
+    };
+    band();
+    title(0);
+    g.fillStyle = 'rgba(255,255,255,.06)';
+    for (let yy = y; yy < y + bandH; yy += 3) g.fillRect(px + 4, yy, pw - 8, 1);
+    y += bandH + 20;
+
+    // rank badge + name plate, with a yellow glow behind
+    const tc = GOLD, by = y + br * 1.02;
+    const glow = g.createRadialGradient(cx, by, 0, cx, by, br * 2.4);
+    glow.addColorStop(0, tc + '99');
+    glow.addColorStop(1, tc + '00');
+    g.fillStyle = glow;
+    g.fillRect(cx - br * 2.4, by - br * 2.4, br * 4.8, br * 4.8);
+    drawBadge(g, cx, by, br, 0.9); // a frame with the shine mid-face
+    const nf = fit(rank, pw - 100, 24);
+    font(nf);
+    const nw = g.measureText(rank).width + 32, ny = y + br * 2.32 + 22;
+    g.save();
+    g.translate(cx, ny);
+    g.transform(1, 0, -0.14, 1, 0, 0);
+    g.fillStyle = INK;
+    g.fillRect(-nw / 2 + 3, -15 + 3, nw, 30);
+    g.fillRect(-nw / 2, -15, nw, 30);
+    g.lineWidth = 2;
+    g.strokeStyle = tc;
+    g.strokeRect(-nw / 2, -15, nw, 30);
+    font(nf);
+    g.fillStyle = RED;
+    g.fillText(rank, 2, 3);
+    g.fillStyle = '#fff';
+    g.fillText(rank, 0, 1);
+    g.restore();
+    y += rankH + 20;
+
+    // stat chips
+    const chips = [[time, 'TIME'], [stats.shots, 'SHOTS FIRED'], [stats.booms, 'EXPLOSIONS'], ['100%', 'WRECKED']];
+    const cw = (pw - 48 - gap * (cols - 1)) / cols;
+    chips.forEach(([v, k], i) => {
+      const x = px + 24 + (i % cols) * (cw + gap), yy = y + ((i / cols) | 0) * (chipH + gap);
+      g.fillStyle = NM;
+      g.fillRect(x + 5, yy + 5, cw, chipH);
+      g.fillStyle = '#fff';
+      g.fillRect(x, yy, cw, chipH);
+      g.lineWidth = 3;
+      g.strokeStyle = INK;
+      g.strokeRect(x, yy, cw, chipH);
+      font(chipH * 0.46);
+      g.fillStyle = INK;
+      g.fillText(String(v), x + cw / 2, yy + chipH * 0.4);
+      font(chipH * 0.19);
+      g.fillStyle = RED;
+      g.fillText(k, x + cw / 2, yy + chipH * 0.8);
+    });
+
+    // stickers on the card + the dare underneath
+    g.save();
+    g.translate(px - 6, py - 2);
+    g.rotate(-0.05);
+    font(14);
+    g.textAlign = 'left';
+    const issue = 'FINAL ISSUE · #100%', iw = g.measureText(issue).width + 20;
+    g.fillStyle = RED;
+    g.fillRect(0, -12, iw, 24);
+    g.lineWidth = 3;
+    g.strokeStyle = INK;
+    g.strokeRect(0, -12, iw, 24);
+    g.fillStyle = '#fff';
+    g.fillText(issue, 10, 1);
+    g.restore();
+    g.save();
+    const sfx = Math.max(24, fs * 0.6);
+    g.translate(Math.min(px + pw - 40, W - sfx * 2 - 8), py - 4); // stays inside on phones
+    g.rotate(0.16);
+    g.transform(1, 0, -0.18, 1, 0, 0);
+    font(sfx);
+    inked('KA-BOOM!', 3, 3, sfx / 6, RED);
+    inked('KA-BOOM!', 0, 0, sfx / 6, '#fff');
+    g.restore();
+    font(26);
+    inked('CAN YOU BEAT IT?', cx, py + ph + 36, 6, GOLD);
+
     const name = 'site-destroyed.png';
     try {
       c.toBlob(async (blob) => {
@@ -1392,8 +1658,26 @@ function createGame(shot, { W, H, Hw, PS, input }, onStop) {
     }
 
     const flip = aimW().x < P.x;
-    drawScarf(ctx, scarf);
-    drawHero(ctx, P, aimAngle(), flip, WEAPONS[weapon], t, gun);
+    if (rim) {
+      // layer is centred on the hero's middle: (S/2, S/2) = (P.x, P.y - 50)
+      const { S, layer, tint, lg, tg } = rim, ox = P.x - S / 2, oy = P.y - 50 - S / 2;
+      lg.setTransform(dpr, 0, 0, dpr, 0, 0);
+      lg.clearRect(0, 0, S, S);
+      lg.translate(-ox, -oy);
+      drawScarf(lg, scarf);
+      drawHero(lg, P, aimAngle(), flip, WEAPONS[weapon], t, gun, true);
+      tg.globalCompositeOperation = 'copy';
+      tg.drawImage(layer, 0, 0);
+      tg.globalCompositeOperation = 'source-in';
+      tg.fillStyle = 'rgba(244, 236, 223, 0.45)';
+      tg.fillRect(0, 0, tint.width, tint.height);
+      // ponytail: 4-way 1px stamp = faint hairline rim; ctx.filter drop-shadow would be one call but Safari lacks it
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) ctx.drawImage(tint, ox + dx, oy + dy, S, S);
+      ctx.drawImage(layer, ox, oy, S, S);
+    } else {
+      drawScarf(ctx, scarf);
+      drawHero(ctx, P, aimAngle(), flip, WEAPONS[weapon], t, gun);
+    }
     if (gun.charge > 0) {
       // plasma ball gathering at the muzzle, sparks pulled in
       // sits at the barrel mouth, growing outward along the barrel

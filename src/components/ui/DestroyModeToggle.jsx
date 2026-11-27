@@ -57,12 +57,13 @@ const DestroyModeToggle = () => {
     const input = pointer.current || 'keyboard';
     pointer.current = null;
     setTease(false);
+    // Show loading before the chunk download, which is the slow part on a real network.
+    if (state === 'off') setState('loading');
     const game = await loadGame();
     if (game.isRunning()) {
       game.stop();
       return setState('off');
     }
-    setState('loading');
     await game.start({ onStop: () => setState('off'), input });
     if (game.isRunning()) track('destroy_mode_started');
     setState(game.isRunning() ? 'on' : 'off');
