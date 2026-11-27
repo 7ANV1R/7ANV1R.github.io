@@ -1,10 +1,7 @@
 import React from 'react';
 import SectionTitle from '../ui/SectionTitle';
-import {
-  HiOutlineCode,
-  HiOutlineTemplate,
-  HiOutlineArrowRight,
-} from 'react-icons/hi';
+import { track } from '../../analytics';
+import Icon from '../ui/Icon';
 import orangePattern from '../../assets/orange-pattern.svg';
 import greenPattern from '../../assets/green-pattern.svg';
 
@@ -13,7 +10,7 @@ const cardData = [
   {
     id: 'code',
     title: ['CODE, CODE', '& VIBE CODE'],
-    icon: HiOutlineCode,
+    icon: 'code',
     bgClass: 'from-orange-400 to-red-500',
     pattern: orangePattern,
     textColor: 'text-white',
@@ -24,7 +21,7 @@ const cardData = [
   {
     id: 'design',
     title: ['FIGMA,SPLINE', '& DESIGN'],
-    icon: HiOutlineTemplate,
+    icon: 'template',
     bgClass: 'from-lime-400 to-green-400',
     pattern: greenPattern,
     textColor: 'text-black',
@@ -51,10 +48,11 @@ const About = () => {
       <div className="flex flex-col items-start justify-center mt-8 w-full max-w-3xl">
         <div className="text-lg text-gray-500 w-full text-left">
           <p>
-            I am a software engineer currently focused on building
-            cross-platform mobile apps with Flutter. I enjoy exploring mobile
-            app UI designs and bringing them to life in Flutter, always aiming
-            to write clean, collaborative, and maintainable code.
+            I am a software engineer building cross-platform mobile apps,
+            mostly with Flutter. And yes, I started coding back when people
+            wrote code by hand and copied answers from Stack Overflow. I
+            really enjoy mobile app development, especially designs with
+            motion and small interactions that make an app feel alive.
           </p>
         </div>
       </div>
@@ -71,7 +69,10 @@ const About = () => {
             } group cursor-pointer w-full lg:max-w-sm about-card-${
               card.id === 'code' ? 'orange' : 'green'
             }`}
-            onClick={() => window.open(card.url, '_blank')}
+            onClick={() => {
+              track('link_clicked', { url: card.url });
+              window.open(card.url, '_blank');
+            }}
           >
             {/* Background pattern */}
             <div className="absolute inset-0 opacity-100">
@@ -88,7 +89,7 @@ const About = () => {
                 <div
                   className={`w-6 h-6 border-2 ${card.borderColor} rounded-md flex items-center justify-center mb-3`}
                 >
-                  <card.icon className="w-4 h-4" />
+                  <Icon name={card.icon} className="w-4 h-4" />
                 </div>
 
                 <h3 className="text-lg font-bold mb-3 leading-tight">
@@ -102,7 +103,7 @@ const About = () => {
                 <button
                   className={`w-10 h-10 border-2 ${card.borderColor} rounded-lg flex items-center justify-center ${card.hoverColors} transition-all duration-500 ease-out`}
                 >
-                  <HiOutlineArrowRight className="w-4 h-4 about-arrow-icon" />
+                  <Icon name="arrowRight" trigger=".group" className="w-4 h-4 about-arrow-icon" />
                 </button>
               </div>
             </div>

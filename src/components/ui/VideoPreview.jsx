@@ -1,74 +1,35 @@
 import { useState, useRef, useEffect } from 'react';
-import { HiOutlinePhotograph } from 'react-icons/hi';
+import Icon from './Icon';
+import MonoLoader from './MonoLoader';
 import styles from './VideoPreview.module.css';
 
-const VideoPreview = ({ videoSrc, className, onHover = false }) => {
+// Plays whenever it is on screen (desktop and mobile), pauses when scrolled away.
+// The poster is a small still shown until the video plays. It also keeps
+// destroy mode's page snapshot from showing empty boxes for videos that were
+// never scrolled into view.
+const VideoPreview = ({ videoSrc, poster, className }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isScrollHovered, setIsScrollHovered] = useState(false);
   const [shouldLoad, setShouldLoad] = useState(false);
   const [isInView, setIsInView] = useState(false);
+  const [posterReady, setPosterReady] = useState(false);
   const videoRef = useRef(null);
   const containerRef = useRef(null);
-  const [isMobile, setIsMobile] = useState(false);
 
-  useEffect(() => {
-    // Check if device is mobile
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024); // lg breakpoint
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // Intersection Observer for lazy loading and mobile viewport tracking
+  // Lazy-load on first approach, then keep tracking visibility for play/pause
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          setIsInView(entry.isIntersecting);
-          if (entry.isIntersecting) {
-            setShouldLoad(true);
-            // Don't unobserve if mobile - we need to track viewport for play/pause
-            if (!isMobile) {
-              observer.unobserve(container);
-            }
-          }
-        });
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+        if (entry.isIntersecting) setShouldLoad(true);
       },
       { rootMargin: '50px', threshold: 0.3 },
     );
 
     observer.observe(container);
-    return () => observer.disconnect();
-  }, [isMobile]);
-
-  // Scroll-hover detection
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const handleScrollHover = () => {
-      const hasScrollHover = container.classList.contains('scroll-hover');
-      setIsScrollHovered(hasScrollHover);
-    };
-
-    // Use MutationObserver to watch for scroll-hover class changes
-    const observer = new MutationObserver(handleScrollHover);
-    observer.observe(container, {
-      attributes: true,
-      attributeFilter: ['class'],
-    });
-
-    // Initial check
-    handleScrollHover();
-
     return () => observer.disconnect();
   }, []);
 
@@ -76,17 +37,8 @@ const VideoPreview = ({ videoSrc, className, onHover = false }) => {
     const video = videoRef.current;
     if (!video || !shouldLoad) return;
 
-    const handleLoadedData = () => {
-      setIsLoaded(true);
-      // On mobile, start playing immediately
-      if (isMobile) {
-        video.play().catch(console.error);
-      }
-    };
-
-    const handleError = () => {
-      setHasError(true);
-    };
+    const handleLoadedData = () => setIsLoaded(true);
+    const handleError = () => setHasError(true);
 
     video.addEventListener('loadeddata', handleLoadedData);
     video.addEventListener('error', handleError);
@@ -95,37 +47,15 @@ const VideoPreview = ({ videoSrc, className, onHover = false }) => {
       video.removeEventListener('loadeddata', handleLoadedData);
       video.removeEventListener('error', handleError);
     };
-  }, [isMobile, shouldLoad]);
+  }, [shouldLoad]);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !isLoaded || hasError) return;
 
-    if (isMobile) {
-      // On mobile, only play when in viewport
-      if (isInView) {
-        video.play().catch(console.error);
-      } else {
-        video.pause();
-      }
-    } else {
-      // On desktop, play on hover OR scroll-hover
-      if ((isHovered || isScrollHovered) && onHover) {
-        video.play().catch(console.error);
-      } else if (!isHovered && !isScrollHovered) {
-        video.pause();
-        video.currentTime = 0;
-      }
-    }
-  }, [isHovered, isScrollHovered, isInView, isLoaded, hasError, isMobile, onHover]);
-
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-  };
+    if (isInView) video.play().catch(() => {});
+    else video.pause();
+  }, [isInView, isLoaded, hasError]);
 
   if (hasError || !videoSrc) {
     return (
@@ -133,7 +63,8 @@ const VideoPreview = ({ videoSrc, className, onHover = false }) => {
         className={`${className} flex items-center justify-center rounded-xl`}
         style={{ backgroundColor: 'var(--bg-secondary)' }}
       >
-        <HiOutlinePhotograph
+        <Icon
+          name="photo"
           className="w-12 h-12 opacity-30"
           style={{ color: 'var(--text-secondary)' }}
         />
@@ -145,21 +76,26 @@ const VideoPreview = ({ videoSrc, className, onHover = false }) => {
     <div
       ref={containerRef}
       className={`${className} ${styles.videoContainer} group cursor-pointer relative rounded-xl overflow-hidden`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
       style={{ aspectRatio: '4/3' }}
     >
-      {/* Loading placeholder */}
-      {(!isLoaded || !shouldLoad) && (
+      {/* Loading placeholder: the site loader until the poster (or video) is in */}
+      {!isLoaded && (
         <div
-          className={`absolute inset-0 flex items-center justify-center rounded-xl ${styles.loadingPulse}`}
-          style={{ backgroundColor: 'var(--bg-secondary)' }}
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--accent)' }}
         >
-          <HiOutlinePhotograph
-            className="w-12 h-12 opacity-30"
-            style={{ color: 'var(--text-secondary)' }}
-          />
+          {!posterReady && <MonoLoader size={56} />}
         </div>
+      )}
+      {!isLoaded && poster && (
+        <img
+          src={poster}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          onLoad={() => setPosterReady(true)}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
       )}
 
       {/* Video element - only render when shouldLoad is true */}
@@ -172,6 +108,7 @@ const VideoPreview = ({ videoSrc, className, onHover = false }) => {
             isLoaded ? 'opacity-100' : 'opacity-0'
           }`}
           style={{ backgroundColor: 'var(--bg-secondary)' }}
+          poster={poster}
           muted
           loop
           playsInline

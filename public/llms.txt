@@ -1,0 +1,28 @@
+# Tanvir Ibn Mizan
+
+> Tanvir Ibn Mizan (also known as 7ANV1R) is a software engineer at weDevs who builds cross-platform mobile apps with Flutter. This is his official website: https://tanvir.wiki
+
+## About
+- Software engineer focused on cross-platform mobile apps with Flutter. Enjoys designs with motion and small interactions that make an app feel alive. Started coding back when people wrote code by hand and copied answers from Stack Overflow.
+- Tools: Flutter, Dart, React, Node.js, Firebase, Supabase, Figma, Rive.
+
+## Experience
+- Software Engineer II, weDevs (Sep 2024 – Present)
+- Mobile Application Developer (Flutter), RetinaSoft (May 2023 – Aug 2024)
+- Junior Mobile Application Developer (Flutter), NexusLab (Aug 2021 – Sep 2022)
+
+## Projects
+- [Store Screenshot Studio](https://github.com/7ANV1R/Store-Screenshot-Studio): Claude Code skill that turns raw app screenshots into App Store and Google Play listing images
+- [Flaran](https://github.com/7ANV1R/Flaran): macOS menu bar app with run, hot reload and hot restart controls for reviewing Flutter apps after an AI coding agent finishes a task (Swift, SwiftUI)
+- [Drift DB Inspector](https://github.com/7ANV1R/Drift-DB-inspector): macOS app for browsing the SQLite database of a debug Android app (Flutter)
+- [TypeSpeed](https://github.com/7ANV1R/TypeSpeed): Flutter typing speed test with WPM, accuracy and personal best
+- [Weather Assistant – Flutter MCP](https://github.com/7ANV1R/flutter-mcp-chatbot): weather chatbot where Gemini calls weather tools on an MCP server (Flutter, mcp_dart, OpenWeather API)
+- [Tyke – Shoe App](https://github.com/7ANV1R/shoe_app): early Flutter practice project with small interaction animations
+
+## Links
+- Website: https://tanvir.wiki
+- GitHub: https://github.com/7ANV1R
+- LinkedIn: https://linkedin.com/in/7anv1r
+- YouTube: https://www.youtube.com/@tanvir_ibn_mizan
+- YouTube (gaming): https://www.youtube.com/@7anv1r71
+- Email: tanvir.inquiries@gmail.com

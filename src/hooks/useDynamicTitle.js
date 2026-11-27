@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-// The real title (also what crawlers read from index.html — SEO stays intact).
+// Must match <title> in index.html.
 const BASE = 'Tanvir Ibn Mizan // Developer Portfolio';
 const GAP = '   •   '; // spacer so the scroll loops cleanly
 const SPEED = 200; // ms per character shift
@@ -14,10 +14,15 @@ const BACK = [
   'knew you’d return 🤜',
 ];
 
+// Googlebot (and other renderers) execute JS and snapshot document.title,
+// so nothing here touches the title until a real human input happens.
+// Bots never move a pointer, press a key or scroll a wheel.
+const HUMAN_EVENTS = ['pointermove', 'pointerdown', 'keydown', 'touchstart', 'wheel'];
+
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 /**
- * Animates document.title:
+ * Animates document.title, starting only after the first user input:
  *  - marquee scroll (right -> left) while the tab is active
  *  - a playful "come back" line when the tab is hidden/blurred
  *  - a short greeting on return, then resumes the marquee
@@ -33,6 +38,7 @@ export default function useDynamicTitle() {
     let mode = 'marquee'; // 'marquee' | 'away' | 'greet'
     let tickTimer;
     let greetTimer;
+    let started = false;
 
     const tick = () => {
       if (mode === 'marquee') {
@@ -45,7 +51,6 @@ export default function useDynamicTitle() {
       }
       tickTimer = setTimeout(tick, SPEED);
     };
-    tick();
 
     const onHide = () => {
       mode = 'away';
@@ -65,13 +70,24 @@ export default function useDynamicTitle() {
 
     const onVisibility = () => (document.hidden ? onHide() : onShow());
 
-    document.addEventListener('visibilitychange', onVisibility);
-    window.addEventListener('blur', onHide);
-    window.addEventListener('focus', onShow);
+    const start = () => {
+      if (started) return;
+      started = true;
+      HUMAN_EVENTS.forEach((e) => window.removeEventListener(e, start));
+      tick();
+      document.addEventListener('visibilitychange', onVisibility);
+      window.addEventListener('blur', onHide);
+      window.addEventListener('focus', onShow);
+    };
+
+    HUMAN_EVENTS.forEach((e) =>
+      window.addEventListener(e, start, { passive: true }),
+    );
 
     return () => {
       clearTimeout(tickTimer);
       clearTimeout(greetTimer);
+      HUMAN_EVENTS.forEach((e) => window.removeEventListener(e, start));
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('blur', onHide);
       window.removeEventListener('focus', onShow);

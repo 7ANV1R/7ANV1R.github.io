@@ -53,21 +53,21 @@ const MobileLayout = () => {
         <div ref={sectionRefs.profile}>
           <ProfileCard className="h-64" />
         </div>
-        <div ref={sectionRefs.about}>
+        <div ref={sectionRefs.about} data-section="about">
           <About />
         </div>
 
-        <div ref={sectionRefs.projects}>
+        <div ref={sectionRefs.projects} data-section="projects">
           <RecentProjects />
         </div>
 
-        <div ref={sectionRefs.experience}>
+        <div ref={sectionRefs.experience} data-section="experience">
           <WorkExperience />
         </div>
-        <div ref={sectionRefs.skills}>
+        <div ref={sectionRefs.skills} data-section="skills">
           <ToolsAndTech />
         </div>
-        <div>
+        <div data-section="contact">
           <GetInTouch />
         </div>
         <div>

@@ -3,9 +3,9 @@
     "id": 1,
     "company": "weDevs",
     "companyLogo": "/experience/weDevs_Logo.svg",
-    "designation": "Software Engineer",
+    "designation": "Software Engineer II",
     "timeFrame": "September 2024 - Present",
-    "objective": "Built a customer app with a JSON-driven layout that made it endlessly customizable, and a vendor app focused on giving sellers a fast, effortless way to run their store. Extended into mobile HR and project management too, with generative AI features that made daily work quicker."
+    "objective": "Built {flyCommerceAdmin}, a companion app that gives FlyCommerce store and marketplace admins everything they need day to day on their phone. For the Dokan plugin, built most of the {dokanVendor} app, where vendors manage their own store, products, orders and everything else that comes with selling. It surpassed $15K in sales within its first few months after launch.\n\nDeveloped the fully white-label {dokanCustomer} app on a JSON-driven UI, so screens and components can be configured without changing core Flutter code. Also built plugin apps like {flyHR} and {wpProjectManager}, where users connect their WordPress site and start using the app right away."
   },
   {
     "id": 2,
@@ -13,7 +13,7 @@
     "companyLogo": "/experience/retinaSoft_Logo.svg",
     "designation": "Mobile Application Developer (Flutter)",
     "timeFrame": "May 2023 - August 2024",
-    "objective": "Built real estate and e-commerce apps that took users from browsing to checkout without friction, with in-app video calling that let buyers and sellers connect face to face. Added an offline mode that kept everything working on weak internet and synced the moment users reconnected, making the apps dependable even in low-signal areas."
+    "objective": "Worked on real estate and e-commerce apps, building product listings, seller profiles, carts, order management and the rest of the core user flows. Added push notifications and video calling with full CallKit integration, so incoming calls show up like regular phone calls. Built offline-first customer and supplier management on a local database that syncs with the server, which kept the apps usable on weak connections."
   },
   {
     "id": 3,
@@ -21,6 +21,6 @@
     "companyLogo": "/experience/nexuslab_Logo.svg",
     "designation": "Junior Mobile Application Developer (Flutter)",
     "timeFrame": "August 2021 - September 2022",
-    "objective": "Turned design ideas into smooth, easy-to-use apps that felt natural across devices, with real-time location tracking that warned users about risky areas from community reviews to help them stay safe. Built instant chat that kept people connected and coming back to the app."
+    "objective": "Integrated Google Maps and background location tracking for real-time features, including alerts based on user reviews and nearby activity. Built real-time chat over WebSockets that kept messages in sync across users. Worked with the design team to turn mockups into responsive Flutter screens and connected them to the APIs behind them."
   }
 ]

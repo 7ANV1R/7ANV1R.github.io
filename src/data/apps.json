@@ -1,0 +1,31 @@
+{
+  "flyCommerceAdmin": {
+    "name": "FlyCommerce Admin",
+    "icon": "/apps/flycommerce-admin.webp",
+    "appStore": "https://apps.apple.com/app/flycommerce-admin/id6762592018",
+    "playStore": "https://play.google.com/store/apps/details?id=com.flycommerce.admin"
+  },
+  "dokanVendor": {
+    "name": "Dokan Vendor",
+    "icon": "/apps/dokan-vendor.webp",
+    "appStore": "https://apps.apple.com/us/app/dokan-vendor-plugin/id6756566902",
+    "playStore": "https://play.google.com/store/apps/details?id=co.dokan.plugin.vendor"
+  },
+  "dokanCustomer": {
+    "name": "Dokan Customer",
+    "appStore": "https://apps.apple.com/us/app/dokan-customer-plugin/id6746025618",
+    "playStore": "https://play.google.com/store/apps/details?id=co.dokan.plugin.customer"
+  },
+  "flyHR": {
+    "name": "FlyHR",
+    "icon": "/apps/flyhr.webp",
+    "appStore": "https://apps.apple.com/us/app/flyhr-for-wperp/id6775363640",
+    "playStore": "https://play.google.com/store/apps/details?id=com.flyhr.app"
+  },
+  "wpProjectManager": {
+    "name": "WP Project Manager",
+    "icon": "/apps/wp-project-manager.webp",
+    "appStore": "https://apps.apple.com/us/app/wp-project-manager/id6794229346",
+    "playStore": "https://play.google.com/store/apps/details?id=com.wedevs.wpprojectmanager"
+  }
+}

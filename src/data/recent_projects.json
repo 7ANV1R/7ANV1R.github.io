@@ -1,21 +1,61 @@
 [
   {
+    "id": 3,
+    "title": "Store Screenshot Studio",
+    "description": "Making App Store screenshots takes hours, and most tools give you the same boring templates. This Claude Code skill does the design work for you. Give it your app screens, pick the colors and the idea you like, and it makes every size the App Store and Google Play need.",
+    "tools": ["Claude Code", "Agent Skills", "Node.js", "Playwright", "Three.js"],
+    "thumbnail": "/videos/store_screenshot_studio_poster.webp",
+    "videoPreview": "/videos/store_screenshot_studio_preview.mp4",
+    "githubUrl": "https://github.com/7ANV1R/Store-Screenshot-Studio",
+    "demoUrl": null
+  },
+  {
+    "id": 4,
+    "title": "Flaran",
+    "description": "AI can write your Flutter code, but you still need to see the app with your own eyes. Flaran puts run, hot reload and hot restart buttons in your Mac menu bar. When the AI finishes a task, one click and you see the change. No IDE, no typing commands.",
+    "tools": ["Swift", "SwiftUI", "AppKit", "Flutter"],
+    "thumbnail": "/videos/flaran_poster.webp",
+    "videoPreview": "/videos/flaran_preview.mp4",
+    "githubUrl": "https://github.com/7ANV1R/Flaran",
+    "demoUrl": null
+  },
+  {
+    "id": 5,
+    "title": "Drift DB Inspector",
+    "description": "Ever wondered what your app really saved on the phone? Plug in your Android phone, type the app id, and Drift DB Inspector copies the app's database to your Mac. Then you can look through every table and search the rows in a simple viewer.",
+    "tools": ["Flutter", "macOS", "hooks_riverpod", "sqlite3", "ADB"],
+    "thumbnail": "/videos/drift_db_inspector_poster.webp",
+    "videoPreview": "/videos/drift_db_inspector_preview.mp4",
+    "githubUrl": "https://github.com/7ANV1R/Drift-DB-inspector",
+    "demoUrl": null
+  },
+  {
+    "id": 6,
+    "title": "TypeSpeed",
+    "description": "How fast can you type on your phone? Pick a timer or a word count and start typing. TypeSpeed shows your speed (WPM) and accuracy, and confetti pops when you beat your best score. Copy and paste? Nice try, that run doesn't count.",
+    "tools": ["Flutter", "hooks_riverpod", "shared_preferences", "confetti"],
+    "thumbnail": "/videos/typespeed_poster.webp",
+    "videoPreview": "/videos/typespeed_preview.mp4",
+    "githubUrl": "https://github.com/7ANV1R/TypeSpeed",
+    "demoUrl": null
+  },
+  {
     "id": 1,
     "title": "Weather Assistant - Flutter MCP",
-    "description": "A weather assistant chatbot built with Flutter and dart mcp. Users can chat naturally to ask for weather information in any location. The app uses mcp for intent recognition, triggering AI calls as needed, and fetches real-time weather data using the OpenWeather API. Designed for a seamless conversational experience and accurate weather updates.",
-    "tools": ["Flutter", "mcp_dart", "openAI", "open_weather_api"],
-    "thumbnail": null,
-    "videoPreview": "/videos/mcp_chat_preview.mp4",
+    "description": "Ask about the weather the way you would ask a friend: \"How's the weather in Dhaka?\" The AI understands the question, gets live data from a small weather server built with MCP, and answers with a clean weather card. A fun way to show how MCP lets AI use real tools.",
+    "tools": ["Flutter", "mcp_dart", "Gemini", "OpenWeather API"],
+    "thumbnail": "/videos/weather_assistant_poster.webp",
+    "videoPreview": "/videos/weather_assistant_preview.mp4",
     "githubUrl": "https://github.com/7ANV1R/flutter-mcp-chatbot",
     "demoUrl": null
   },
   {
     "id": 2,
     "title": "Tyke - Shoe App",
-    "description": "A demo UI project designed to showcase a carousel slider animation for browsing a curated shoe collection. The app features smooth transitions, allowing users to swipe through various shoes, view detailed descriptions, and explore product highlights. Built to demonstrate interactive UI patterns and clean design for product-focused applications.",
-    "tools": ["Flutter", "flutter_animate"],
-    "thumbnail": null,
-    "videoPreview": "/videos/shoe_app_preview.mp4",
+    "description": "One of my first Flutter projects, from when I was just starting out. Even back then I loved small animations that make an app feel alive. Swipe through the shoes, tap one and watch it fly into the details page, then slide to add it to your cart.",
+    "tools": ["Flutter", "flutter_animate", "hooks_riverpod", "google_nav_bar"],
+    "thumbnail": "/videos/tyke_poster.webp",
+    "videoPreview": "/videos/tyke_preview.mp4",
     "githubUrl": "https://github.com/7ANV1R/shoe_app",
     "demoUrl": null
   }

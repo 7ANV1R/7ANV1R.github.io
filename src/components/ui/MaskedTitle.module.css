@@ -1,0 +1,20 @@
+/* The secret title on an accent fill, clipped to a blob that follows the
+   cursor. Fixed to the viewport so no column edge can crop the blob; JS keeps
+   the copy translated exactly over the visible title. */
+.reveal {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: var(--accent);
+  --text-primary: #111;
+  --text-secondary: #111;
+  clip-path: circle(0 at 0 0);
+  pointer-events: none;
+}
+.revealCopy {
+  position: absolute;
+  top: 0;
+  left: 0;
+  white-space: nowrap;
+  will-change: transform;
+}

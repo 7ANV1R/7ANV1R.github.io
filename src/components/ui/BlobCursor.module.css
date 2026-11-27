@@ -1,0 +1,24 @@
+/* A lazy follower; the native cursor stays visible. Its shape (a morphing
+   cookie) is set from JS via clip-path. */
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9998; /* under the work-experience logo cursor (9999) */
+  pointer-events: none;
+}
+.blob {
+  translate: -50% -50%;
+  background: var(--accent);
+  transition:
+    opacity 0.2s ease,
+    scale 0.2s ease;
+}
+.cursor[data-hidden='true'] .blob,
+:global(html[data-blob-open]) .blob {
+  opacity: 0;
+  scale: 0.3;
+}
+.cursor[data-pressed='true'] .blob {
+  scale: 0.7;
+}

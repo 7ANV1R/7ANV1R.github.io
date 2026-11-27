@@ -47,7 +47,10 @@ const DesktopLayout = () => {
   };
 
   return (
-    <div className="hidden lg:flex h-screen flex-col">
+    // min-h, not h-screen: a capped height keeps <html> viewport-sized while
+    // content overflows, so Lenis's ResizeObserver never sees the page grow
+    // and its cached scroll limit stops the wheel short of the footer.
+    <div className="hidden lg:flex min-h-screen flex-col">
       <FloatingNav onNavigate={handleNavigate} />
 
       <div className="flex flex-1">
@@ -61,23 +64,23 @@ const DesktopLayout = () => {
         {/* Right Side - Scrollable Content */}
         <div className="w-2/3 overflow-y-auto">
           <div className="p-6 space-y-6">
-            <div ref={sectionRefs.about}>
+            <div ref={sectionRefs.about} data-section="about">
               <About className="h-80" />
             </div>
 
-            <div ref={sectionRefs.projects}>
+            <div ref={sectionRefs.projects} data-section="projects">
               <RecentProjects className="h-96" />
             </div>
 
-            <div ref={sectionRefs.experience}>
+            <div ref={sectionRefs.experience} data-section="experience">
               <WorkExperience className="h-96" />
             </div>
 
-            <div ref={sectionRefs.skills}>
+            <div ref={sectionRefs.skills} data-section="skills">
               <ToolsAndTech className="h-96" />
             </div>
 
-            <div>
+            <div data-section="contact">
               <GetInTouch />
             </div>
           </div>

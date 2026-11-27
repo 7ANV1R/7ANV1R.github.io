@@ -5,14 +5,67 @@
     <link rel="icon" type="image/svg+xml" href="/7anv1r.svg" />
     <link rel="canonical" href="https://tanvir.wiki/" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Boot: saved theme before the first paint, and a loader that covers the
+         page (incl. the crawler copy in #root) until the app, Poppins and the
+         profile photo are ready. App.jsx fades it out; CSS hides it after 6s
+         regardless, in case the app never starts. -->
+    <script>
+      try {
+        document.documentElement.dataset.theme = localStorage.getItem('theme') || 'dark';
+      } catch {
+        document.documentElement.dataset.theme = 'dark';
+      }
+    </script>
+    <style>
+      #boot {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        display: grid;
+        place-items: center;
+        background: #f9fafb;
+        transition: opacity 0.45s ease, visibility 0.45s;
+        animation: boot-out 0.45s 6s forwards;
+      }
+      [data-theme='dark'] #boot { background: #161312; }
+      #boot.boot-done { opacity: 0; visibility: hidden; pointer-events: none; }
+      #boot { color: #f36c38; }
+      /* The site's one loading indicator (here and MonoLoader.jsx): the 7ANV1R
+         monogram (public/7anv1r.svg) as outlines in currentColor. Each letter
+         draws itself on, holds, then retracts along its path, staggered. */
+      .mono-loader { width: 96px; height: 96px; overflow: visible; }
+      .mono-loader .glyph {
+        fill: none;
+        stroke: currentColor;
+        stroke-width: var(--mono-stroke, 1.3);
+        stroke-linejoin: round;
+        stroke-dasharray: 1;
+        animation: boot-draw 3s calc(var(--i) * 0.12s) infinite both;
+      }
+      @keyframes boot-draw {
+        0% { stroke-dashoffset: 1; animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }
+        45%, 70% { stroke-dashoffset: 0; animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }
+        100% { stroke-dashoffset: -1; }
+      }
+      @keyframes boot-out { to { opacity: 0; visibility: hidden; pointer-events: none; } }
+      @media (prefers-reduced-motion: reduce) {
+        .mono-loader .glyph { animation: none; stroke-dashoffset: 0; }
+      }
+    </style>
+    <noscript><style>#boot { display: none; }</style></noscript>
+    <!-- Poppins: linked here so it downloads in parallel with the app CSS instead
+         of after it. index.css keeps an identical @import (cache hit) for destroy mode. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" />
 
     <!-- Basic Meta Tags -->
     <title>Tanvir Ibn Mizan // Developer Portfolio</title>
     <meta
       name="description"
-      content="AI-powered software engineer turning prompts into Flutter apps that (mostly) work."
+      content="Tanvir Ibn Mizan is a software engineer at weDevs building cross-platform mobile apps with Flutter, with a love for motion and interaction design."
     />
-    <meta name="author" content="Tanvir" />
+    <meta name="author" content="Tanvir Ibn Mizan" />
     <meta
       name="keywords"
       content="Tanvir, Tanvir Ibn Mizan, 7ANV1R, Rivnat, Flutter Developer, Designer, Portfolio, Mobile Development, Web Development"
@@ -23,15 +76,17 @@
     <meta property="og:title" content="Tanvir Ibn Mizan // Developer Portfolio" />
     <meta
       property="og:description"
-      content="AI-powered software engineer turning prompts into Flutter apps that (mostly) work."
+      content="Tanvir Ibn Mizan is a software engineer at weDevs building cross-platform mobile apps with Flutter, with a love for motion and interaction design."
     />
-    <meta property="og:image" content="https://tanvir.wiki/og-image.png" />
-    <meta property="og:image:alt" content="Tanvir's Logo" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:type" content="image/png" />
+    <!-- Animated GIF: Slack/Discord play it; others show frame 1. X ignores GIF cards, so twitter:image stays PNG. -->
+    <meta property="og:image" content="https://tanvir.wiki/og-image.gif" />
+    <meta property="og:image:secure_url" content="https://tanvir.wiki/og-image.gif" />
+    <meta property="og:image:alt" content="Tanvir Ibn Mizan" />
+    <meta property="og:image:width" content="2400" />
+    <meta property="og:image:height" content="1260" />
+    <meta property="og:image:type" content="image/gif" />
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Tanvir's Portfolio" />
+    <meta property="og:site_name" content="Tanvir Ibn Mizan" />
     <meta property="og:locale" content="en_US" />
 
     <!-- Twitter Card Meta Tags -->
@@ -39,40 +94,118 @@
     <meta name="twitter:title" content="Tanvir Ibn Mizan // Developer Portfolio" />
     <meta
       name="twitter:description"
-      content="AI-powered software engineer turning prompts into Flutter apps that (mostly) work."
+      content="Tanvir Ibn Mizan is a software engineer at weDevs building cross-platform mobile apps with Flutter, with a love for motion and interaction design."
     />
     <meta name="twitter:image" content="https://tanvir.wiki/og-image.png" />
-    <meta name="twitter:image:alt" content="Tanvir's Logo" />
+    <meta name="twitter:image:alt" content="Tanvir Ibn Mizan" />
 
     <!-- Additional Meta Tags for better SEO -->
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
     <meta name="theme-color" content="#7cc248" />
 
-    <!-- Structured data: tells Google this site IS the person "Tanvir Ibn Mizan" -->
+    <!-- Structured data: WebSite (site name in results) + ProfilePage about the Person -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "Person",
-        "name": "Tanvir Ibn Mizan",
-        "alternateName": ["Tanvir", "7ANV1R", "Rivnat"],
-        "url": "https://tanvir.wiki/",
-        "image": "https://tanvir.wiki/og-image.png",
-        "jobTitle": "Software Engineer & Flutter Developer",
-        "email": "mailto:tanvir.inquiries@gmail.com",
-        "sameAs": [
-          "https://github.com/7ANV1R",
-          "https://linkedin.com/in/7anv1r",
-          "https://twitter.com/tanvir_ibn_mizan",
-          "https://instagram.com/tanvir_ibn_mizan",
-          "https://facebook.com/tanvir.ibn.mizan",
-          "https://www.behance.net/Tanvir_ibn_mizan",
-          "https://about.me/rivnat"
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://tanvir.wiki/#website",
+            "url": "https://tanvir.wiki/",
+            "name": "Tanvir Ibn Mizan",
+            "alternateName": ["tanvir.wiki", "7ANV1R"],
+            "publisher": { "@id": "https://tanvir.wiki/#person" }
+          },
+          {
+            "@type": "ProfilePage",
+            "@id": "https://tanvir.wiki/#profilepage",
+            "url": "https://tanvir.wiki/",
+            "name": "Tanvir Ibn Mizan // Developer Portfolio",
+            "isPartOf": { "@id": "https://tanvir.wiki/#website" },
+            "mainEntity": { "@id": "https://tanvir.wiki/#person" }
+          },
+          {
+            "@type": "Person",
+            "@id": "https://tanvir.wiki/#person",
+            "name": "Tanvir Ibn Mizan",
+            "alternateName": ["Tanvir", "7ANV1R", "Rivnat"],
+            "url": "https://tanvir.wiki/",
+            "image": "https://tanvir.wiki/og-image.png",
+            "jobTitle": "Software Engineer",
+            "description": "Software engineer building cross-platform mobile apps with Flutter, with a love for motion and small interactions that make an app feel alive.",
+            "worksFor": { "@type": "Organization", "name": "weDevs" },
+            "knowsAbout": ["Flutter", "Dart", "Mobile App Development", "React", "Node.js", "Firebase", "Supabase", "Figma", "Rive", "UI Design", "Motion Design", "Interaction Design"],
+            "email": "mailto:tanvir.inquiries@gmail.com",
+            "sameAs": [
+              "https://github.com/7ANV1R",
+              "https://linkedin.com/in/7anv1r",
+              "https://twitter.com/tanvir_ibn_mizan",
+              "https://instagram.com/tanvir_ibn_mizan",
+              "https://facebook.com/tanvir.ibn.mizan",
+              "https://www.behance.net/Tanvir_ibn_mizan",
+              "https://www.youtube.com/@tanvir_ibn_mizan",
+              "https://www.youtube.com/@7anv1r71",
+              "https://about.me/rivnat"
+            ]
+          }
         ]
       }
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="boot" aria-hidden="true">
+      <svg class="mono-loader" viewBox="0 0 100 100">
+        <polygon class="glyph" style="--i: 0" pathLength="1" points="35.21 14.15 35.21 19.88 23.97 49.95 10.69 49.95 21.22 24.03 8.54 24.03 8.54 14.15 35.21 14.15" />
+        <polygon class="glyph" style="--i: 1" pathLength="1" points="62.06 14.06 62.06 49.95 50.22 49.95 50.22 21.61 39.45 50.04 27 50.04 40.34 14.06 62.06 14.06" />
+        <polygon class="glyph" style="--i: 2" pathLength="1" points="81.83 14.24 81.83 28.41 73.99 14.24 81.83 14.24" />
+        <polygon class="glyph" style="--i: 2" pathLength="1" points="73.25 35.97 81.17 50.23 73.39 50.23 73.25 50.09 73.25 35.97" />
+        <line class="glyph" style="--i: 2" pathLength="1" x1="93.7" y1="14.06" x2="93.7" y2="50.04" />
+        <polygon class="glyph" style="--i: 3" pathLength="1" points="16.19 81.19 26.82 52.85 39.4 52.85 25.93 88.83 4.35 88.83 4.35 52.85 16.05 52.85 16.19 52.99 16.19 81.19" />
+        <polygon class="glyph" style="--i: 4" pathLength="1" points="55.12 52.85 55.12 88.83 43.1 88.83 43.1 62.63 41.88 62.64 42.18 54.59 45.38 52.85 55.12 52.85" />
+        <path class="glyph" style="--i: 5" pathLength="1" d="M58.61,52.8h16.65c6.84.31,11.48,3.08,11.89,10.39.23,4.21-.73,8.08-4.56,10.32l-.02.12,5.32,15.25h-12.87l-3.53-12.35-.94-.05v12.4h-11.93v-36.08ZM70.36,69.3h2.19c.4,0,1.06-.63,1.24-1,.57-1.14.61-4.46-.35-5.39-.13-.12-.75-.51-.89-.51h-2.19v6.9Z" />
+      </svg>
+    </div>
+    <div id="root">
+      <!-- Static copy of the page for crawlers / AI bots that don't run JS.
+           React replaces this on mount. Keep it in sync with the real content. -->
+      <main style="max-width: 48rem; margin: 0 auto; padding: 4rem 1rem; line-height: 1.6">
+        <h1>Tanvir Ibn Mizan</h1>
+        <p><strong>Software Engineer</strong> at weDevs &middot; Flutter developer</p>
+        <p>
+          I am a software engineer building cross-platform mobile apps, mostly
+          with Flutter. And yes, I started coding back when people wrote code by
+          hand and copied answers from Stack Overflow. I really enjoy
+          mobile app development, especially designs with motion and small
+          interactions that make an app feel alive.
+        </p>
+        <h2>Work experience</h2>
+        <ul>
+          <li><strong>Software Engineer II, weDevs</strong> (September 2024 &ndash; Present): Dokan Vendor app (iOS and Android), JSON-driven UI system for the white-label Dokan Customer app, FlyCommerce Admin app, FlyHR, WP Project Manager and FlyPOS, plus most of the app release process.</li>
+          <li><strong>Mobile Application Developer (Flutter), RetinaSoft</strong> (May 2023 &ndash; August 2024): real estate and e-commerce apps, push notifications, video calling with CallKit, offline-first data with server sync.</li>
+          <li><strong>Junior Mobile Application Developer (Flutter), NexusLab</strong> (August 2021 &ndash; September 2022): Google Maps and background location tracking with review-based alerts, real-time chat over WebSockets.</li>
+        </ul>
+        <h2>Projects</h2>
+        <ul>
+          <li><a href="https://github.com/7ANV1R/Store-Screenshot-Studio">Store Screenshot Studio</a>: Claude Code skill that turns raw app screenshots into App Store and Google Play listing images in every store size.</li>
+          <li><a href="https://github.com/7ANV1R/Flaran">Flaran</a>: macOS menu bar app with run, hot reload and hot restart controls for reviewing a Flutter app after an AI coding agent finishes a task in the terminal (Swift, SwiftUI).</li>
+          <li><a href="https://github.com/7ANV1R/Drift-DB-inspector">Drift DB Inspector</a>: macOS app built with Flutter for pulling and browsing the SQLite database of a debug Android app.</li>
+          <li><a href="https://github.com/7ANV1R/TypeSpeed">TypeSpeed</a>: Flutter typing speed test with WPM, accuracy and personal best tracking.</li>
+          <li><a href="https://github.com/7ANV1R/flutter-mcp-chatbot">Weather Assistant &ndash; Flutter MCP</a>: weather chatbot built with Flutter and MCP: Gemini calls weather tools on an MCP server backed by the OpenWeather API.</li>
+          <li><a href="https://github.com/7ANV1R/shoe_app">Tyke &ndash; Shoe App</a>: early Flutter practice project with small interaction animations (carousel, hero transition, slide to add to cart).</li>
+        </ul>
+        <h2>Tools &amp; tech</h2>
+        <p>Flutter, React, Node.js, Firebase, Supabase, Figma, Rive</p>
+        <h2>Contact</h2>
+        <p>
+          <a href="mailto:tanvir.inquiries@gmail.com">tanvir.inquiries@gmail.com</a> &middot;
+          <a href="https://github.com/7ANV1R">GitHub</a> &middot;
+          <a href="https://linkedin.com/in/7anv1r">LinkedIn</a> &middot;
+          <a href="https://www.behance.net/Tanvir_ibn_mizan">Behance</a> &middot;
+          <a href="https://www.youtube.com/@tanvir_ibn_mizan">YouTube</a> &middot;
+          <a href="https://www.youtube.com/@7anv1r71">YouTube (gaming)</a>
+        </p>
+      </main>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

@@ -1,0 +1,312 @@
+/* Flourishes for <Icon>. Rule of the house: every keyframe is the plain icon
+   at 0% and 100%, so the motion lives strictly in between and the icon always
+   comes back to rest. Parts move; the <svg> root is left alone so existing
+   hover transforms on it (.arrow-icon, group-hover:scale-*) still apply. */
+
+.ico {
+  overflow: visible;
+}
+.ico * {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+/* Accents that only exist mid-flourish. */
+.ico .p-star,
+.ico .p-flash {
+  opacity: 0;
+}
+
+/* Played only by Icon.jsx (hover / tap / focus). */
+.ico-play {
+  /* Profile: hops up and nods hello */
+  &.ico-user .p-head { animation: ico-nod 0.7s ease-in-out; }
+  &.ico-user .p-body { animation: ico-shrug 0.7s ease-in-out; transform-origin: 50% 100%; }
+
+  /* Projects: picked up by the handle, swings */
+  &.ico-briefcase .p-handle { animation: ico-lift 0.8s ease-in-out; }
+  &.ico-briefcase .p-case {
+    animation: ico-swing 0.8s ease-in-out;
+    transform-box: view-box;
+    transform-origin: 12px 3px;
+  }
+
+  /* Experience: lights come on floor by floor, door opens */
+  &.ico-office .p-win { animation: ico-light 0.35s ease-out calc(var(--i) * 70ms) backwards; }
+  &.ico-office .p-door { animation: ico-door 0.9s ease-in-out; transform-origin: 0% 100%; }
+
+  /* Tools: wrench turns, screwdriver jabs */
+  &.ico-tools .p-wrench { animation: ico-twist 0.75s ease-in-out; }
+  &.ico-tools .p-driver { animation: ico-jab 0.75s ease-in-out; }
+
+  /* Game mode: rumble + button mash */
+  &.ico-controller .p-pad { animation: ico-rumble 0.6s linear; }
+  &.ico-controller .p-btn { animation: ico-pop 0.3s ease-out calc(var(--i) * 80ms + 100ms); }
+
+  /* Theme */
+  &.ico-sun .p-sun {
+    animation: ico-spin 0.8s cubic-bezier(0.3, 1.3, 0.5, 1);
+    transform-box: view-box;
+    transform-origin: 10px 10px;
+  }
+  &.ico-moon .p-moon { animation: ico-rock 0.9s ease-in-out; }
+  &.ico-moon .p-star { animation: ico-twinkle 0.6s ease-in-out calc(var(--i) * 180ms + 150ms) backwards; }
+
+  /* GitHub: the octocat waves */
+  &.ico-github .p-arm {
+    animation: ico-wave 0.9s ease-in-out;
+    transform-box: view-box;
+    transform-origin: 9px 19px;
+  }
+  &.ico-github .p-cat { animation: ico-tilt 0.9s ease-in-out; transform-origin: 50% 100%; }
+
+  /* LinkedIn (outline): the dot jumps, the stem catches it */
+  &.ico-linkedin .p-dot { animation: ico-bounce 0.7s ease-in-out; }
+  &.ico-linkedin .p-stem { animation: ico-catch 0.7s ease-in-out; transform-origin: 50% 100%; }
+  &.ico-linkedin .p-n { animation: ico-sway 0.7s ease-in-out; transform-origin: 50% 100%; }
+
+
+  /* About: code / design */
+  &.ico-code .p-lt { animation: ico-push-l 0.6s ease-in-out; }
+  &.ico-code .p-gt { animation: ico-push-r 0.6s ease-in-out; }
+  &.ico-code .p-sl { animation: ico-half-turn 0.6s ease-in-out; }
+  &.ico-template .p-blk {
+    animation: ico-hop 0.55s ease-in-out calc(var(--i) * 90ms);
+    transform-origin: 50% 100%;
+  }
+
+  /* Arrows */
+  &.ico-arrowRight .p-head { animation: ico-dash-head 0.6s ease-in-out; }
+  &.ico-arrowRight .p-shaft {
+    animation: ico-dash-shaft 0.6s ease-in-out;
+    transform-box: view-box;
+    transform-origin: 3px 12px;
+  }
+  &.ico-arrowUpRight .p-all { animation: ico-zip 0.6s cubic-bezier(0.5, 0, 0.2, 1); }
+
+  /* Photo placeholder: the sun rises */
+  &.ico-photo .p-sun { animation: ico-rise 0.9s ease-in-out; }
+  &.ico-photo .p-hill { animation: ico-hop 0.5s ease-in-out 0.35s; transform-origin: 50% 100%; }
+
+  /* Footer + store links (single-shape brand glyphs move whole) */
+  &.ico-gamepad .p-all { animation: ico-rumble 0.6s linear; }
+  &.ico-youtube .p-all { animation: ico-press 0.6s ease-in-out; }
+  &.ico-instagram .p-all { animation: ico-press 0.6s ease-in-out; }
+  &.ico-instagram .p-flash { animation: ico-flash 0.5s ease-out 0.12s backwards; }
+  &.ico-twitter .p-all { animation: ico-chirp 0.75s ease-in-out; transform-origin: 50% 100%; }
+  &.ico-facebook .p-all { animation: ico-tilt-pop 0.7s ease-in-out; }
+  &.ico-linkedinSolid .p-all { animation: ico-hop 0.6s ease-in-out; transform-origin: 50% 100%; }
+  &.ico-file .p-all { animation: ico-peel 0.8s ease-in-out; transform-origin: 50% 100%; }
+  &.ico-heart .p-all { animation: ico-beat 0.8s ease-in-out; }
+  &.ico-apple .p-leaf {
+    animation: ico-leaf 0.9s ease-in-out;
+    transform-box: view-box;
+    transform-origin: 194px 138px;
+  }
+  &.ico-apple .p-fruit { animation: ico-hop 0.6s ease-in-out; transform-origin: 50% 100%; }
+  &.ico-googlePlay .p-all { animation: ico-nudge 0.6s ease-in-out; }
+}
+
+/* ArrowUpRight leaves through its own corner, so it must clip. */
+.ico-arrowUpRight {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ico * {
+    animation: none !important;
+  }
+}
+
+/* ---- keyframes (identity at 0% and 100%, always) ---- */
+
+@keyframes ico-nod {
+  0%, 100% { transform: none; }
+  25% { transform: translateY(1px); }
+  50% { transform: translateY(-2px) rotate(-10deg); }
+  75% { transform: translateY(-0.4px) rotate(6deg); }
+}
+@keyframes ico-shrug {
+  0%, 100% { transform: none; }
+  25% { transform: scale(1.06, 0.9); }
+  50% { transform: scale(0.97, 1.04); }
+  75% { transform: scale(1.02, 0.98); }
+}
+@keyframes ico-lift {
+  0%, 100% { transform: none; }
+  20% { transform: translateY(-1.5px); }
+  45% { transform: translateY(-2px); }
+  65% { transform: translateY(-1px); }
+}
+@keyframes ico-swing {
+  0%, 100% { transform: none; }
+  20% { transform: translateY(-1.5px); }
+  45% { transform: translateY(-2px) rotate(-7deg); }
+  65% { transform: translateY(-1px) rotate(5deg); }
+  85% { transform: rotate(-1.5deg); }
+}
+@keyframes ico-light {
+  0% { opacity: 0.15; transform: scale(0.3); }
+  60% { opacity: 1; transform: scale(1.7); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes ico-door {
+  0%, 100% { transform: none; }
+  30%, 65% { transform: scaleX(0.5); }
+}
+@keyframes ico-twist {
+  0%, 100% { transform: none; }
+  25% { transform: rotate(-20deg); }
+  55% { transform: rotate(12deg); }
+  80% { transform: rotate(-4deg); }
+}
+@keyframes ico-jab {
+  0%, 100% { transform: none; }
+  25% { transform: translate(1px, 1px); }
+  50% { transform: translate(-1.2px, -1.2px); }
+  70% { transform: translate(0.4px, 0.4px); }
+}
+@keyframes ico-rumble {
+  0%, 100% { transform: none; }
+  10% { transform: translateX(-3%) rotate(-4deg); }
+  20% { transform: translateX(3%) rotate(4deg); }
+  30% { transform: translateX(-2.5%) rotate(-3deg); }
+  40% { transform: translateX(2.5%) rotate(3deg); }
+  55% { transform: translateX(-1.5%) rotate(-2deg); }
+  70% { transform: translateX(1%) rotate(1deg); }
+  85% { transform: translateX(-0.5%); }
+}
+@keyframes ico-pop {
+  0%, 100% { transform: none; }
+  45% { transform: scale(1.6); }
+}
+@keyframes ico-spin {
+  0% { transform: none; }
+  50% { transform: rotate(60deg) scale(0.82); }
+  /* 90° on an 8-ray sun looks exactly like 0°, so the snap home is invisible. */
+  100% { transform: rotate(90deg); }
+}
+@keyframes ico-rock {
+  0%, 100% { transform: none; }
+  30% { transform: rotate(-20deg); }
+  60% { transform: rotate(10deg); }
+  85% { transform: rotate(-3deg); }
+}
+@keyframes ico-twinkle {
+  0% { opacity: 0; transform: scale(0.2); }
+  45% { opacity: 1; transform: scale(1.15) rotate(45deg); }
+  100% { opacity: 0; transform: scale(0.2) rotate(90deg); }
+}
+@keyframes ico-wave {
+  0%, 100% { transform: none; }
+  15% { transform: rotate(22deg); }
+  35% { transform: rotate(-10deg); }
+  55% { transform: rotate(18deg); }
+  75% { transform: rotate(-5deg); }
+}
+@keyframes ico-tilt {
+  0%, 100% { transform: none; }
+  30% { transform: translateY(-0.6px) rotate(-5deg); }
+  60% { transform: rotate(4deg); }
+  85% { transform: rotate(-1deg); }
+}
+@keyframes ico-bounce {
+  0%, 100% { transform: none; }
+  30% { transform: translateY(-3.5px); }
+  50% { transform: scale(1.3, 0.7); }
+  70% { transform: translateY(-1px); }
+}
+@keyframes ico-catch {
+  0%, 45%, 100% { transform: none; }
+  55% { transform: scaleY(0.85); }
+  75% { transform: scaleY(1.04); }
+}
+@keyframes ico-sway {
+  0%, 45%, 100% { transform: none; }
+  60% { transform: skewX(-8deg); }
+  80% { transform: skewX(4deg); }
+}
+@keyframes ico-push-r {
+  0%, 100% { transform: none; }
+  30% { transform: translateX(2.5px); }
+  60% { transform: translateX(-0.6px); }
+}
+@keyframes ico-half-turn {
+  /* A line turned 180° about its middle is the same line: seamless. */
+  0% { transform: none; }
+  100% { transform: rotate(180deg); }
+}
+@keyframes ico-hop {
+  0%, 100% { transform: none; }
+  15% { transform: translateY(4%) scale(1.08, 0.9); }
+  45% { transform: translateY(-20%) scale(0.95, 1.05); }
+  70% { transform: scale(1.08, 0.92); }
+  85% { transform: translateY(-3%); }
+}
+@keyframes ico-dash-head {
+  0%, 100% { transform: none; }
+  35% { transform: translateX(-1.5px); }
+  65% { transform: translateX(2px); }
+}
+@keyframes ico-dash-shaft {
+  /* Shaft is 18 long, anchored at its tail: (18 + head offset) / 18. */
+  0%, 100% { transform: none; }
+  35% { transform: scaleX(0.917); }
+  65% { transform: scaleX(1.111); }
+}
+@keyframes ico-zip {
+  0%, 100% { transform: none; }
+  40% { transform: translate(150%, -150%); }
+  40.01% { transform: translate(-150%, 150%); }
+}
+@keyframes ico-rise {
+  0%, 100% { transform: none; opacity: 1; }
+  25% { transform: translateY(4px); opacity: 0; }
+  65% { transform: translateY(-1.5px) scale(1.8); opacity: 1; }
+}
+@keyframes ico-press {
+  0%, 100% { transform: none; }
+  25% { transform: scale(0.8); }
+  55% { transform: scale(1.12); }
+  80% { transform: scale(0.97); }
+}
+@keyframes ico-flash {
+  0% { opacity: 0.9; transform: scale(0.6); }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+@keyframes ico-chirp {
+  0%, 100% { transform: none; }
+  20% { transform: translateY(5%) scale(1.06, 0.92); }
+  45% { transform: translateY(-18%) rotate(-12deg); }
+  70% { transform: rotate(4deg) scale(1.05, 0.95); }
+  85% { transform: rotate(-2deg); }
+}
+@keyframes ico-tilt-pop {
+  0%, 100% { transform: none; }
+  30% { transform: rotate(-14deg) scale(1.15); }
+  60% { transform: rotate(8deg) scale(0.95); }
+  85% { transform: rotate(-3deg); }
+}
+@keyframes ico-peel {
+  0%, 100% { transform: none; }
+  25% { transform: translateY(-8%) rotate(-10deg); }
+  50% { transform: translateY(-4%) rotate(6deg); }
+  75% { transform: rotate(-3deg); }
+}
+@keyframes ico-beat {
+  0%, 30%, 70%, 100% { transform: none; }
+  15% { transform: scale(1.3); }
+  45% { transform: scale(1.2); }
+}
+@keyframes ico-leaf {
+  0%, 100% { transform: none; }
+  20% { transform: rotate(-25deg); }
+  45% { transform: rotate(15deg); }
+  70% { transform: rotate(-8deg); }
+  88% { transform: rotate(3deg); }
+}
+@keyframes ico-nudge {
+  0%, 100% { transform: none; }
+  25% { transform: translateX(-8%) scale(0.92); }
+  55% { transform: translateX(12%) scale(1.05, 0.95); }
+  80% { transform: translateX(-3%); }
+}

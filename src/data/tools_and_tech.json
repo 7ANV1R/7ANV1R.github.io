@@ -1,30 +1,9 @@
 [
-  {
-    "name": "React",
-    "logoPath": "src/assets/skills/react.svg"
-  },
-  {
-    "name": "Node.js",
-    "logoPath": "src/assets/skills/node_js.svg"
-  },
-  {
-    "name": "Flutter",
-    "logoPath": "src/assets/skills/flutter.svg"
-  },
-  {
-    "name": "Firebase",
-    "logoPath": "src/assets/skills/firebase.svg"
-  },
-  {
-    "name": "Supabase",
-    "logoPath": "src/assets/skills/supabase.svg"
-  },
-  {
-    "name": "Figma",
-    "logoPath": "src/assets/skills/figma.svg"
-  },
-  {
-    "name": "Rive",
-    "logoPath": "src/assets/skills/rive.svg"
-  }
+  { "name": "React", "logoPath": "src/assets/skills/react.svg", "prompt": "sent my friend localhost:5173. not working" },
+  { "name": "Node.js", "logoPath": "src/assets/skills/node_js.svg", "prompt": "who is json? why we need him?" },
+  { "name": "Flutter", "logoPath": "src/assets/skills/flutter.svg", "prompt": "fix the yellow-black overflow stripes" },
+  { "name": "Firebase", "logoPath": "src/assets/skills/firebase.svg", "prompt": "why 2M reads? i opened the app once" },
+  { "name": "Supabase", "logoPath": "src/assets/skills/supabase.svg", "prompt": "drop the test table. wait, that was prod" },
+  { "name": "Figma", "logoPath": "src/assets/skills/figma.svg", "prompt": "turn this sign-up card into react. pls" },
+  { "name": "Rive", "logoPath": "src/assets/skills/rive.svg", "prompt": "isWalking is true. why is he moonwalking" }
 ]

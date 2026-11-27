@@ -4,9 +4,154 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/all';
 import { SplitText } from 'gsap/SplitText';
 import SectionTitle from '../ui/SectionTitle';
+import AppLink from '../ui/AppLink';
 import workExperienceData from '../../data/work_experience.json';
+import apps from '../../data/apps.json';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
+
+// Fastest a paragraph may go dim -> bright, however fast the page scrolls.
+// Scrolling slower than (reveal range / this) tracks the scrollbar exactly.
+const MIN_SWEEP_S = 0.9;
+
+// Pieces of one timeline entry. Module scope, not inside WorkExperience: a
+// re-render would otherwise remount them and drop SplitText's word wrappers.
+const TimelineDot = ({ isCurrent }) => (
+  <div
+    className={`w-3 h-3 md:w-4 md:h-4 rounded-full border-2 relative z-10 flex-shrink-0 ${
+      isCurrent ? 'shadow-lg' : ''
+    }`}
+    style={{
+      backgroundColor: isCurrent ? 'var(--accent)' : 'var(--bg-secondary)',
+      borderColor: 'var(--accent)',
+      ...(isCurrent && { boxShadow: '0 0 0 3px var(--accent)20' }),
+    }}
+  />
+);
+
+const TimelineLine = () => (
+  <div
+    className="w-0.5 flex-1 mt-2"
+    style={{
+      backgroundColor: 'var(--card-border)',
+      minHeight: '20px',
+    }}
+  />
+);
+
+const TimeFrameBadge = ({ timeFrame }) => (
+  <div className="mb-3 md:mb-4">
+    <span
+      className="text-xs md:text-sm font-medium px-3 md:px-4 py-1.5 md:py-2 rounded-lg"
+      style={{
+        backgroundColor: 'var(--bg-secondary)',
+        color: 'var(--text-secondary)',
+        border: '1px solid var(--card-border)',
+      }}
+    >
+      {timeFrame}
+    </span>
+  </div>
+);
+
+const CompanyInfo = ({ company, designation, companyLogo }) => (
+  <div className="mb-3 md:mb-4">
+    {/* Mobile Company Logo - Only visible on mobile */}
+    <div className="flex items-center justify-between gap-4 mb-2 md:hidden">
+      <div className="flex-1">
+        <h3
+          className="text-lg font-semibold mb-1"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          {company}
+        </h3>
+        <p
+          className="text-base font-medium"
+          style={{ color: 'var(--accent)' }}
+        >
+          {designation}
+        </p>
+      </div>
+      <div
+        className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
+        style={{
+          backgroundColor: 'var(--bg-secondary)',
+          border: '1px solid var(--card-border)',
+        }}
+      >
+        <img
+          src={companyLogo}
+          alt={`${company} logo`}
+          className="w-8 h-8 object-contain"
+        />
+      </div>
+    </div>
+
+    {/* Desktop Layout - Hidden on mobile */}
+    <div className="hidden md:block">
+      <h3
+        className="text-h4 font-semibold mb-2"
+        style={{ color: 'var(--text-primary)' }}
+      >
+        {company}
+      </h3>
+      <p className="text-lg font-medium" style={{ color: 'var(--accent)' }}>
+        {designation}
+      </p>
+    </div>
+  </div>
+);
+
+// Blank lines in the copy split it into paragraphs; "{key}" tokens become
+// store-link popups from apps.json.
+const Objective = ({ objective }) => (
+  <div className="space-y-3 md:space-y-4 max-w-3xl">
+    {objective.split('\n\n').map((para, p) => (
+      <p
+        key={p}
+        className="objective-text text-sm md:text-base leading-relaxed"
+        style={{ color: 'var(--text-primary)' }}
+      >
+        {para
+          .split(/\{(\w+)\}/)
+          .map((part, i) =>
+            i % 2 ? <AppLink key={i} app={apps[part]} /> : part,
+          )}
+      </p>
+    ))}
+  </div>
+);
+
+const ExperienceItem = ({ experience, index, totalItems }) => {
+  const isCurrent = experience.timeFrame.includes('Present');
+  const isLast = index === totalItems - 1;
+
+  return (
+    <div
+      className="flex items-stretch work-experience-item"
+      data-work-item={experience.id}
+      data-company-logo={experience.companyLogo}
+    >
+      {/* Timeline Column - Responsive width */}
+      <div className="flex flex-col items-center w-16 md:w-24 flex-shrink-0">
+        <TimelineDot isCurrent={isCurrent} />
+        {!isLast && <TimelineLine />}
+      </div>
+
+      {/* Content Column - Responsive padding */}
+      <div className="flex-1 pl-4 md:pl-8">
+        <TimeFrameBadge timeFrame={experience.timeFrame} />
+        <CompanyInfo
+          company={experience.company}
+          designation={experience.designation}
+          companyLogo={experience.companyLogo}
+        />
+        <Objective objective={experience.objective} />
+        {!isLast && <div className="h-8 md:h-12" />}
+      </div>
+    </div>
+  );
+};
 
 const WorkExperience = ({ scrollContainerRef }) => {
   // Remove unnecessary state - data is static and doesn't need to be in state
@@ -14,8 +159,8 @@ const WorkExperience = ({ scrollContainerRef }) => {
   const sectionRef = useRef();
 
   // Scroll-driven reveal, one trigger per objective: words start dim and
-  // brighten to full in reading order (left-to-right), tied to scroll via
-  // `scrub`. Explicit set(dim) -> to(bright) is monotonic, so the sweep stays a
+  // brighten to full in reading order (left-to-right), tied to scroll (speed
+  // capped, see MIN_SWEEP_S). Explicit set(dim) -> to(bright) is monotonic, so the sweep stays a
   // single clean boundary (no stranded/partial words). Each objective is driven
   // by its own position, so they reveal one after another as you scroll down.
   useGSAP(
@@ -27,159 +172,54 @@ const WorkExperience = ({ scrollContainerRef }) => {
       if (!paragraphs.length) return;
 
       const splits = [];
+      const chasers = [];
       paragraphs.forEach((p) => {
         const split = new SplitText(p, { type: 'words', aria: 'auto' });
         splits.push(split);
 
         gsap.set(split.words, { opacity: 0.2 }); // initial (dim) color
-        gsap.to(split.words, {
+        const reveal = gsap.to(split.words, {
           opacity: 1, // final (bright) color
           ease: 'none',
           stagger: { each: 0.05 },
           duration: 0.5,
-          scrollTrigger: {
-            trigger: p,
-            scroller: scrollContainerRef?.current || undefined,
-            start: 'top 85%', // begins as the objective enters from the bottom
-            end: 'top 45%', // fully bright once comfortably in view
-            scrub: true,
-            invalidateOnRefresh: true,
-          },
+          paused: true,
+        });
+
+        // Scroll sets the target; the reveal chases it at a capped speed.
+        // Slow scroll stays 1:1 with the scrollbar, a fast flick can't skip
+        // the sweep: it lags behind and finishes at a readable pace.
+        let target = 0;
+        const chase = (_time, deltaMs) => {
+          const step = deltaMs / 1000 / MIN_SWEEP_S;
+          const now = reveal.progress();
+          const next = now + gsap.utils.clamp(-step, step, target - now);
+          reveal.progress(next);
+          if (next === target) gsap.ticker.remove(chase);
+        };
+        chasers.push(chase);
+        const aim = (self) => {
+          target = self.progress;
+          gsap.ticker.add(chase); // no-op if already running
+        };
+
+        ScrollTrigger.create({
+          trigger: p,
+          scroller: scrollContainerRef?.current || undefined,
+          start: 'top 85%', // begins as the objective enters from the bottom
+          end: 'top 45%', // fully bright once comfortably in view
+          onUpdate: aim,
+          onRefresh: aim,
         });
       });
 
       return () => {
+        chasers.forEach((c) => gsap.ticker.remove(c));
         splits.forEach((split) => split.revert());
       };
     },
     { dependencies: [scrollContainerRef] },
   );
-
-  const TimelineDot = ({ isCurrent }) => (
-    <div
-      className={`w-3 h-3 md:w-4 md:h-4 rounded-full border-2 relative z-10 flex-shrink-0 ${
-        isCurrent ? 'shadow-lg' : ''
-      }`}
-      style={{
-        backgroundColor: isCurrent ? 'var(--accent)' : 'var(--bg-secondary)',
-        borderColor: 'var(--accent)',
-        ...(isCurrent && { boxShadow: '0 0 0 3px var(--accent)20' }),
-      }}
-    />
-  );
-
-  const TimelineLine = () => (
-    <div
-      className="w-0.5 flex-1 mt-2"
-      style={{
-        backgroundColor: 'var(--card-border)',
-        minHeight: '20px',
-      }}
-    />
-  );
-
-  const TimeFrameBadge = ({ timeFrame }) => (
-    <div className="mb-3 md:mb-4">
-      <span
-        className="text-xs md:text-sm font-medium px-3 md:px-4 py-1.5 md:py-2 rounded-lg"
-        style={{
-          backgroundColor: 'var(--bg-secondary)',
-          color: 'var(--text-secondary)',
-          border: '1px solid var(--card-border)',
-        }}
-      >
-        {timeFrame}
-      </span>
-    </div>
-  );
-
-  const CompanyInfo = ({ company, designation, companyLogo }) => (
-    <div className="mb-3 md:mb-4">
-      {/* Mobile Company Logo - Only visible on mobile */}
-      <div className="flex items-center justify-between gap-4 mb-2 md:hidden">
-        <div className="flex-1">
-          <h3
-            className="text-lg font-semibold mb-1"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            {company}
-          </h3>
-          <p
-            className="text-base font-medium"
-            style={{ color: 'var(--accent)' }}
-          >
-            {designation}
-          </p>
-        </div>
-        <div
-          className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
-          style={{
-            backgroundColor: 'var(--bg-secondary)',
-            border: '1px solid var(--card-border)',
-          }}
-        >
-          <img
-            src={companyLogo}
-            alt={`${company} logo`}
-            className="w-8 h-8 object-contain"
-          />
-        </div>
-      </div>
-
-      {/* Desktop Layout - Hidden on mobile */}
-      <div className="hidden md:block">
-        <h3
-          className="text-h4 font-semibold mb-2"
-          style={{ color: 'var(--text-primary)' }}
-        >
-          {company}
-        </h3>
-        <p className="text-lg font-medium" style={{ color: 'var(--accent)' }}>
-          {designation}
-        </p>
-      </div>
-    </div>
-  );
-
-  const Objective = ({ objective }) => (
-    <p
-      className="objective-text text-sm md:text-base leading-relaxed max-w-3xl"
-      style={{ color: 'var(--text-primary)' }}
-    >
-      {objective}
-    </p>
-  );
-
-  const ExperienceItem = ({ experience, index, totalItems }) => {
-    const isCurrent = experience.timeFrame.includes('Present');
-    const isLast = index === totalItems - 1;
-
-    return (
-      <div
-        className="flex items-stretch work-experience-item"
-        data-work-item={experience.id}
-        data-company-logo={experience.companyLogo}
-      >
-        {/* Timeline Column - Responsive width */}
-        <div className="flex flex-col items-center w-16 md:w-24 flex-shrink-0">
-          <TimelineDot isCurrent={isCurrent} />
-          {!isLast && <TimelineLine />}
-        </div>
-
-        {/* Content Column - Responsive padding */}
-        <div className="flex-1 pl-4 md:pl-8">
-          <TimeFrameBadge timeFrame={experience.timeFrame} />
-          <CompanyInfo
-            company={experience.company}
-            designation={experience.designation}
-            companyLogo={experience.companyLogo}
-          />
-          <Objective objective={experience.objective} />
-          {!isLast && <div className="h-8 md:h-12" />}
-        </div>
-      </div>
-    );
-  };
 
   return (
     <>
