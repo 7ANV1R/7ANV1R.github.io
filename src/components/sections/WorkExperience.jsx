@@ -10,14 +10,18 @@ import apps from '../../data/apps.json';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
+// Fastest a paragraph may go dim -> bright, however fast the page scrolls.
+// Scrolling slower than (reveal range / this) tracks the scrollbar exactly.
+const MIN_SWEEP_S = 0.9;
+
 const WorkExperience = ({ scrollContainerRef }) => {
   // Remove unnecessary state - data is static and doesn't need to be in state
   const experiences = workExperienceData;
   const sectionRef = useRef();
 
   // Scroll-driven reveal, one trigger per objective: words start dim and
-  // brighten to full in reading order (left-to-right), tied to scroll via
-  // `scrub`. Explicit set(dim) -> to(bright) is monotonic, so the sweep stays a
+  // brighten to full in reading order (left-to-right), tied to scroll (speed
+  // capped, see MIN_SWEEP_S). Explicit set(dim) -> to(bright) is monotonic, so the sweep stays a
   // single clean boundary (no stranded/partial words). Each objective is driven
   // by its own position, so they reveal one after another as you scroll down.
   useGSAP(
@@ -29,28 +33,49 @@ const WorkExperience = ({ scrollContainerRef }) => {
       if (!paragraphs.length) return;
 
       const splits = [];
+      const chasers = [];
       paragraphs.forEach((p) => {
         const split = new SplitText(p, { type: 'words', aria: 'auto' });
         splits.push(split);
 
         gsap.set(split.words, { opacity: 0.2 }); // initial (dim) color
-        gsap.to(split.words, {
+        const reveal = gsap.to(split.words, {
           opacity: 1, // final (bright) color
           ease: 'none',
           stagger: { each: 0.05 },
           duration: 0.5,
-          scrollTrigger: {
-            trigger: p,
-            scroller: scrollContainerRef?.current || undefined,
-            start: 'top 85%', // begins as the objective enters from the bottom
-            end: 'top 45%', // fully bright once comfortably in view
-            scrub: true,
-            invalidateOnRefresh: true,
-          },
+          paused: true,
+        });
+
+        // Scroll sets the target; the reveal chases it at a capped speed.
+        // Slow scroll stays 1:1 with the scrollbar, a fast flick can't skip
+        // the sweep: it lags behind and finishes at a readable pace.
+        let target = 0;
+        const chase = (_time, deltaMs) => {
+          const step = deltaMs / 1000 / MIN_SWEEP_S;
+          const now = reveal.progress();
+          const next = now + gsap.utils.clamp(-step, step, target - now);
+          reveal.progress(next);
+          if (next === target) gsap.ticker.remove(chase);
+        };
+        chasers.push(chase);
+        const aim = (self) => {
+          target = self.progress;
+          gsap.ticker.add(chase); // no-op if already running
+        };
+
+        ScrollTrigger.create({
+          trigger: p,
+          scroller: scrollContainerRef?.current || undefined,
+          start: 'top 85%', // begins as the objective enters from the bottom
+          end: 'top 45%', // fully bright once comfortably in view
+          onUpdate: aim,
+          onRefresh: aim,
         });
       });
 
       return () => {
+        chasers.forEach((c) => gsap.ticker.remove(c));
         splits.forEach((split) => split.revert());
       };
     },

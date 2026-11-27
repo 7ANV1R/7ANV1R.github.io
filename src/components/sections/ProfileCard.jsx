@@ -1,4 +1,4 @@
-import { FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
+import Icon from '../ui/Icon';
 import tanvirImg from '../../assets/tanvir.png';
 import { useTheme } from '../../hooks/useTheme';
 
@@ -81,6 +81,7 @@ const ProfileCard = () => {
         <div className="flex space-x-3 sm:space-x-4 mt-1 sm:mt-4">
           <a
             href="https://github.com/7anv1r"
+            aria-label="GitHub"
             target="_blank"
             rel="noopener noreferrer"
             className="text-lg p-2 rounded-lg transition-all duration-300"
@@ -89,18 +90,19 @@ const ProfileCard = () => {
               backgroundColor: 'transparent',
             }}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = cardColors.iconHoverBg;
-              e.target.style.color = cardColors.textColor;
+              e.currentTarget.style.backgroundColor = cardColors.iconHoverBg;
+              e.currentTarget.style.color = cardColors.textColor;
             }}
             onMouseLeave={(e) => {
-              e.target.style.backgroundColor = 'transparent';
-              e.target.style.color = cardColors.textColor;
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = cardColors.textColor;
             }}
           >
-            <FiGithub />
+            <Icon name="github" />
           </a>
           <a
             href="https://linkedin.com/in/7anv1r"
+            aria-label="LinkedIn"
             target="_blank"
             rel="noopener noreferrer"
             className="text-xl p-2 rounded-lg transition-all duration-300"
@@ -109,33 +111,34 @@ const ProfileCard = () => {
               backgroundColor: 'transparent',
             }}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = cardColors.iconHoverBg;
-              e.target.style.color = cardColors.textColor;
+              e.currentTarget.style.backgroundColor = cardColors.iconHoverBg;
+              e.currentTarget.style.color = cardColors.textColor;
             }}
             onMouseLeave={(e) => {
-              e.target.style.backgroundColor = 'transparent';
-              e.target.style.color = cardColors.textColor;
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = cardColors.textColor;
             }}
           >
-            <FiLinkedin />
+            <Icon name="linkedin" />
           </a>
           <a
             href="mailto:tanvir.inquiries@gmail.com"
+            aria-label="Email"
             className="text-xl p-2 rounded-lg transition-all duration-300"
             style={{
               color: cardColors.textColor,
               backgroundColor: 'transparent',
             }}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = cardColors.iconHoverBg;
-              e.target.style.color = cardColors.textColor;
+              e.currentTarget.style.backgroundColor = cardColors.iconHoverBg;
+              e.currentTarget.style.color = cardColors.textColor;
             }}
             onMouseLeave={(e) => {
-              e.target.style.backgroundColor = 'transparent';
-              e.target.style.color = cardColors.textColor;
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = cardColors.textColor;
             }}
           >
-            <FiMail />
+            <Icon name="mail" />
           </a>
         </div>
       </div>

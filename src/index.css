@@ -444,14 +444,14 @@ body {
 /* Regular group-hover support for 3D rotation */
 .group:hover .description-content {
   transform: rotateX(0deg) !important;
-  max-height: 8rem !important;
+  max-height: 18rem !important;
   opacity: 1 !important;
 }
 
 /* Scroll-hover support for 3D rotation */
 .scroll-hover.group .description-content {
   transform: rotateX(0deg) !important;
-  max-height: 8rem !important;
+  max-height: 18rem !important;
   opacity: 1 !important;
 }
 

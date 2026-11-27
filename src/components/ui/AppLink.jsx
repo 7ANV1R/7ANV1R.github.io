@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { FaApple, FaGooglePlay } from 'react-icons/fa';
+import Icon from './Icon';
 
 // Inline app name (+ tiny icon) that reveals App Store / Play Store links.
 // Hover opens it on desktop (CSS group-hover); tap toggles it on touch.
@@ -23,8 +23,8 @@ const AppLink = ({ app }) => {
   }, [open]);
 
   const stores = [
-    { href: app.appStore, label: 'App Store', icon: <FaApple size={15} /> },
-    { href: app.playStore, label: 'Google Play', icon: <FaGooglePlay size={14} /> },
+    { href: app.appStore, label: 'App Store', icon: <Icon name="apple" size={15} /> },
+    { href: app.playStore, label: 'Google Play', icon: <Icon name="googlePlay" size={14} /> },
   ];
 
   return (

@@ -3,6 +3,7 @@ import MobileLayout from './components/layout/MobileLayout';
 import DesktopLayout from './components/layout/DesktopLayout';
 import useScrollAwareHover from './hooks/useScrollAwareHover';
 import CompanyLogoCursor from './components/ui/CompanyLogoCursor';
+import BlobCursor from './components/ui/BlobCursor';
 import useMediaQuery from './hooks/useMediaQuery';
 import useDynamicTitle from './hooks/useDynamicTitle';
 import { watchSections } from './analytics';
@@ -20,6 +21,7 @@ const App = () => {
       style={{ backgroundColor: 'var(--bg-secondary)' }}
     >
       <CompanyLogoCursor />
+      <BlobCursor />
       {isDesktop ? <DesktopLayout /> : <MobileLayout />}
     </div>
   );

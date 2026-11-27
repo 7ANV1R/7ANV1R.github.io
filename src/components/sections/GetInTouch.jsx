@@ -41,9 +41,9 @@ const GetInTouch = () => {
   const handleButtonMouseEnter = useCallback(
     (e) => {
       if (!submitting) {
-        e.target.style.backgroundColor = 'var(--accent)';
-        e.target.style.boxShadow = '0 8px 25px 0 var(--accent)50';
-        e.target.style.transform = 'translateY(-2px)';
+        e.currentTarget.style.backgroundColor = 'var(--accent)';
+        e.currentTarget.style.boxShadow = '0 8px 25px 0 var(--accent)50';
+        e.currentTarget.style.transform = 'translateY(-2px)';
       }
     },
     [submitting],
@@ -53,8 +53,8 @@ const GetInTouch = () => {
   const handleButtonMouseLeave = useCallback(
     (e) => {
       if (!submitting) {
-        e.target.style.transform = 'translateY(0)';
-        e.target.style.boxShadow = '0 4px 14px 0 var(--accent)40';
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = '0 4px 14px 0 var(--accent)40';
       }
     },
     [submitting],

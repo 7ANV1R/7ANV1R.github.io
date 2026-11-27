@@ -36,8 +36,9 @@ export default function useLenis({
       content: contentRef?.current ?? document.documentElement,
       lerp: 0.1,
       smoothWheel: true, // smooth mouse-wheel scrolling
-      syncTouch: true, // smooth touch scrolling too (every device)
-      touchMultiplier: 1.5,
+      // ponytail: touch stays native (no syncTouch). syncTouch preventDefaults
+      // every touchmove and fakes momentum in JS: page outruns the finger, no
+      // iOS rubber-band, and it janks whenever the main thread is busy.
     });
     lenisRef.current = lenis;
 

@@ -1,0 +1,218 @@
+/* Comic-print glitch on the game button: something on the other side is
+   trying to get through, and it escalates. Every layer runs on one clock
+   (--run, --delay, --loops):
+     0-10%   interference: the icon flickers, colour plates split
+     30-37%  peek: the button flips to a comic panel from the other world (once mirrored)
+     37-55%  tear, straight after: halftone strips rip sideways, dead pixels, "ZZT!"
+     55-59%  snap back
+   .tease  = once per page load.  .loading = loops while the game loads. */
+.tease {
+  --delay: 0.9s;
+  --run: 2.8s;
+  --loops: 1;
+}
+.loading {
+  --delay: -0.1s;
+  --run: 1.6s;
+  --loops: infinite;
+}
+
+.under,
+.over {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.over {
+  z-index: 1;
+}
+
+.icon {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+}
+
+/* ---- misregistered print plates, peeking out from behind the icon ---- */
+.plate {
+  opacity: 0;
+  animation: var(--run) steps(1, end) var(--delay) var(--loops) both;
+}
+.cyan {
+  color: #00d8ff;
+  animation-name: plate-c;
+}
+.magenta {
+  color: #ff2bd6;
+  animation-name: plate-m;
+}
+.yellow {
+  color: #ffd400;
+  animation-name: plate-y;
+}
+
+/* ---- torn bands: strips of the button slide sideways, showing halftone panels ---- */
+.band {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  color: var(--ink);
+  background: var(--bg);
+  animation: band var(--run) steps(1, end) calc(var(--delay) + var(--o)) var(--loops) both;
+}
+.band:nth-child(1) {
+  --ink: #111;
+  --bg: radial-gradient(circle, #ff2bd6 0.9px, transparent 1.3px) 0 0 / 3px 3px, #ffd400;
+}
+.band:nth-child(2) {
+  --ink: #111;
+  --bg: radial-gradient(circle, #2b3cff 0.9px, transparent 1.3px) 0 0 / 3px 3px, #00d8ff;
+}
+.band:nth-child(3) {
+  --ink: #111;
+  --bg: radial-gradient(circle, #ffd400 0.9px, transparent 1.3px) 0 0 / 3px 3px, #ff2bd6;
+}
+.band:nth-child(4) {
+  --ink: #fff;
+  --bg: linear-gradient(90deg, #00d8ff, #7a2bff 50%, #ff2bd6);
+}
+
+/* ---- dead pixels blinking at the edges ---- */
+.over i {
+  position: absolute;
+  opacity: 0;
+  animation: block var(--run) steps(1, end) calc(var(--delay) + var(--o)) var(--loops) both;
+}
+
+/* ---- a glimpse of the other world: the button as a comic panel ---- */
+.panel {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  color: #111;
+  background: radial-gradient(circle, #ff2bd6 0.9px, transparent 1.3px) 0 0 / 3px 3px, #ffd400;
+  box-shadow: inset 0 0 0 2px #111;
+  animation: panel var(--run) steps(1, end) var(--delay) var(--loops) both;
+}
+.panel svg {
+  filter: drop-shadow(-1.5px 0 #00d8ff) drop-shadow(1.5px 0 #ff2bd6);
+}
+
+/* ---- comic sound effect ---- */
+.zap {
+  position: absolute;
+  left: 58%;
+  top: -9px;
+  font: italic 900 11px/1 Impact, 'Arial Black', sans-serif;
+  letter-spacing: 0.02em;
+  color: #ffd400;
+  -webkit-text-stroke: 2.5px #111;
+  paint-order: stroke fill;
+  opacity: 0;
+  transform: rotate(-12deg);
+  animation: zap var(--run) steps(1, end) var(--delay) var(--loops) both;
+}
+
+/* ---- the real icon twitches along ---- */
+.jitter {
+  animation: jitter var(--run) steps(1, end) var(--delay) var(--loops) both;
+}
+/* The game snapshots the page while it loads: freeze the icon for that moment. */
+:global(html[data-dm-capture]) .jitter {
+  animation: none;
+}
+
+@keyframes plate-c {
+  0% { opacity: 0; transform: none; }
+  2.5% { opacity: 1; transform: translate(-2px, 0); }
+  5% { transform: translate(-1px, 0); }
+  7.5% { transform: translate(-3px, 0); }
+  10% { opacity: 0; transform: none; }
+  37% { opacity: 1; transform: translate(-3px, -1px); }
+  40% { transform: translate(-5px, 1px); }
+  43% { transform: translate(-2px, 0); }
+  46% { transform: translate(-6px, 0); }
+  49% { transform: translate(-1px, 1px); }
+  52% { transform: translate(-3px, 0); }
+  55%, 100% { opacity: 0; transform: none; }
+}
+@keyframes plate-m {
+  0% { opacity: 0; transform: none; }
+  2.5% { opacity: 1; transform: translate(2px, 0); }
+  5% { transform: translate(1px, 0); }
+  7.5% { transform: translate(3px, 0); }
+  10% { opacity: 0; transform: none; }
+  37% { opacity: 1; transform: translate(3px, 1px); }
+  40% { transform: translate(5px, -1px); }
+  43% { transform: translate(2px, 1px); }
+  46% { transform: translate(6px, 0); }
+  49% { transform: translate(1px, -1px); }
+  52% { transform: translate(3px, 1px); }
+  55%, 100% { opacity: 0; transform: none; }
+}
+@keyframes plate-y {
+  0%, 36.9% { opacity: 0; transform: none; }
+  37% { opacity: 1; transform: translate(0, 2px); }
+  43% { transform: translate(-1px, 3px); }
+  49% { transform: translate(1px, -2px); }
+  55%, 100% { opacity: 0; transform: none; }
+}
+
+@keyframes panel {
+  0%, 29.9% { opacity: 0; transform: none; }
+  30% { opacity: 1; }
+  31.5% { opacity: 0; }
+  32.5% { opacity: 1; transform: scaleX(-1); }
+  34% { opacity: 0; transform: none; }
+  35% { opacity: 1; }
+  37%, 100% { opacity: 0; }
+}
+
+@keyframes band {
+  0%, 36.9% { opacity: 0; transform: none; }
+  37% { opacity: 1; transform: translateX(var(--dx)); }
+  40% { transform: translateX(calc(var(--dx) * -0.6)); }
+  43% { opacity: 0; }
+  45% { opacity: 1; transform: translateX(calc(var(--dx) * 1.4)); }
+  49% { transform: translateX(calc(var(--dx) * -1)); }
+  53%, 100% { opacity: 0; transform: none; }
+}
+
+@keyframes block {
+  0%, 36.9% { opacity: 0; transform: none; }
+  37% { opacity: 1; }
+  40% { opacity: 0; }
+  43% { opacity: 1; transform: translateX(var(--bx)); }
+  48% { opacity: 0; transform: none; }
+  50% { opacity: 1; }
+  52%, 100% { opacity: 0; }
+}
+
+@keyframes zap {
+  0%, 38.9% { opacity: 0; transform: rotate(-12deg) scale(0.3); }
+  39% { opacity: 1; transform: rotate(-12deg) scale(1.3); }
+  41% { transform: rotate(-8deg) scale(1); }
+  46% { transform: rotate(-14deg) scale(1.05) translateX(1px); }
+  51%, 100% { opacity: 0; transform: rotate(-12deg) scale(1); }
+}
+
+@keyframes jitter {
+  0% { opacity: 1; transform: none; }
+  2.5% { opacity: 0.35; transform: translate(1px, 0); }
+  4% { opacity: 1; }
+  6.5% { opacity: 0.5; transform: skewX(-6deg); }
+  8% { opacity: 1; transform: none; }
+  37% { transform: translate(-1px, 0) skewX(10deg); }
+  40% { transform: translate(1px, -1px); }
+  43% { transform: skewX(-12deg) scaleY(1.1); }
+  46% { transform: translate(2px, 0); }
+  49% { transform: none; }
+  55% { transform: scale(1.18); }
+  57% { transform: scale(1.06); }
+  59%, 100% { transform: none; }
+}

@@ -47,7 +47,10 @@ const DesktopLayout = () => {
   };
 
   return (
-    <div className="hidden lg:flex h-screen flex-col">
+    // min-h, not h-screen: a capped height keeps <html> viewport-sized while
+    // content overflows, so Lenis's ResizeObserver never sees the page grow
+    // and its cached scroll limit stops the wheel short of the footer.
+    <div className="hidden lg:flex min-h-screen flex-col">
       <FloatingNav onNavigate={handleNavigate} />
 
       <div className="flex flex-1">

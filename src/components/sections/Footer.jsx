@@ -1,49 +1,40 @@
 import React from 'react';
-import { 
-  FaYoutube, 
-  FaGamepad, 
-  FaFacebook, 
-  FaLinkedin,
-  FaInstagram,
-  FaTwitter,
-  FaFileAlt,
-  FaHeart
-} from 'react-icons/fa';
+import Icon from '../ui/Icon';
 
 const Footer = () => {
   const socialLinks = [
     {
-      icon: FaGamepad,
+      icon: 'gamepad',
       href: 'https://www.youtube.com/@7anv1r71',
       label: 'Gaming',
       color: 'hover:text-purple-500'
     },
     {
-      icon: FaYoutube,
+      icon: 'youtube',
       href: 'https://www.youtube.com/@tanvir_ibn_mizan',
       label: 'YouTube',
       color: 'hover:text-red-500'
     },
     {
-      icon: FaInstagram,
+      icon: 'instagram',
       href: 'https://instagram.com/tanvir_ibn_mizan',
       label: 'Instagram',
       color: 'hover:text-pink-500'
     },
     {
-      icon: FaTwitter,
+      icon: 'twitter',
       href: 'https://twitter.com/tanvir_ibn_mizan',
       label: 'Twitter',
       color: 'hover:text-blue-400'
     },
     {
-      icon: FaFacebook,
+      icon: 'facebook',
       href: 'https://facebook.com/tanvir.ibn.mizan',
       label: 'Facebook',
       color: 'hover:text-blue-500'
     },
     {
-      icon: FaLinkedin,
+      icon: 'linkedinSolid',
       href: 'https://linkedin.com/in/7anv1r',
       label: 'LinkedIn',
       color: 'hover:text-blue-600'
@@ -63,7 +54,6 @@ const Footer = () => {
           {/* Social Links */}
           <div className="flex items-center gap-3">
             {socialLinks.map((social, index) => {
-              const IconComponent = social.icon;
               return (
                 <a
                   key={index}
@@ -79,7 +69,7 @@ const Footer = () => {
                   }}
                   aria-label={social.label}
                 >
-                  <IconComponent className="text-lg" />
+                  <Icon name={social.icon} className="text-lg" />
                 </a>
               );
             })}
@@ -96,7 +86,7 @@ const Footer = () => {
                 color: 'var(--text-secondary)'
               }}
             >
-              <FaFileAlt className="text-sm" />
+              <Icon name="file" className="text-sm" />
               Resume
             </a>
             
@@ -116,7 +106,7 @@ const Footer = () => {
               className="text-xs flex items-center gap-1"
               style={{ color: 'var(--text-secondary)' }}
             >
-              Made with <FaHeart className="text-red-500 animate-pulse text-xs" /> by Tanvir
+              Made with <Icon name="heart" trigger="p" className="text-red-500 animate-pulse text-xs" /> by Tanvir
             </p>
             <span 
               className="text-xs"

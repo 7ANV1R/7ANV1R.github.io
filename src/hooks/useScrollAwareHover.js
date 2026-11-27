@@ -163,7 +163,8 @@ export const useScrollAwareHover = () => {
     }
 
     // Check for common hoverable classes
-    const classList = element.className;
+    // getAttribute, not className: on SVG elements className is an object.
+    const classList = element.getAttribute('class') || '';
     return HOVERABLE_CLASSES.some((className) => classList.includes(className));
   }, []);
 

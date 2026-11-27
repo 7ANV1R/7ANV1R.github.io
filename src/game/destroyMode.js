@@ -99,6 +99,8 @@ export function stop() {
 // profile card) sit where they naturally are. Exiting leaves the real page
 // where it was.
 function captureFullPage(root, W, Hw, PS) {
+  // Lets page effects (the nav button's loading glitch) hold still for the picture.
+  document.documentElement.setAttribute('data-dm-capture', '');
   return domToCanvas(root, {
     width: W,
     height: Hw,
@@ -108,8 +110,8 @@ function captureFullPage(root, W, Hw, PS) {
     timeout: 1500,
     // Videos without a decoded frame render nothing anyway, and cloning them
     // crashes WebKit.
-    filter: (n) => !(n instanceof Element) || !(n.tagName === 'VIDEO' && n.readyState < 2),
-  });
+    filter: (n) => !(n instanceof Element) || !(n.hasAttribute('data-dm-fx') || (n.tagName === 'VIDEO' && n.readyState < 2)),
+  }).finally(() => document.documentElement.removeAttribute('data-dm-capture'));
 }
 
 const HUD_CSS = `

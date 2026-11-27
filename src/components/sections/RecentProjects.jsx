@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
-import SectionTitle from '../ui/SectionTitle';
+import MaskedTitle from '../ui/MaskedTitle';
 import VideoPreview from '../ui/VideoPreview';
 // import useVideoPreloader from '../../hooks/useVideoPreloader'; // Temporarily disabled
 import projectsData from '../../data/recent_projects.json';
-import { HiOutlinePhotograph } from 'react-icons/hi';
-import { FiArrowUpRight } from 'react-icons/fi';
+import Icon from '../ui/Icon';
 import { track } from '../../analytics';
 
 const RecentProjects = () => {
@@ -38,8 +37,8 @@ const RecentProjects = () => {
               {project.videoPreview ? (
                 <VideoPreview
                   videoSrc={project.videoPreview}
+                  poster={project.thumbnail}
                   className="w-full"
-                  onHover={true}
                 />
               ) : project.thumbnail ? (
                 <div
@@ -65,7 +64,8 @@ const RecentProjects = () => {
                     aspectRatio: '4/3',
                   }}
                 >
-                  <HiOutlinePhotograph
+                  <Icon
+                    name="photo"
                     className="w-12 h-12 opacity-30"
                     style={{ color: 'var(--text-secondary)' }}
                   />
@@ -81,7 +81,8 @@ const RecentProjects = () => {
                   {project.title}
                 </h3>
                 <div className="ml-4 flex-shrink-0">
-                  <FiArrowUpRight
+                  <Icon
+                    name="arrowUpRight"
                     className="arrow-icon w-6 h-6 opacity-40 group-hover:opacity-100 transition-all duration-300"
                     style={{ color: 'var(--accent)', strokeWidth: '2.5' }}
                   />
@@ -128,7 +129,12 @@ const RecentProjects = () => {
       <div style={{ height: 80 }} />
 
       <div className="space-y-8">
-        <SectionTitle primaryText="RECENT" secondaryText="PROJECTS" />
+        <MaskedTitle
+          primaryText="RECENT"
+          secondaryText="PROJECTS"
+          revealPrimary="AI SLOP"
+          revealSecondary="PROJECTS"
+        />
 
         <div className="space-y-0">
           {projects.map((project, index) => (
